@@ -1,0 +1,23 @@
+{
+    "name": "Mi Denario",
+    "short_name": "Mi Denario",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#0175C2",
+    "theme_color": "#0175C2",
+    "description": "Mi Denario",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "icons/android-icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/apple-icon-152-152.png",
+            "sizes": "152x152",
+            "type": "image/png"
+        }
+    ]
+}

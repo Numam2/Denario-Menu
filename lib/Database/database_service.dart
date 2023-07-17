@@ -38,7 +38,10 @@ class DatabaseService {
             : [],
         snapshot.data().toString().contains('Social Media')
             ? snapshot['Social Media']
-            : []);
+            : [],
+        snapshot.data().toString().contains('Visible Store Categories')
+            ? snapshot['Visible Store Categories']
+            : ['All']);
   }
 
   //User Business Stream

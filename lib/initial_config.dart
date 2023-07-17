@@ -16,7 +16,8 @@ class InitialConfig extends StatelessWidget {
           initialData: CategoryList([]),
           value: DatabaseService().categoriesList(businessID)),
       StreamProvider<BusinessProfile>.value(
-          initialData: BusinessProfile('', '', '', '', '', '', 0, [], [], []),
+          initialData:
+              BusinessProfile('', '', '', '', '', '', 0, [], [], [], []),
           value: DatabaseService().userBusinessProfile(businessID.toString())),
     ], child: StoreHome(businessID));
   }

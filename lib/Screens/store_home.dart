@@ -59,7 +59,14 @@ class _StoreHomeState extends State<StoreHome> {
       );
     }
 
-    List categories = categoriesProvider.categoryList;
+    List categories = [];
+    if ((businessProvider.visibleStoreCategories.contains('All') &&
+            businessProvider.visibleStoreCategories.length == 1) ||
+        businessProvider.visibleStoreCategories == []) {
+      categories = categoriesProvider.categoryList;
+    } else {
+      categories = businessProvider.visibleStoreCategories;
+    }
 
     if (firstLoad == true) {
       selectedCategory = categories.first;
@@ -596,7 +603,7 @@ class _StoreHomeState extends State<StoreHome> {
             ),
             //Categories
             SliverAppBar(
-              backgroundColor: Theme.of(context).backgroundColor,
+              backgroundColor: Theme.of(context).colorScheme.background,
               elevation: 5,
               pinned: true,
               automaticallyImplyLeading: false,

@@ -9,6 +9,7 @@ class BusinessProfile {
   final List businessUsers;
   final List businessSchedule;
   final List socialMedia;
+  final List visibleStoreCategories;
 
   BusinessProfile(
       this.businessID,
@@ -20,5 +21,6 @@ class BusinessProfile {
       this.businessSize,
       this.businessUsers,
       this.businessSchedule,
-      this.socialMedia);
+      this.socialMedia,
+      this.visibleStoreCategories);
 }

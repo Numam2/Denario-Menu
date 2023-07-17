@@ -158,7 +158,7 @@ class _ProductSelectionState extends State<ProductSelection> {
                                     (product[i].description != '')
                                         ? product[i].description
                                         : '',
-                                    maxLines: 2,
+                                    maxLines: 3,
                                     overflow: TextOverflow.ellipsis,
                                     softWrap: true,
                                     textAlign: TextAlign.left,
@@ -245,8 +245,8 @@ class _ProductSelectionState extends State<ProductSelection> {
                   }
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 15.0, horizontal: 10),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15.0, horizontal: 2),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,26 +276,36 @@ class _ProductSelectionState extends State<ProductSelection> {
                                 overflow: TextOverflow.ellipsis,
                                 softWrap: true,
                                 textAlign: TextAlign.left,
-                                style: const TextStyle(
+                                style: TextStyle(
                                     color: Colors.black,
-                                    fontSize: 18,
+                                    fontSize:
+                                        (MediaQuery.of(context).size.width <
+                                                900)
+                                            ? 15
+                                            : 18,
                                     fontWeight: FontWeight.w500),
                               ),
                               const SizedBox(height: 15),
-                              Text(
-                                (product[i].description != '')
-                                    ? product[i].description
-                                    : '',
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                softWrap: true,
-                                textAlign: TextAlign.left,
-                                style: const TextStyle(
-                                    color: Colors.black45,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400),
+                              Expanded(
+                                child: Text(
+                                  (product[i].description != '')
+                                      ? product[i].description
+                                      : '',
+                                  maxLines: 4,
+                                  overflow: TextOverflow.ellipsis,
+                                  softWrap: true,
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                      color: Colors.black45,
+                                      fontSize:
+                                          (MediaQuery.of(context).size.width <
+                                                  900)
+                                              ? 12
+                                              : 14,
+                                      fontWeight: FontWeight.w400),
+                                ),
                               ),
-                              const Spacer(),
+                              const SizedBox(height: 5),
 
                               ///Price
                               Text(
@@ -311,8 +321,10 @@ class _ProductSelectionState extends State<ProductSelection> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 5),
                       //Button
                       IconButton(
+                        splashRadius: 15,
                         onPressed: () {
                           if (widget.open) {
                             addToCart(product[i]);
@@ -324,7 +336,6 @@ class _ProductSelectionState extends State<ProductSelection> {
                         color: Colors.black,
                         hoverColor: Colors.black54,
                         iconSize: 30,
-                        splashRadius: 15,
                         splashColor: Colors.white70,
                       ),
                     ],

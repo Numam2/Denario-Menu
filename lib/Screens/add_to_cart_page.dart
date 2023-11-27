@@ -20,7 +20,7 @@ class _AddToCartPageState extends State<AddToCartPage> {
   double selectedPrice = 0;
   double basePrice = 0;
   List selectedTags = [];
-  final formatCurrency =  NumberFormat.simpleCurrency();
+  final formatCurrency = NumberFormat.simpleCurrency();
 
   double totalAmount(
     double basePrice,
@@ -67,16 +67,45 @@ class _AddToCartPageState extends State<AddToCartPage> {
     return optionsCompleted;
   }
 
+  double totalCost = 0;
+  List ingredients = [];
+
   @override
   void initState() {
-    selectedPrice = widget.product.price.toDouble();
-    basePrice = widget.product.price.toDouble();
+    ingredients = widget.product.ingredients!;
+    if (ingredients.isNotEmpty) {
+      for (int x = 0; x < ingredients.length; x++) {
+        if (ingredients[x]['Supply Cost'] != null &&
+            ingredients[x]['Supply Quantity'] != null &&
+            ingredients[x]['Quantity'] != null &&
+            ingredients[x]['Yield'] != null) {
+          double ingredientTotal = ((ingredients[x]['Supply Cost'] /
+                      ingredients[x]['Supply Quantity']) *
+                  ingredients[x]['Quantity']) /
+              ingredients[x]['Yield'];
+          if (!ingredientTotal.isNaN &&
+              !ingredientTotal.isInfinite &&
+              !ingredientTotal.isNegative) {
+            totalCost = totalCost + ingredientTotal;
+          }
+        }
+      }
+    }
+
+    if (widget.product.priceType == 'Precio por margen') {
+      selectedPrice = (totalCost + (totalCost * (widget.product.price / 100)));
+      basePrice = (totalCost + (totalCost * (widget.product.price / 100)));
+    } else {
+      selectedPrice = widget.product.price.toDouble();
+      basePrice = widget.product.price.toDouble();
+    }
 
     for (var i = 0; i < widget.product.productOptions.length; i++) {
       if (widget.product.productOptions[i].mandatory) {
         mandatoryOptions[widget.product.productOptions[i].title] = false;
       }
     }
+
     super.initState();
   }
 
@@ -109,16 +138,35 @@ class _AddToCartPageState extends State<AddToCartPage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       //Image
-                      Container(
-                        width: MediaQuery.of(context).size.width * 0.5,
-                        height: MediaQuery.of(context).size.width * 0.4,
-                        decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.all(Radius.circular(12)),
-                            color: Colors.grey[100],
-                            image: DecorationImage(
-                                image: NetworkImage(widget.product.image),
-                                fit: BoxFit.cover)),
-                      ),
+                      (widget.product.image != '')
+                          ? Container(
+                              width: MediaQuery.of(context).size.width * 0.5,
+                              height: MediaQuery.of(context).size.width * 0.4,
+                              decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(12)),
+                                  color: Colors.grey[100],
+                                  image: DecorationImage(
+                                      image: NetworkImage(widget.product.image),
+                                      fit: BoxFit.cover)))
+                          : Container(
+                              width: MediaQuery.of(context).size.width * 0.5,
+                              height: MediaQuery.of(context).size.width * 0.4,
+                              decoration: BoxDecoration(
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(12)),
+                                color: Colors.grey[100],
+                              ),
+                              child: Center(
+                                child: Text(
+                                  widget.product.product.substring(0, 2),
+                                  style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
                       const SizedBox(height: 25),
                       //Price
                       SizedBox(
@@ -219,7 +267,7 @@ class _AddToCartPageState extends State<AddToCartPage> {
                                                       (context, int x) {
                                                     return Padding(
                                                       padding: const EdgeInsets
-                                                              .symmetric(
+                                                          .symmetric(
                                                           vertical: 5.0),
                                                       child: Column(
                                                         mainAxisAlignment:
@@ -231,8 +279,8 @@ class _AddToCartPageState extends State<AddToCartPage> {
                                                         children: [
                                                           //iTEM
                                                           SizedBox(
-                                                            width: double
-                                                                .infinity,
+                                                            width:
+                                                                double.infinity,
                                                             child: Row(
                                                               mainAxisAlignment:
                                                                   MainAxisAlignment
@@ -244,10 +292,12 @@ class _AddToCartPageState extends State<AddToCartPage> {
                                                                 //Text/Price
                                                                 Text(
                                                                   widget
-                                                                      .product
-                                                                      .productOptions[
-                                                                          i]
-                                                                      .priceOptions[x]['Option'],
+                                                                          .product
+                                                                          .productOptions[
+                                                                              i]
+                                                                          .priceOptions[x]
+                                                                      [
+                                                                      'Option'],
                                                                   style: const TextStyle(
                                                                       fontWeight:
                                                                           FontWeight
@@ -258,22 +308,31 @@ class _AddToCartPageState extends State<AddToCartPage> {
                                                                           .black),
                                                                 ),
                                                                 const SizedBox(
-                                                                    width:
-                                                                        10),
-                                                                (widget.product.productOptions[i].priceStructure ==
+                                                                    width: 10),
+                                                                (widget
+                                                                            .product
+                                                                            .productOptions[
+                                                                                i]
+                                                                            .priceStructure ==
                                                                         'Complete')
                                                                     ? Text(
                                                                         '(\$${widget.product.productOptions[i].priceOptions[x]['Price']})',
                                                                         style: const TextStyle(
-                                                                            fontWeight: FontWeight.normal,
-                                                                            fontSize: 14,
-                                                                            color: Colors.black),
+                                                                            fontWeight: FontWeight
+                                                                                .normal,
+                                                                            fontSize:
+                                                                                14,
+                                                                            color:
+                                                                                Colors.black),
                                                                       )
                                                                     : (widget.product.productOptions[i].priceStructure ==
                                                                             'Aditional')
                                                                         ? Text(
                                                                             '( +\$${widget.product.productOptions[i].priceOptions[x]['Price']})',
-                                                                            style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),
+                                                                            style: const TextStyle(
+                                                                                fontWeight: FontWeight.normal,
+                                                                                fontSize: 14,
+                                                                                color: Colors.black),
                                                                           )
                                                                         : const SizedBox(),
                                                                 const Spacer(),
@@ -286,13 +345,17 @@ class _AddToCartPageState extends State<AddToCartPage> {
                                                                     ? IconButton(
                                                                         onPressed:
                                                                             () {
-                                                                          if (!selectedTags.contains(widget.product.productOptions[i].priceOptions[x]['Option'])) {
+                                                                          if (!selectedTags.contains(widget
+                                                                              .product
+                                                                              .productOptions[i]
+                                                                              .priceOptions[x]['Option'])) {
                                                                             //Add new
                                                                             setState(() {
                                                                               selectedTags.add(widget.product.productOptions[i].priceOptions[x]['Option']);
                                                                             });
                                                                             //Add price
-                                                                            if (widget.product.productOptions[i].priceStructure == 'Complete') {
+                                                                            if (widget.product.productOptions[i].priceStructure ==
+                                                                                'Complete') {
                                                                               setState(() {
                                                                                 basePrice = widget.product.productOptions[i].priceOptions[x]['Price'];
                                                                               });
@@ -307,7 +370,8 @@ class _AddToCartPageState extends State<AddToCartPage> {
                                                                               selectedTags.remove(widget.product.productOptions[i].priceOptions[x]['Option']);
                                                                             });
                                                                             //Add price
-                                                                            if (widget.product.productOptions[i].priceStructure == 'Complete') {
+                                                                            if (widget.product.productOptions[i].priceStructure ==
+                                                                                'Complete') {
                                                                               setState(() {
                                                                                 basePrice = widget.product.price;
                                                                               });
@@ -330,15 +394,21 @@ class _AddToCartPageState extends State<AddToCartPage> {
                                                                             }
                                                                           }
                                                                         },
-                                                                        icon: (selectedTags.contains(widget.product.productOptions[i].priceOptions[x]['Option']))
+                                                                        icon: (selectedTags.contains(widget.product.productOptions[i].priceOptions[x][
+                                                                                'Option']))
                                                                             ? Icon(
                                                                                 Icons.check_box,
                                                                                 color: Colors.greenAccent[400],
                                                                               )
-                                                                            : const Icon(Icons.check_box_outline_blank))
+                                                                            : const Icon(Icons
+                                                                                .check_box_outline_blank))
                                                                     : IconButton(
-                                                                        onPressed: () {
-                                                                          if (!selectedTags.contains(widget.product.productOptions[i].priceOptions[x]['Option'])) {
+                                                                        onPressed:
+                                                                            () {
+                                                                          if (!selectedTags.contains(widget
+                                                                              .product
+                                                                              .productOptions[i]
+                                                                              .priceOptions[x]['Option'])) {
                                                                             //IF SINGLE CHOICE, REMOVE OTHERS
                                                                             widget.product.productOptions[i].priceOptions.forEach((x) {
                                                                               if (selectedTags.contains(x['Option'])) {
@@ -352,7 +422,8 @@ class _AddToCartPageState extends State<AddToCartPage> {
                                                                             });
 
                                                                             //Add price
-                                                                            if (widget.product.productOptions[i].priceStructure == 'Complete') {
+                                                                            if (widget.product.productOptions[i].priceStructure ==
+                                                                                'Complete') {
                                                                               setState(() {
                                                                                 basePrice = widget.product.productOptions[i].priceOptions[x]['Price'];
                                                                               });
@@ -386,8 +457,7 @@ class _AddToCartPageState extends State<AddToCartPage> {
                                                           ), //Divider
                                                           const Divider(
                                                             thickness: 0.5,
-                                                            color:
-                                                                Colors.grey,
+                                                            color: Colors.grey,
                                                           )
                                                         ],
                                                       ),
@@ -464,9 +534,12 @@ class _AddToCartPageState extends State<AddToCartPage> {
                           //Add
                           IconButton(
                             onPressed: () {
-                              setState(() {
-                                quantity = quantity + 1;
-                              });
+                              if (widget.product.currentStock! >=
+                                  quantity + 1) {
+                                setState(() {
+                                  quantity = quantity + 1;
+                                });
+                              }
                             },
                             icon: const Icon(Icons.add_circle_outline),
                             iconSize: 24,
@@ -489,13 +562,13 @@ class _AddToCartPageState extends State<AddToCartPage> {
                           overlayColor:
                               MaterialStateProperty.resolveWith<Color>(
                             (Set<MaterialState> states) {
-                              if (states.contains(MaterialState.hovered)){
+                              if (states.contains(MaterialState.hovered)) {
                                 return Colors.grey.shade300;
-                              }                                
+                              }
                               if (states.contains(MaterialState.focused) ||
-                                  states.contains(MaterialState.pressed)){
-                                    return Colors.grey.shade200;
-                                  }                                                                  
+                                  states.contains(MaterialState.pressed)) {
+                                return Colors.grey.shade200;
+                              }
                               return Colors
                                   .black; // Defer to the widget's default.
                             },
@@ -513,7 +586,11 @@ class _AddToCartPageState extends State<AddToCartPage> {
                                     totalAmount(basePrice, selectedTags) *
                                         quantity,
                                 'Options': selectedTags,
-                                'Image': widget.product.image
+                                'Image': widget.product.image,
+                                'Supplies': widget.product.ingredients,
+                                'Control Stock': widget.product.controlStock,
+                                'Product ID': widget.product.productID,
+                                'Stock Updated': true,
                               });
                             }
 
@@ -525,7 +602,10 @@ class _AddToCartPageState extends State<AddToCartPage> {
                           padding: const EdgeInsets.all(8.0),
                           child: Center(
                               child: Text(
-                            'Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedTags) * quantity)}',
+                            (widget.product.controlStock! &&
+                                    widget.product.currentStock! < 1)
+                                ? 'Fuera de Stock'
+                                : 'Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedTags) * quantity)}',
                             style: TextStyle(
                                 color: (mandatoryOptionsCompleted())
                                     ? Colors.white

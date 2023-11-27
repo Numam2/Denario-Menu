@@ -66,10 +66,38 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
     return optionsCompleted;
   }
 
+  double totalCost = 0;
+  List ingredients = [];
+
   @override
   void initState() {
-    selectedPrice = widget.product.price.toDouble();
-    basePrice = widget.product.price.toDouble();
+    ingredients = widget.product.ingredients!;
+    if (ingredients.isNotEmpty) {
+      for (int x = 0; x < ingredients.length; x++) {
+        if (ingredients[x]['Supply Cost'] != null &&
+            ingredients[x]['Supply Quantity'] != null &&
+            ingredients[x]['Quantity'] != null &&
+            ingredients[x]['Yield'] != null) {
+          double ingredientTotal = ((ingredients[x]['Supply Cost'] /
+                      ingredients[x]['Supply Quantity']) *
+                  ingredients[x]['Quantity']) /
+              ingredients[x]['Yield'];
+          if (!ingredientTotal.isNaN &&
+              !ingredientTotal.isInfinite &&
+              !ingredientTotal.isNegative) {
+            totalCost = totalCost + ingredientTotal;
+          }
+        }
+      }
+    }
+
+    if (widget.product.priceType == 'Precio por margen') {
+      selectedPrice = (totalCost + (totalCost * (widget.product.price / 100)));
+      basePrice = (totalCost + (totalCost * (widget.product.price / 100)));
+    } else {
+      selectedPrice = widget.product.price.toDouble();
+      basePrice = widget.product.price.toDouble();
+    }
 
     for (var i = 0; i < widget.product.productOptions.length; i++) {
       if (widget.product.productOptions[i].mandatory) {
@@ -144,17 +172,39 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             //Image
-                            Container(
-                                width: MediaQuery.of(context).size.width * 0.2,
-                                height: MediaQuery.of(context).size.width * 0.2,
-                                decoration: BoxDecoration(
-                                    borderRadius:
-                                        const BorderRadius.all(Radius.circular(12)),
-                                    color: Colors.grey[100],
-                                    image: DecorationImage(
-                                        image:
-                                            NetworkImage(widget.product.image),
-                                        fit: BoxFit.cover))),
+                            (widget.product.image != '')
+                                ? Container(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.2,
+                                    height:
+                                        MediaQuery.of(context).size.width * 0.2,
+                                    decoration: BoxDecoration(
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(12)),
+                                        color: Colors.grey[100],
+                                        image: DecorationImage(
+                                            image: NetworkImage(
+                                                widget.product.image),
+                                            fit: BoxFit.cover)))
+                                : Container(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.2,
+                                    height:
+                                        MediaQuery.of(context).size.width * 0.2,
+                                    decoration: const BoxDecoration(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(12)),
+                                        color: Colors.grey),
+                                    child: Center(
+                                      child: Text(
+                                        widget.product.product.substring(0, 2),
+                                        style: const TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 28,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ),
                             const SizedBox(width: 20),
                             //Details
                             Expanded(
@@ -166,7 +216,8 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                   SizedBox(
                                     width: double.infinity,
                                     child: Text(
-                                      formatCurrency.format(totalAmount(basePrice, selectedTags)),
+                                      formatCurrency.format(
+                                          totalAmount(basePrice, selectedTags)),
                                       textAlign: TextAlign.left,
                                       style: const TextStyle(
                                         color: Colors.black,
@@ -271,7 +322,7 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                                             return Padding(
                                                               padding:
                                                                   const EdgeInsets
-                                                                          .symmetric(
+                                                                      .symmetric(
                                                                       vertical:
                                                                           5.0),
                                                               child: Column(
@@ -286,24 +337,30 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                                                   SizedBox(
                                                                     width: double
                                                                         .infinity,
-                                                                    child:
-                                                                        Row(
+                                                                    child: Row(
                                                                       mainAxisAlignment:
-                                                                          MainAxisAlignment.start,
+                                                                          MainAxisAlignment
+                                                                              .start,
                                                                       crossAxisAlignment:
-                                                                          CrossAxisAlignment.center,
+                                                                          CrossAxisAlignment
+                                                                              .center,
                                                                       children: [
                                                                         //Text/Price
                                                                         Text(
-                                                                          widget.product.productOptions[i].priceOptions[x]['Option'],
+                                                                          widget
+                                                                              .product
+                                                                              .productOptions[i]
+                                                                              .priceOptions[x]['Option'],
                                                                           style: const TextStyle(
                                                                               fontWeight: FontWeight.normal,
                                                                               fontSize: 14,
                                                                               color: Colors.black),
                                                                         ),
                                                                         const SizedBox(
-                                                                            width: 10),
-                                                                        (widget.product.productOptions[i].priceStructure == 'Complete')
+                                                                            width:
+                                                                                10),
+                                                                        (widget.product.productOptions[i].priceStructure ==
+                                                                                'Complete')
                                                                             ? Text(
                                                                                 '(\$${widget.product.productOptions[i].priceOptions[x]['Price']})',
                                                                                 style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),
@@ -433,7 +490,8 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                           }),
 
                                   SizedBox(
-                                      height: (widget.product.productOptions.isEmpty)
+                                      height: (widget
+                                              .product.productOptions.isEmpty)
                                           ? 0
                                           : 30),
                                 ],
@@ -454,8 +512,8 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                 height:
                                     MediaQuery.of(context).size.width * 0.35,
                                 decoration: BoxDecoration(
-                                    borderRadius:
-                                        const BorderRadius.all(Radius.circular(12)),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(12)),
                                     color: Colors.grey[100],
                                     image: DecorationImage(
                                         image:
@@ -561,7 +619,7 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                                       return Padding(
                                                         padding:
                                                             const EdgeInsets
-                                                                    .symmetric(
+                                                                .symmetric(
                                                                 vertical: 5.0),
                                                         child: Column(
                                                           mainAxisAlignment:
@@ -591,12 +649,13 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                                                             i]
                                                                         .priceOptions[x]['Option'],
                                                                     style: const TextStyle(
-                                                                        fontWeight: FontWeight
-                                                                            .normal,
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .normal,
                                                                         fontSize:
                                                                             14,
-                                                                        color:
-                                                                            Colors.black),
+                                                                        color: Colors
+                                                                            .black),
                                                                   ),
                                                                   const SizedBox(
                                                                       width:
@@ -740,10 +799,9 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                     }),
 
                             SizedBox(
-                                height:
-                                    (widget.product.productOptions.isEmpty)
-                                        ? 0
-                                        : 30),
+                                height: (widget.product.productOptions.isEmpty)
+                                    ? 0
+                                    : 30),
                           ],
                         ),
                 ),
@@ -762,7 +820,8 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                     ? const EdgeInsets.all(20)
                     : (MediaQuery.of(context).size.width > 450)
                         ? const EdgeInsets.all(12)
-                        : const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                        : const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 5),
                 child: (MediaQuery.of(context).size.width > 900)
                     ? Row(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -771,36 +830,39 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                           //Add/Substract items
                           Row(
                             children: [
-                          //Remove
-                          IconButton(
-                            onPressed: () {
-                              if (quantity <= 1) {
-                                //
-                              } else {
-                                setState(() {
-                                  quantity = quantity - 1;
-                                });
-                              }
-                            },
-                            icon: const Icon(Icons.remove_circle_outline),
-                            iconSize: 24,
-                          ),
-                          const SizedBox(width: 15),
-                          Text(
-                            '$quantity',
-                            style: const TextStyle(fontSize: 18),
-                          ), //'${cartList[i]['Quantity']}'),
-                          const SizedBox(width: 15),
-                          //Add
-                          IconButton(
-                            onPressed: () {
-                              setState(() {
-                                quantity = quantity + 1;
-                              });
-                            },
-                            icon: const Icon(Icons.add_circle_outline),
-                            iconSize: 24,
-                          )
+                              //Remove
+                              IconButton(
+                                onPressed: () {
+                                  if (quantity <= 1) {
+                                    //
+                                  } else {
+                                    setState(() {
+                                      quantity = quantity - 1;
+                                    });
+                                  }
+                                },
+                                icon: const Icon(Icons.remove_circle_outline),
+                                iconSize: 24,
+                              ),
+                              const SizedBox(width: 15),
+                              Text(
+                                '$quantity',
+                                style: const TextStyle(fontSize: 18),
+                              ), //'${cartList[i]['Quantity']}'),
+                              const SizedBox(width: 15),
+                              //Add
+                              IconButton(
+                                onPressed: () {
+                                  if (widget.product.currentStock! >=
+                                      quantity + 1) {
+                                    setState(() {
+                                      quantity = quantity + 1;
+                                    });
+                                  }
+                                },
+                                icon: const Icon(Icons.add_circle_outline),
+                                iconSize: 24,
+                              )
                             ],
                           ),
                           const Spacer(),
@@ -819,16 +881,16 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                       MaterialStateProperty.resolveWith<Color>(
                                     (Set<MaterialState> states) {
                                       if (states
-                                          .contains(MaterialState.hovered)){
-                                            return Colors.grey.shade300;
-                                          }
-                                        
+                                          .contains(MaterialState.hovered)) {
+                                        return Colors.grey.shade300;
+                                      }
+
                                       if (states.contains(
                                               MaterialState.focused) ||
-                                          states
-                                              .contains(MaterialState.pressed)){
-                                                return Colors.grey.shade200;
-                                              }                                        
+                                          states.contains(
+                                              MaterialState.pressed)) {
+                                        return Colors.grey.shade200;
+                                      }
                                       return Colors
                                           .black; // Defer to the widget's default.
                                     },
@@ -847,7 +909,12 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                                 basePrice, selectedTags) *
                                             quantity,
                                         'Options': selectedTags,
-                                        'Image': widget.product.image
+                                        'Image': widget.product.image,
+                                        'Supplies': widget.product.ingredients,
+                                        'Control Stock':
+                                            widget.product.controlStock,
+                                        'Product ID': widget.product.productID,
+                                        'Stock Updated': true,
                                       });
                                     }
 
@@ -859,7 +926,10 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                   padding: const EdgeInsets.all(8.0),
                                   child: Center(
                                       child: Text(
-                                   ' Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedTags) * quantity)}',
+                                    (widget.product.controlStock! &&
+                                            widget.product.currentStock! < 1)
+                                        ? 'Fuera de Stock'
+                                        : ' Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedTags) * quantity)}',
                                     style: TextStyle(
                                         color: (mandatoryOptionsCompleted())
                                             ? Colors.white
@@ -879,36 +949,41 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                 flex: 2,
                                 child: Row(
                                   children: [
-                                //Remove
-                                IconButton(
-                                  onPressed: () {
-                                    if (quantity <= 1) {
-                                      //
-                                    } else {
-                                      setState(() {
-                                        quantity = quantity - 1;
-                                      });
-                                    }
-                                  },
-                                  icon: const Icon(Icons.remove_circle_outline),
-                                  iconSize: 24,
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  '$quantity',
-                                  style: const TextStyle(fontSize: 18),
-                                ), //'${cartList[i]['Quantity']}'),
-                                const SizedBox(width: 10),
-                                //Add
-                                IconButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      quantity = quantity + 1;
-                                    });
-                                  },
-                                  icon: const Icon(Icons.add_circle_outline),
-                                  iconSize: 24,
-                                )
+                                    //Remove
+                                    IconButton(
+                                      onPressed: () {
+                                        if (quantity <= 1) {
+                                          //
+                                        } else {
+                                          setState(() {
+                                            quantity = quantity - 1;
+                                          });
+                                        }
+                                      },
+                                      icon: const Icon(
+                                          Icons.remove_circle_outline),
+                                      iconSize: 24,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      '$quantity',
+                                      style: const TextStyle(fontSize: 18),
+                                    ), //'${cartList[i]['Quantity']}'),
+                                    const SizedBox(width: 10),
+                                    //Add
+                                    IconButton(
+                                      onPressed: () {
+                                        if (widget.product.currentStock! >=
+                                            quantity + 1) {
+                                          setState(() {
+                                            quantity = quantity + 1;
+                                          });
+                                        }
+                                      },
+                                      icon:
+                                          const Icon(Icons.add_circle_outline),
+                                      iconSize: 24,
+                                    )
                                   ],
                                 ),
                               ),
@@ -963,7 +1038,14 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                                       basePrice, selectedTags) *
                                                   quantity,
                                               'Options': selectedTags,
-                                              'Image': widget.product.image
+                                              'Image': widget.product.image,
+                                              'Supplies':
+                                                  widget.product.ingredients,
+                                              'Control Stock':
+                                                  widget.product.controlStock,
+                                              'Product ID':
+                                                  widget.product.productID,
+                                              'Stock Updated': true,
                                             });
                                           }
 
@@ -975,7 +1057,11 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                         padding: const EdgeInsets.all(8.0),
                                         child: Center(
                                             child: Text(
-                                          'Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedTags) * quantity)}',
+                                          (widget.product.controlStock! &&
+                                                  widget.product.currentStock! <
+                                                      1)
+                                              ? 'Fuera de Stock'
+                                              : 'Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedTags) * quantity)}',
                                           style: TextStyle(
                                               color:
                                                   (mandatoryOptionsCompleted())
@@ -1008,7 +1094,8 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                             });
                                           }
                                         },
-                                        icon: const Icon(Icons.remove_circle_outline),
+                                        icon: const Icon(
+                                            Icons.remove_circle_outline),
                                         iconSize: 24,
                                       ),
                                       const SizedBox(width: 10),
@@ -1020,11 +1107,15 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                       //Add
                                       IconButton(
                                         onPressed: () {
-                                          setState(() {
-                                            quantity = quantity + 1;
-                                          });
+                                          if (widget.product.currentStock! >=
+                                              quantity + 1) {
+                                            setState(() {
+                                              quantity = quantity + 1;
+                                            });
+                                          }
                                         },
-                                        icon: const Icon(Icons.add_circle_outline),
+                                        icon: const Icon(
+                                            Icons.add_circle_outline),
                                         iconSize: 24,
                                       )
                                     ],
@@ -1047,16 +1138,16 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                       overlayColor: MaterialStateProperty
                                           .resolveWith<Color>(
                                         (Set<MaterialState> states) {
-                                          if (states
-                                              .contains(MaterialState.hovered)){
-                                                return Colors.grey.shade300;
-                                              }                                            
+                                          if (states.contains(
+                                              MaterialState.hovered)) {
+                                            return Colors.grey.shade300;
+                                          }
                                           if (states.contains(
                                                   MaterialState.focused) ||
                                               states.contains(
-                                                  MaterialState.pressed)){
-                                                    return Colors.grey.shade200;
-                                                  }                                            
+                                                  MaterialState.pressed)) {
+                                            return Colors.grey.shade200;
+                                          }
                                           return Colors
                                               .black; // Defer to the widget's default.
                                         },
@@ -1075,7 +1166,14 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                                     basePrice, selectedTags) *
                                                 quantity,
                                             'Options': selectedTags,
-                                            'Image': widget.product.image
+                                            'Image': widget.product.image,
+                                            'Supplies':
+                                                widget.product.ingredients,
+                                            'Control Stock':
+                                                widget.product.controlStock,
+                                            'Product ID':
+                                                widget.product.productID,
+                                            'Stock Updated': true,
                                           });
                                         }
 
@@ -1087,7 +1185,11 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                       padding: const EdgeInsets.all(8.0),
                                       child: Center(
                                           child: Text(
-                                        'Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedTags) * quantity)}',
+                                        (widget.product.controlStock! &&
+                                                widget.product.currentStock! <
+                                                    1)
+                                            ? 'Fuera de Stock'
+                                            : 'Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedTags) * quantity)}',
                                         style: TextStyle(
                                             color: (mandatoryOptionsCompleted())
                                                 ? Colors.white

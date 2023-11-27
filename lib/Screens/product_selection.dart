@@ -84,6 +84,27 @@ class _ProductSelectionState extends State<ProductSelection> {
       return SliverList(
           key: productListKey,
           delegate: SliverChildBuilderDelegate((context, i) {
+            double totalCost = 0;
+            List ingredients = product[i].ingredients!;
+            if (ingredients.isNotEmpty) {
+              for (int x = 0; x < ingredients.length; x++) {
+                if (ingredients[x]['Supply Cost'] != null &&
+                    ingredients[x]['Supply Quantity'] != null &&
+                    ingredients[x]['Quantity'] != null &&
+                    ingredients[x]['Yield'] != null) {
+                  double ingredientTotal = ((ingredients[x]['Supply Cost'] /
+                              ingredients[x]['Supply Quantity']) *
+                          ingredients[x]['Quantity']) /
+                      ingredients[x]['Yield'];
+                  if (!ingredientTotal.isNaN &&
+                      !ingredientTotal.isInfinite &&
+                      !ingredientTotal.isNegative) {
+                    totalCost = totalCost + ingredientTotal;
+                  }
+                }
+              }
+            }
+
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
               child: SizedBox(
@@ -125,14 +146,31 @@ class _ProductSelectionState extends State<ProductSelection> {
                         children: <Widget>[
                           //Fotos
                           Expanded(
-                            child: Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(12)),
-                                    color: Colors.grey[100],
-                                    image: DecorationImage(
-                                        image: NetworkImage(product[i].image),
-                                        fit: BoxFit.cover))),
+                            child: (product[i].image != '')
+                                ? Container(
+                                    decoration: BoxDecoration(
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(12)),
+                                        color: Colors.grey[100],
+                                        image: DecorationImage(
+                                            image:
+                                                NetworkImage(product[i].image),
+                                            fit: BoxFit.cover)))
+                                : Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(12)),
+                                      color: Colors.grey[100],
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        product[i].product.substring(0, 2),
+                                        style: const TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 28,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    )),
                           ),
                           const SizedBox(width: 15),
                           //Description
@@ -171,7 +209,14 @@ class _ProductSelectionState extends State<ProductSelection> {
 
                                   ///Price
                                   Text(
-                                    formatCurrency.format(product[i].price),
+                                    (product[i].controlStock! &&
+                                            product[i].currentStock! < 1)
+                                        ? 'Fuera de Stock'
+                                        : (product[i].priceType ==
+                                                'Precio por margen')
+                                            ? "\$${(totalCost + (totalCost * (product[i].price / 100))).toStringAsFixed(2)}"
+                                            : formatCurrency
+                                                .format(product[i].price),
                                     textAlign: TextAlign.end,
                                     style: const TextStyle(
                                       color: Colors.black,
@@ -220,6 +265,27 @@ class _ProductSelectionState extends State<ProductSelection> {
         ),
         delegate: SliverChildBuilderDelegate(
           (context, i) {
+            double totalCost = 0;
+            List ingredients = product[i].ingredients!;
+            if (ingredients.isNotEmpty) {
+              for (int x = 0; x < ingredients.length; x++) {
+                if (ingredients[x]['Supply Cost'] != null &&
+                    ingredients[x]['Supply Quantity'] != null &&
+                    ingredients[x]['Quantity'] != null &&
+                    ingredients[x]['Yield'] != null) {
+                  double ingredientTotal = ((ingredients[x]['Supply Cost'] /
+                              ingredients[x]['Supply Quantity']) *
+                          ingredients[x]['Quantity']) /
+                      ingredients[x]['Yield'];
+                  if (!ingredientTotal.isNaN &&
+                      !ingredientTotal.isInfinite &&
+                      !ingredientTotal.isNegative) {
+                    totalCost = totalCost + ingredientTotal;
+                  }
+                }
+              }
+            }
+
             return ElevatedButton(
                 style: ButtonStyle(
                   backgroundColor:
@@ -299,7 +365,14 @@ class _ProductSelectionState extends State<ProductSelection> {
 
                               ///Price
                               Text(
-                                formatCurrency.format(product[i].price),
+                                (product[i].controlStock! &&
+                                        product[i].currentStock! < 1)
+                                    ? 'Fuera de Stock'
+                                    : (product[i].priceType ==
+                                            'Precio por margen')
+                                        ? "\$${(totalCost + (totalCost * (product[i].price / 100))).toStringAsFixed(2)}"
+                                        : formatCurrency
+                                            .format(product[i].price),
                                 textAlign: TextAlign.end,
                                 style: const TextStyle(
                                   color: Colors.black,

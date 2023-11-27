@@ -9,7 +9,9 @@ import '../Database/ticket.dart';
 class TicketView extends StatefulWidget {
   final String? businessID;
   final String businessPhone;
-  const TicketView(this.businessID, this.businessPhone, {super.key});
+  final String? storeType;
+  const TicketView(this.businessID, this.businessPhone, this.storeType,
+      {super.key});
 
   @override
   _TicketViewState createState() => _TicketViewState();
@@ -147,18 +149,41 @@ class _TicketViewState extends State<TicketView> {
                                           CrossAxisAlignment.center,
                                       children: [
                                         //Image
-                                        Container(
-                                            width: 100,
-                                            height: 100,
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                    const BorderRadius.all(
-                                                        Radius.circular(12)),
-                                                color: Colors.grey[100],
-                                                image: DecorationImage(
-                                                    image: NetworkImage(
-                                                        cartList[i]['Image']),
-                                                    fit: BoxFit.cover))),
+                                        (cartList[i]['Image'] != '')
+                                            ? Container(
+                                                width: 100,
+                                                height: 100,
+                                                decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        const BorderRadius.all(
+                                                            Radius.circular(
+                                                                12)),
+                                                    color: Colors.grey[100],
+                                                    image: DecorationImage(
+                                                        image: NetworkImage(
+                                                            cartList[i]
+                                                                ['Image']),
+                                                        fit: BoxFit.cover)))
+                                            : Container(
+                                                width: 100,
+                                                height: 100,
+                                                decoration: const BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(12)),
+                                                  color: Colors.grey,
+                                                ),
+                                                child: Center(
+                                                  child: Text(
+                                                    cartList[i]['Name']
+                                                        .substring(0, 2),
+                                                    style: const TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 28,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                )),
                                         const SizedBox(width: 10),
                                         //Column Name + Qty
                                         Expanded(
@@ -182,7 +207,7 @@ class _TicketViewState extends State<TicketView> {
                                                   // : SizedBox(),
                                                   : Padding(
                                                       padding: const EdgeInsets
-                                                              .symmetric(
+                                                          .symmetric(
                                                           vertical: 5),
                                                       child: Text(
                                                           cartList[i]['Options']
@@ -278,7 +303,8 @@ class _TicketViewState extends State<TicketView> {
                                           builder: (context) => StoreCheckout(
                                               total,
                                               widget.businessID,
-                                              widget.businessPhone)));
+                                              widget.businessPhone,
+                                              widget.storeType!)));
                                 }
                               },
                               child: Center(

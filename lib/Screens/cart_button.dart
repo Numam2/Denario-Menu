@@ -55,8 +55,8 @@ class CartButton extends StatelessWidget {
               width: 120,
               constraints: BoxConstraints(
                   maxWidth: MediaQuery.of(context).size.width * 0.9),
-              child: Stack(
-                children: const [
+              child: const Stack(
+                children: [
                   //Icon
                   Align(
                       alignment: Alignment(0, 0),

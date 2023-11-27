@@ -8,10 +8,20 @@ class Products {
   bool available;
   String productID;
   String code;
+  List? listOfIngredients;
+  List? ingredients;
   List searchName;
   bool vegan;
   bool showOnMenu;
   bool featured;
+  double? iva;
+  //new
+  String? priceType;
+  bool? controlStock;
+  int? currentStock;
+  int? lowStockAlert;
+  bool? deliveryMenu;
+  bool? allowReservation;
 
   Products(
       this.product,
@@ -26,7 +36,16 @@ class Products {
       this.searchName,
       this.vegan,
       this.showOnMenu,
-      this.featured);
+      this.featured,
+      this.listOfIngredients,
+      this.ingredients,
+      this.iva,
+      this.priceType,
+      this.controlStock,
+      this.currentStock,
+      this.lowStockAlert,
+      this.deliveryMenu,
+      this.allowReservation);
 }
 
 class ProductOptions {

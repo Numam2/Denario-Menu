@@ -1,7 +1,6 @@
 // ignore_for_file: depend_on_referenced_packages
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:menu_denario/Models/categories.dart';
 import 'package:menu_denario/Models/products.dart';
 import 'package:menu_denario/Models/user.dart';
 
@@ -51,23 +50,21 @@ class DatabaseService {
   }
 
   //Get Categories
-  CategoryList _categoriesFromSnapshot(DocumentSnapshot snapshot) {
+  List _categoriesFromSnapshot(DocumentSnapshot snapshot) {
     try {
-      return CategoryList(snapshot.data().toString().contains('Category List')
-          ? snapshot['Category List']
-          : []);
+      return snapshot.data().toString().contains('Visible Store Categories')
+          ? snapshot['Visible Store Categories']
+          : [];
     } catch (e) {
-      return CategoryList([]);
+      return [];
     }
   }
 
   //Categories Stream (Costo de Ventas)
-  Stream<CategoryList> categoriesList(uid) async* {
+  Stream<List> categoriesList(uid) async* {
     yield* FirebaseFirestore.instance
         .collection('ERP')
         .doc(uid)
-        .collection('Master Data')
-        .doc('Categories')
         .snapshots()
         .map(_categoriesFromSnapshot);
   }
@@ -116,12 +113,41 @@ class DatabaseService {
               : false,
           doc.data().toString().contains('Show') ? doc['Show'] : true,
           doc.data().toString().contains('Featured') ? doc['Featured'] : false,
+          doc.data().toString().contains('List of Ingredients')
+              ? doc['List of Ingredients']
+              : [],
+          doc.data().toString().contains('Ingredients')
+              ? doc['Ingredients']
+              : [],
+          doc.data().toString().contains('IVA')
+              ? (doc['IVA'] != null)
+                  ? doc['IVA']
+                  : 0
+              : 0,
+          doc.data().toString().contains('Price Type')
+              ? doc['Price Type']
+              : 'Precio por unidad',
+          doc.data().toString().contains('Control Stock')
+              ? doc['Control Stock']
+              : false,
+          doc.data().toString().contains('Current Stock')
+              ? doc['Current Stock']
+              : 0,
+          doc.data().toString().contains('Low Stock Alert')
+              ? doc['Low Stock Alert']
+              : 0,
+          doc.data().toString().contains('Allow Delivery')
+              ? doc['Allow Delivery']
+              : true,
+          doc.data().toString().contains('Allow Reservation')
+              ? doc['Allow Reservation']
+              : false,
         );
       }).toList();
     } catch (e) {
       return snapshot.docs.map((doc) {
-        return Products(
-            '', 0, '', '', '', [], false, doc.id, '', [], false, false, false);
+        return Products('', 0, '', '', '', [], false, doc.id, '', [], false,
+            false, false, [], [], 0, '', false, 0, 0, true, false);
       }).toList();
     }
   }
@@ -159,6 +185,32 @@ class DatabaseService {
         .map(_productListFromSnapshot);
   }
 
+  //Menu Product Stream
+  Stream<List<Products>> menuProductList(String category, uid) async* {
+    yield* FirebaseFirestore.instance
+        .collection('Products')
+        .doc(uid)
+        .collection('Menu')
+        .where('Category', isEqualTo: category)
+        .where('Show', isEqualTo: true)
+        .where('Allow Delivery', isEqualTo: true)
+        .snapshots()
+        .map(_productListFromSnapshot);
+  }
+
+  //Reservation Product Stream
+  Stream<List<Products>> reservationProductList(String category, uid) async* {
+    yield* FirebaseFirestore.instance
+        .collection('Products')
+        .doc(uid)
+        .collection('Menu')
+        .where('Category', isEqualTo: category)
+        .where('Show', isEqualTo: true)
+        .where('Allow Reservation', isEqualTo: true)
+        .snapshots()
+        .map(_productListFromSnapshot);
+  }
+
   //Create Order
   Future createOrder(String businessID, orderName, address, phone, orderDetail,
       paymentType, total, String orderType) async {
@@ -179,5 +231,130 @@ class DatabaseService {
       'Total': total,
       'Order Type': orderType
     });
+  }
+
+  void saveOrder(String businessID, orderName, address, phone, orderDetail,
+      paymentType, total, String orderType) async {
+    /////////////////////////// Update Product Stock ///////////////////////////
+
+    for (var i = 0; i < orderDetail.length; i++) {
+      if (orderDetail[i]['Control Stock'] == true) {
+        //Firestore reference
+        var firestore = FirebaseFirestore.instance;
+        var prdRef = firestore
+            .collection('Products')
+            .doc(businessID)
+            .collection('Menu')
+            .doc(orderDetail[i]['Product ID']);
+
+        final prdDoc = await prdRef.get();
+
+        try {
+          if (prdDoc.exists) {
+            prdRef.update({
+              'Current Stock': FieldValue.increment(-orderDetail[i]["Quantity"])
+            });
+          }
+        } catch (error) {
+          print('Error updating Total Sales Value: $error');
+        }
+      }
+    }
+    createOrder(businessID, orderName, address, phone, orderDetail, paymentType,
+        total, orderType);
+  }
+
+  /// Schedule
+  Future scheduleFirebaseSale(
+      businessID,
+      String transactionID,
+      subTotal,
+      discount,
+      tax,
+      total,
+      orderDetail,
+      orderName,
+      DateTime dueDate,
+      client,
+      initialPayment,
+      remainingBalance,
+      String note) async {
+    return await FirebaseFirestore.instance
+        .collection('ERP')
+        .doc(businessID)
+        .collection('Schedule')
+        .doc(transactionID)
+        .set({
+      'Discount': discount,
+      'IVA': tax,
+      'Items': orderDetail,
+      'Order Name': orderName,
+      'Subtotal': subTotal,
+      'Total': total,
+      'Initial Payment': initialPayment,
+      'Remaining Blanace': remainingBalance,
+      'Document ID': transactionID,
+      'Order Type': 'Encargo',
+      'Saved Date': DateTime.now(),
+      'Due Date': dueDate,
+      'Client': client,
+      'Pending': true,
+      'Note': note
+    });
+  }
+
+  void scheduleSale(
+      businessID,
+      String transactionID,
+      subTotal,
+      discount,
+      tax,
+      total,
+      orderDetail,
+      orderName,
+      DateTime dueDate,
+      client,
+      initialPayment,
+      remainingBalance,
+      String note) async {
+    /////////////////////////// Update Product Stock ///////////////////////////
+
+    for (var i = 0; i < orderDetail.length; i++) {
+      if (orderDetail[i]['Control Stock'] == true) {
+        //Firestore reference
+        var firestore = FirebaseFirestore.instance;
+        var prdRef = firestore
+            .collection('Products')
+            .doc(businessID)
+            .collection('Menu')
+            .doc(orderDetail[i]['Product ID']);
+
+        final prdDoc = await prdRef.get();
+
+        try {
+          if (prdDoc.exists) {
+            prdRef.update({
+              'Current Stock': FieldValue.increment(-orderDetail[i]["Quantity"])
+            });
+          }
+        } catch (error) {
+          print('Error updating Total Sales Value: $error');
+        }
+      }
+    }
+    scheduleFirebaseSale(
+        businessID,
+        transactionID,
+        subTotal,
+        discount,
+        tax,
+        total,
+        orderDetail,
+        orderName,
+        dueDate,
+        client,
+        initialPayment,
+        remainingBalance,
+        note);
   }
 }

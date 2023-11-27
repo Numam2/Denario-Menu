@@ -78,6 +78,26 @@ class FeaturedProducts extends StatelessWidget {
           itemCount: product.length,
           controller: productScrollController,
           itemBuilder: ((context, i) {
+            double totalCost = 0;
+            List ingredients = product[i].ingredients!;
+            if (ingredients.isNotEmpty) {
+              for (int x = 0; x < ingredients.length; x++) {
+                if (ingredients[x]['Supply Cost'] != null &&
+                    ingredients[x]['Supply Quantity'] != null &&
+                    ingredients[x]['Quantity'] != null &&
+                    ingredients[x]['Yield'] != null) {
+                  double ingredientTotal = ((ingredients[x]['Supply Cost'] /
+                              ingredients[x]['Supply Quantity']) *
+                          ingredients[x]['Quantity']) /
+                      ingredients[x]['Yield'];
+                  if (!ingredientTotal.isNaN &&
+                      !ingredientTotal.isInfinite &&
+                      !ingredientTotal.isNegative) {
+                    totalCost = totalCost + ingredientTotal;
+                  }
+                }
+              }
+            }
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
               child: SizedBox(
@@ -162,7 +182,14 @@ class FeaturedProducts extends StatelessWidget {
 
                                   ///Price
                                   Text(
-                                    formatCurrency.format(product[i].price),
+                                    (product[i].controlStock! &&
+                                            product[i].currentStock! < 1)
+                                        ? 'Fuera de Stock'
+                                        : (product[i].priceType ==
+                                                'Precio por margen')
+                                            ? "\$${(totalCost + (totalCost * (product[i].price / 100))).toStringAsFixed(2)}"
+                                            : formatCurrency
+                                                .format(product[i].price),
                                     textAlign: TextAlign.end,
                                     style: const TextStyle(
                                       color: Colors.black,
@@ -203,6 +230,26 @@ class FeaturedProducts extends StatelessWidget {
           itemCount: product.length,
           controller: productScrollController,
           itemBuilder: ((context, i) {
+            double totalCost = 0;
+            List ingredients = product[i].ingredients!;
+            if (ingredients.isNotEmpty) {
+              for (int x = 0; x < ingredients.length; x++) {
+                if (ingredients[x]['Supply Cost'] != null &&
+                    ingredients[x]['Supply Quantity'] != null &&
+                    ingredients[x]['Quantity'] != null &&
+                    ingredients[x]['Yield'] != null) {
+                  double ingredientTotal = ((ingredients[x]['Supply Cost'] /
+                              ingredients[x]['Supply Quantity']) *
+                          ingredients[x]['Quantity']) /
+                      ingredients[x]['Yield'];
+                  if (!ingredientTotal.isNaN &&
+                      !ingredientTotal.isInfinite &&
+                      !ingredientTotal.isNegative) {
+                    totalCost = totalCost + ingredientTotal;
+                  }
+                }
+              }
+            }
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
               child: SizedBox(
@@ -292,7 +339,14 @@ class FeaturedProducts extends StatelessWidget {
 
                                   //Price
                                   Text(
-                                    formatCurrency.format(product[i].price),
+                                    (product[i].controlStock! &&
+                                            product[i].currentStock! < 1)
+                                        ? 'Fuera de Stock'
+                                        : (product[i].priceType ==
+                                                'Precio por margen')
+                                            ? "\$${(totalCost + (totalCost * (product[i].price / 100))).toStringAsFixed(2)}"
+                                            : formatCurrency
+                                                .format(product[i].price),
                                     textAlign: TextAlign.end,
                                     style: const TextStyle(
                                       color: Colors.black,

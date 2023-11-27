@@ -26,8 +26,11 @@ class MyApp extends StatelessWidget {
         title: 'Mi Denario',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-            primarySwatch: Colors.grey, backgroundColor: Colors.white),
-        home: InitialConfig(Uri.base.queryParameters[
-            'id'])); //Uri.base.queryParameters['id'])); //'VTam7iYZhiWiAFs3IVRBaLB5s3m2'
+            colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.grey)
+                .copyWith(background: Colors.white)),
+        home: InitialConfig(
+          Uri.base.queryParameters['id'],
+          storeType: Uri.base.queryParameters['type'] ?? 'Menu',
+        )); //Uri.base.queryParameters['id'])); //'VTam7iYZhiWiAFs3IVRBaLB5s3m2'
   }
 }

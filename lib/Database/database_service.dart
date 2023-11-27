@@ -153,15 +153,25 @@ class DatabaseService {
   }
 
   // Product Stream
-  Stream<List<Products>> productList(String category, uid) async* {
-    yield* FirebaseFirestore.instance
-        .collection('Products')
-        .doc(uid)
-        .collection('Menu')
-        .where('Category', isEqualTo: category)
-        .where('Show', isEqualTo: true)
-        .snapshots()
-        .map(_productListFromSnapshot);
+  Stream<List<Products>> productList(String category, uid, display) async* {
+    if (display == 'Categorized') {
+      yield* FirebaseFirestore.instance
+          .collection('Products')
+          .doc(uid)
+          .collection('Menu')
+          .where('Category', isEqualTo: category)
+          .where('Show', isEqualTo: true)
+          .snapshots()
+          .map(_productListFromSnapshot);
+    } else {
+      yield* FirebaseFirestore.instance
+          .collection('Products')
+          .doc(uid)
+          .collection('Menu')
+          .where('Show', isEqualTo: true)
+          .snapshots()
+          .map(_productListFromSnapshot);
+    }
   }
 
   Stream<List<Products>> allProductsList(uid) async* {
@@ -186,29 +196,52 @@ class DatabaseService {
   }
 
   //Menu Product Stream
-  Stream<List<Products>> menuProductList(String category, uid) async* {
-    yield* FirebaseFirestore.instance
-        .collection('Products')
-        .doc(uid)
-        .collection('Menu')
-        .where('Category', isEqualTo: category)
-        .where('Show', isEqualTo: true)
-        .where('Allow Delivery', isEqualTo: true)
-        .snapshots()
-        .map(_productListFromSnapshot);
+  Stream<List<Products>> menuProductList(String category, uid, display) async* {
+    if (display == 'Categorized') {
+      yield* FirebaseFirestore.instance
+          .collection('Products')
+          .doc(uid)
+          .collection('Menu')
+          .where('Category', isEqualTo: category)
+          .where('Show', isEqualTo: true)
+          .where('Allow Delivery', isEqualTo: true)
+          .snapshots()
+          .map(_productListFromSnapshot);
+    } else {
+      yield* FirebaseFirestore.instance
+          .collection('Products')
+          .doc(uid)
+          .collection('Menu')
+          .where('Show', isEqualTo: true)
+          .where('Allow Delivery', isEqualTo: true)
+          .snapshots()
+          .map(_productListFromSnapshot);
+    }
   }
 
   //Reservation Product Stream
-  Stream<List<Products>> reservationProductList(String category, uid) async* {
-    yield* FirebaseFirestore.instance
-        .collection('Products')
-        .doc(uid)
-        .collection('Menu')
-        .where('Category', isEqualTo: category)
-        .where('Show', isEqualTo: true)
-        .where('Allow Reservation', isEqualTo: true)
-        .snapshots()
-        .map(_productListFromSnapshot);
+  Stream<List<Products>> reservationProductList(
+      String category, uid, display) async* {
+    if (display == 'Categorized') {
+      yield* FirebaseFirestore.instance
+          .collection('Products')
+          .doc(uid)
+          .collection('Menu')
+          .where('Category', isEqualTo: category)
+          .where('Show', isEqualTo: true)
+          .where('Allow Reservation', isEqualTo: true)
+          .snapshots()
+          .map(_productListFromSnapshot);
+    } else {
+      yield* FirebaseFirestore.instance
+          .collection('Products')
+          .doc(uid)
+          .collection('Menu')
+          .where('Show', isEqualTo: true)
+          .where('Allow Reservation', isEqualTo: true)
+          .snapshots()
+          .map(_productListFromSnapshot);
+    }
   }
 
   //Create Order

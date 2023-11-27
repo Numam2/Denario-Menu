@@ -7,17 +7,24 @@ import 'package:provider/provider.dart';
 class InitialConfig extends StatelessWidget {
   final String? businessID;
   final String? storeType;
-  const InitialConfig(this.businessID, {this.storeType, super.key});
+  final String? display;
+  const InitialConfig(this.businessID,
+      {this.storeType, this.display, super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(providers: [
-      StreamProvider<List>.value(
-          initialData: const [],
-          value: DatabaseService().categoriesList(businessID)),
-      StreamProvider<BusinessProfile>.value(
-          initialData: BusinessProfile('', '', '', '', '', '', 0, [], [], []),
-          value: DatabaseService().userBusinessProfile(businessID.toString())),
-    ], child: StoreHome(businessID, storeType ?? 'Menu'));
+    return MultiProvider(
+        providers: [
+          StreamProvider<List>.value(
+              initialData: const [],
+              value: DatabaseService().categoriesList(businessID)),
+          StreamProvider<BusinessProfile>.value(
+              initialData:
+                  BusinessProfile('', '', '', '', '', '', 0, [], [], []),
+              value:
+                  DatabaseService().userBusinessProfile(businessID.toString())),
+        ],
+        child: StoreHome(
+            businessID, storeType ?? 'Menu', display ?? 'Categorized'));
   }
 }

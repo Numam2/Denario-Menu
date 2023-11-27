@@ -31,6 +31,7 @@ class MyApp extends StatelessWidget {
         home: InitialConfig(
           Uri.base.queryParameters['id'],
           storeType: Uri.base.queryParameters['type'] ?? 'Menu',
+          display: Uri.base.queryParameters['display'] ?? 'Categorized',
         )); //Uri.base.queryParameters['id'])); //'VTam7iYZhiWiAFs3IVRBaLB5s3m2'
   }
 }

@@ -14,7 +14,8 @@ import 'package:url_launcher/url_launcher.dart';
 class StoreHome extends StatefulWidget {
   final String? businessID;
   final String storeType;
-  const StoreHome(this.businessID, this.storeType, {super.key});
+  final String display;
+  const StoreHome(this.businessID, this.storeType, this.display, {super.key});
 
   @override
   State<StoreHome> createState() => _StoreHomeState();
@@ -43,6 +44,7 @@ class _StoreHomeState extends State<StoreHome> {
   }
 
   late String storeType;
+  late String display;
   //Menu, Reservations and Store, have the same store layout for now
   //Catalog has no cart, only display and contact through whatsapp
 
@@ -53,6 +55,7 @@ class _StoreHomeState extends State<StoreHome> {
   @override
   void initState() {
     storeType = widget.storeType;
+    display = widget.display;
     super.initState();
   }
 
@@ -597,7 +600,7 @@ class _StoreHomeState extends State<StoreHome> {
                     (MediaQuery.of(context).size.width > 700) ? 300 : 450,
               ),
               //Featured
-              (storeType != 'Menu' || storeType != 'Store')
+              (storeType == 'Menu' || storeType == 'Store')
                   ? SliverToBoxAdapter(
                       child: SizedBox(
                         child: Align(
@@ -615,7 +618,7 @@ class _StoreHomeState extends State<StoreHome> {
                       ),
                     )
                   : SliverToBoxAdapter(),
-              (storeType != 'Menu' || storeType != 'Store')
+              (storeType == 'Menu' || storeType == 'Store')
                   ? SliverToBoxAdapter(
                       child: StreamProvider<List<Products>>.value(
                           initialData: const [],
@@ -637,86 +640,107 @@ class _StoreHomeState extends State<StoreHome> {
                     )
                   : SliverToBoxAdapter(),
               //Categories
-              SliverAppBar(
-                backgroundColor: Theme.of(context).colorScheme.background,
-                elevation: 5,
-                pinned: true,
-                automaticallyImplyLeading: false,
-                actions: <Widget>[Container()],
-                flexibleSpace: SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ListView.builder(
-                      shrinkWrap: true,
-                      physics: BouncingScrollPhysics(),
-                      scrollDirection: Axis.horizontal,
-                      itemCount: categories.length,
-                      itemBuilder: (context, i) {
-                        return Padding(
-                          padding: (i == 0)
-                              ? EdgeInsets.fromLTRB(15, 5, 5, 5)
-                              : EdgeInsets.symmetric(
-                                  horizontal: 5, vertical: 5),
-                          child: TextButton(
-                            style: ButtonStyle(
-                              backgroundColor:
-                                  (selectedCategory == categories[i])
-                                      ? MaterialStateProperty.all<Color>(
-                                          Colors.black)
-                                      : MaterialStateProperty.all<Color>(
-                                          Colors.transparent),
-                              overlayColor:
-                                  MaterialStateProperty.resolveWith<Color>(
-                                (Set<MaterialState> states) {
-                                  if (states.contains(MaterialState.hovered)) {
-                                    return Colors.grey.shade300;
-                                  }
-                                  if (states.contains(MaterialState.focused) ||
-                                      states.contains(MaterialState.pressed)) {
-                                    return Colors.grey.shade200;
-                                  }
-                                  return Colors
-                                      .black; // Defer to the widget's default.
-                                },
-                              ),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                selectedCategory = categories[i];
-                                firstLoad = false;
-                              });
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 5.0, horizontal: 10),
-                              child: Center(
-                                child: Text(
-                                  categories[i],
-                                  style: TextStyle(
-                                      color: (selectedCategory == categories[i])
-                                          ? Colors.white
-                                          : Colors.black,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400),
+              (display == 'Categorized')
+                  ? SliverAppBar(
+                      backgroundColor: Theme.of(context).colorScheme.background,
+                      elevation: 5,
+                      pinned: true,
+                      automaticallyImplyLeading: false,
+                      actions: <Widget>[Container()],
+                      flexibleSpace: SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ListView.builder(
+                            shrinkWrap: true,
+                            physics: BouncingScrollPhysics(),
+                            scrollDirection: Axis.horizontal,
+                            itemCount: categories.length,
+                            itemBuilder: (context, i) {
+                              return Padding(
+                                padding: (i == 0)
+                                    ? EdgeInsets.fromLTRB(15, 5, 5, 5)
+                                    : EdgeInsets.symmetric(
+                                        horizontal: 5, vertical: 5),
+                                child: TextButton(
+                                  style: ButtonStyle(
+                                    backgroundColor:
+                                        (selectedCategory == categories[i])
+                                            ? MaterialStateProperty.all<Color>(
+                                                Colors.black)
+                                            : MaterialStateProperty.all<Color>(
+                                                Colors.transparent),
+                                    overlayColor: MaterialStateProperty
+                                        .resolveWith<Color>(
+                                      (Set<MaterialState> states) {
+                                        if (states
+                                            .contains(MaterialState.hovered)) {
+                                          return Colors.grey.shade300;
+                                        }
+                                        if (states.contains(
+                                                MaterialState.focused) ||
+                                            states.contains(
+                                                MaterialState.pressed)) {
+                                          return Colors.grey.shade200;
+                                        }
+                                        return Colors
+                                            .black; // Defer to the widget's default.
+                                      },
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      selectedCategory = categories[i];
+                                      firstLoad = false;
+                                    });
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 5.0, horizontal: 10),
+                                    child: Center(
+                                      child: Text(
+                                        categories[i],
+                                        style: TextStyle(
+                                            color: (selectedCategory ==
+                                                    categories[i])
+                                                ? Colors.white
+                                                : Colors.black,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400),
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
+                              );
+                            }),
+                      ),
+                    )
+                  : SliverToBoxAdapter(
+                      child: SizedBox(
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 20),
+                            child: Text('Productos',
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 21,
+                                    fontWeight: FontWeight.bold)),
                           ),
-                        );
-                      }),
-                ),
-              ),
+                        ),
+                      ),
+                    ),
               //Products
               StreamProvider<List<Products>>.value(
                   initialData: const [],
                   value: (storeType == 'Menu')
                       ? DatabaseService()
-                          .menuProductList(selectedCategory, widget.businessID)
+                          .menuProductList(selectedCategory, widget.businessID, display)
                       : (storeType == 'Reservation')
                           ? DatabaseService().reservationProductList(
-                              selectedCategory, widget.businessID)
+                              selectedCategory, widget.businessID, display)
                           : DatabaseService()
-                              .productList(selectedCategory, widget.businessID),
+                              .productList(selectedCategory, widget.businessID, display),
                   child: ProductSelection(
                       ((businessSchedule[DateTime.now().weekday - 1]['Open']
                                       ['Hour'] >
@@ -1188,80 +1212,101 @@ class _StoreHomeState extends State<StoreHome> {
                     (MediaQuery.of(context).size.width > 700) ? 300 : 450,
               ),
               //Categories
-              SliverAppBar(
-                backgroundColor: Theme.of(context).colorScheme.background,
-                elevation: 5,
-                pinned: true,
-                automaticallyImplyLeading: false,
-                actions: <Widget>[Container()],
-                flexibleSpace: SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ListView.builder(
-                      shrinkWrap: true,
-                      physics: BouncingScrollPhysics(),
-                      scrollDirection: Axis.horizontal,
-                      itemCount: categories.length,
-                      itemBuilder: (context, i) {
-                        return Padding(
-                          padding: (i == 0)
-                              ? EdgeInsets.fromLTRB(15, 5, 5, 5)
-                              : EdgeInsets.symmetric(
-                                  horizontal: 5, vertical: 5),
-                          child: TextButton(
-                            style: ButtonStyle(
-                              backgroundColor:
-                                  (selectedCategory == categories[i])
-                                      ? MaterialStateProperty.all<Color>(
-                                          Colors.black)
-                                      : MaterialStateProperty.all<Color>(
-                                          Colors.transparent),
-                              overlayColor:
-                                  MaterialStateProperty.resolveWith<Color>(
-                                (Set<MaterialState> states) {
-                                  if (states.contains(MaterialState.hovered)) {
-                                    return Colors.grey.shade300;
-                                  }
-                                  if (states.contains(MaterialState.focused) ||
-                                      states.contains(MaterialState.pressed)) {
-                                    return Colors.grey.shade200;
-                                  }
-                                  return Colors
-                                      .black; // Defer to the widget's default.
-                                },
-                              ),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                selectedCategory = categories[i];
-                                firstLoad = false;
-                              });
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 5.0, horizontal: 10),
-                              child: Center(
-                                child: Text(
-                                  categories[i],
-                                  style: TextStyle(
-                                      color: (selectedCategory == categories[i])
-                                          ? Colors.white
-                                          : Colors.black,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400),
+              (display == 'Categorized')
+                  ? SliverAppBar(
+                      backgroundColor: Theme.of(context).colorScheme.background,
+                      elevation: 5,
+                      pinned: true,
+                      automaticallyImplyLeading: false,
+                      actions: <Widget>[Container()],
+                      flexibleSpace: SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ListView.builder(
+                            shrinkWrap: true,
+                            physics: BouncingScrollPhysics(),
+                            scrollDirection: Axis.horizontal,
+                            itemCount: categories.length,
+                            itemBuilder: (context, i) {
+                              return Padding(
+                                padding: (i == 0)
+                                    ? EdgeInsets.fromLTRB(15, 5, 5, 5)
+                                    : EdgeInsets.symmetric(
+                                        horizontal: 5, vertical: 5),
+                                child: TextButton(
+                                  style: ButtonStyle(
+                                    backgroundColor:
+                                        (selectedCategory == categories[i])
+                                            ? MaterialStateProperty.all<Color>(
+                                                Colors.black)
+                                            : MaterialStateProperty.all<Color>(
+                                                Colors.transparent),
+                                    overlayColor: MaterialStateProperty
+                                        .resolveWith<Color>(
+                                      (Set<MaterialState> states) {
+                                        if (states
+                                            .contains(MaterialState.hovered)) {
+                                          return Colors.grey.shade300;
+                                        }
+                                        if (states.contains(
+                                                MaterialState.focused) ||
+                                            states.contains(
+                                                MaterialState.pressed)) {
+                                          return Colors.grey.shade200;
+                                        }
+                                        return Colors
+                                            .black; // Defer to the widget's default.
+                                      },
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      selectedCategory = categories[i];
+                                      firstLoad = false;
+                                    });
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 5.0, horizontal: 10),
+                                    child: Center(
+                                      child: Text(
+                                        categories[i],
+                                        style: TextStyle(
+                                            color: (selectedCategory ==
+                                                    categories[i])
+                                                ? Colors.white
+                                                : Colors.black,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400),
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
+                              );
+                            }),
+                      ),
+                    )
+                  : SliverToBoxAdapter(
+                      child: SizedBox(
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 20),
+                            child: Text('Productos',
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 21,
+                                    fontWeight: FontWeight.bold)),
                           ),
-                        );
-                      }),
-                ),
-              ),
+                        ),
+                      ),
+                    ),
               //Products
               StreamProvider<List<Products>>.value(
                   initialData: const [],
                   value: DatabaseService()
-                      .productList(selectedCategory, widget.businessID),
+                              .productList(selectedCategory, widget.businessID, display),
                   child: ProductSelection(
                       ((businessSchedule[DateTime.now().weekday - 1]['Open']
                                       ['Hour'] >

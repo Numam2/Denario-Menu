@@ -1213,6 +1213,7 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                             LengthLimitingTextInputFormatter(45)
                                           ],
                                           cursorColor: Colors.grey,
+                                          textInputAction: TextInputAction.next,
                                           decoration: InputDecoration(
                                             label: const Text('Dirección'),
                                             labelStyle: const TextStyle(
@@ -1244,7 +1245,6 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                           onChanged: (val) {
                                             setState(() => address = val);
                                           },
-                                          textInputAction: TextInputAction.next,
                                           onEditingComplete: () {
                                             addressNode.unfocus();
                                             aptNode.requestFocus();
@@ -1300,11 +1300,11 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                               ),
                                             ),
                                           ),
+                                          textInputAction: TextInputAction.next,
                                           keyboardType: TextInputType.text,
                                           onChanged: (val) {
                                             setState(() => apt = val);
                                           },
-                                          textInputAction: TextInputAction.next,
                                           onEditingComplete: () {
                                             aptNode.unfocus();
                                             phoneNode.requestFocus();
@@ -2450,6 +2450,7 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                     width: double.infinity,
                                     child: TextFormField(
                                       keyboardType: TextInputType.number,
+                                      textInputAction: TextInputAction.next,
                                       focusNode: phoneNode,
                                       textAlign: TextAlign.left,
                                       style: const TextStyle(
@@ -2566,7 +2567,7 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                         color: Colors.black, fontSize: 16),
                                     cursorColor: Colors.grey,
                                     focusNode: _noteNode,
-                                    textInputAction: TextInputAction.next,
+                                    textInputAction: TextInputAction.done,
                                     decoration: InputDecoration(
                                       hintText: 'Agrega una nota',
                                       hintStyle: const TextStyle(fontSize: 14),

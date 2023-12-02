@@ -61,10 +61,12 @@ class _StoreHomeState extends State<StoreHome> {
 
   @override
   Widget build(BuildContext context) {
-    final categoriesProvider = Provider.of<List>(context);
-    final businessProvider = Provider.of<BusinessProfile>(context);
+    final categoriesProvider = Provider.of<List?>(context);
+    final businessProvider = Provider.of<BusinessProfile?>(context);
 
-    if (categoriesProvider.isEmpty) {
+    if (categoriesProvider == null ||
+        categoriesProvider.isEmpty ||
+        businessProvider == null) {
       return Center(
         child: Container(
           height: 100,
@@ -135,15 +137,15 @@ class _StoreHomeState extends State<StoreHome> {
         {'Social Media': 'Twitter', 'Link': '', 'Active': false}
       ];
     }
-    if (storeType != 'Catalog') {
+    if (storeType != 'Catálogo') {
       return Scaffold(
         key: _scaffoldKey,
         endDrawer: Drawer(
           width: (MediaQuery.of(context).size.width > 900)
               ? 500
               : MediaQuery.of(context).size.width,
-          child:
-              TicketView(widget.businessID, socialMedia[0]['Link'], storeType),
+          child: TicketView(widget.businessID, socialMedia[0]['Link'],
+              storeType, businessSchedule),
         ),
         body: NotificationListener<ScrollUpdateNotification>(
           onNotification: (notification) {
@@ -734,13 +736,13 @@ class _StoreHomeState extends State<StoreHome> {
               StreamProvider<List<Products>>.value(
                   initialData: const [],
                   value: (storeType == 'Menu')
-                      ? DatabaseService()
-                          .menuProductList(selectedCategory, widget.businessID, display)
+                      ? DatabaseService().menuProductList(
+                          selectedCategory, widget.businessID, display)
                       : (storeType == 'Reservation')
                           ? DatabaseService().reservationProductList(
                               selectedCategory, widget.businessID, display)
-                          : DatabaseService()
-                              .productList(selectedCategory, widget.businessID, display),
+                          : DatabaseService().productList(
+                              selectedCategory, widget.businessID, display),
                   child: ProductSelection(
                       ((businessSchedule[DateTime.now().weekday - 1]['Open']
                                       ['Hour'] >
@@ -749,7 +751,8 @@ class _StoreHomeState extends State<StoreHome> {
                                       ['Close']['Hour'] <
                                   TimeOfDay.now().hour))
                           ? false
-                          : true)),
+                          : true,
+                      storeType)),
             ],
           ),
         ),
@@ -1305,8 +1308,8 @@ class _StoreHomeState extends State<StoreHome> {
               //Products
               StreamProvider<List<Products>>.value(
                   initialData: const [],
-                  value: DatabaseService()
-                              .productList(selectedCategory, widget.businessID, display),
+                  value: DatabaseService().productList(
+                      selectedCategory, widget.businessID, display),
                   child: ProductSelection(
                       ((businessSchedule[DateTime.now().weekday - 1]['Open']
                                       ['Hour'] >
@@ -1315,7 +1318,8 @@ class _StoreHomeState extends State<StoreHome> {
                                       ['Close']['Hour'] <
                                   TimeOfDay.now().hour))
                           ? false
-                          : true)),
+                          : true,
+                      storeType)),
             ],
           ),
         ),

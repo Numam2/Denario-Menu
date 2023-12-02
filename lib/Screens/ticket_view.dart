@@ -10,7 +10,9 @@ class TicketView extends StatefulWidget {
   final String? businessID;
   final String businessPhone;
   final String? storeType;
+  final List businessSchedule;
   const TicketView(this.businessID, this.businessPhone, this.storeType,
+      this.businessSchedule,
       {super.key});
 
   @override
@@ -304,7 +306,8 @@ class _TicketViewState extends State<TicketView> {
                                               total,
                                               widget.businessID,
                                               widget.businessPhone,
-                                              widget.storeType!)));
+                                              widget.storeType!,
+                                              widget.businessSchedule)));
                                 }
                               },
                               child: Center(

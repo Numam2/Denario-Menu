@@ -155,7 +155,7 @@ class _AddToCartPageState extends State<AddToCartPage> {
                               decoration: BoxDecoration(
                                 borderRadius:
                                     const BorderRadius.all(Radius.circular(12)),
-                                color: Colors.grey[100],
+                                color: Colors.grey[300],
                               ),
                               child: Center(
                                 child: Text(

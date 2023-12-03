@@ -50,15 +50,19 @@ class _ReserveButtonState extends State<ReserveButton> {
   late Future checkAvailability;
   //Check if day is unavailable in firestore
   Future dayIsAvailable() async {
-    var firestore = FirebaseFirestore.instance;
+    try {
+      var firestore = FirebaseFirestore.instance;
 
-    var docRef = firestore
-        .collection('ERP')
-        .doc(widget.businessID)
-        .collection('Schedule Limits')
-        .doc(widget.selectedDate.year.toString())
-        .get();
-    return docRef;
+      var docRef = firestore
+          .collection('ERP')
+          .doc(widget.businessID)
+          .collection('Schedule Limits')
+          .doc(widget.selectedDate.year.toString())
+          .get();
+      return docRef;
+    } catch (e) {
+      return null;
+    }
   }
 
   @override
@@ -75,6 +79,7 @@ class _ReserveButtonState extends State<ReserveButton> {
           if (snapshot.connectionState == ConnectionState.done) {
             bool isAvailable = true;
             if (snapshot.hasData &&
+                snapshot.data.exists &&
                 snapshot.data['${widget.selectedDate.month}']
                     .contains('${widget.selectedDate.day}')) {
               isAvailable = false;

@@ -1,6 +1,5 @@
 // ignore_for_file: depend_on_referenced_packages
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -151,18 +150,6 @@ class StoreCheckoutState extends State<StoreCheckout> {
   String clarificationMessage =
       '** Para confirmar la reserva por favor envíe el mensaje por whatsapp en el siguiente paso y nos pondremos en contacto lo antes posible para coordinar el pago';
 
-  //Check if day is unavailable in firestore
-  Future dayIsAvailable(DateTime date) async {
-    var firestore = FirebaseFirestore.instance;
-
-    var docRef = firestore
-        .collection('ERP')
-        .doc(widget.businessID)
-        .collection('Schedule Limits')
-        .doc(date.year.toString())
-        .get();
-    return docRef;
-  }
 
   @override
   void initState() {

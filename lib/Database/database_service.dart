@@ -332,7 +332,9 @@ class DatabaseService {
       'Due Date': dueDate,
       'Client': client,
       'Pending': true,
-      'Note': note
+      'Note': note,
+      'New Reservation': true,
+      'Hide Notification': false,
     });
   }
 

@@ -62,8 +62,14 @@ class OrderSuccessful extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) =>
-                                InitialConfig('$businessID')));
+                            builder: (context) => InitialConfig(
+                                  '$businessID',
+                                  storeType: Uri.base.queryParameters['type'] ??
+                                      'Menu',
+                                  display:
+                                      Uri.base.queryParameters['display'] ??
+                                          'Categorized',
+                                )));
                   },
                   child: const Padding(
                     padding: EdgeInsets.all(8.0),

@@ -101,8 +101,13 @@ class _ReserveButtonState extends State<ReserveButton> {
                         if (widget.formKey.currentState!.validate()) {
                           String orderItems = '';
                           for (var i in widget.data['Items']) {
-                            orderItems = orderItems +
-                                ('${i['Quantity']} ${i['Name']}%0A');
+                            if (i['Options'] != null && !i['Options'].isEmpty) {
+                              orderItems = orderItems +
+                                  ('${i['Quantity']} ${i['Name']} (${i['Options'].join(', ')}) %0A');
+                            } else {
+                              orderItems = orderItems +
+                                  ('${i['Quantity']} ${i['Name']}%0A');
+                            }
                           }
 
                           DatabaseService().scheduleSale(
@@ -135,7 +140,7 @@ class _ReserveButtonState extends State<ReserveButton> {
                           String reservedTime =
                               '${DateFormat.yMMMd().format(widget.selectedDate)} ${DateFormat.Hm().format(widget.selectedDate)}';
                           var orderMessage =
-                              'Nombre: ${widget.name} %0ATipo de Orden: Encargo %0ANro. Teléfono: ${widget.phone} %0Aemail: ${widget.email}%0AFecha de reserva: $reservedTime  %0AOrden:%0A$orderItems %0ATotal: %24${widget.total}';
+                              'Nombre: ${widget.name} %0ATipo de Orden: Reserva %0ANro. Teléfono: ${widget.phone} %0Aemail: ${widget.email}%0AFecha de reserva: $reservedTime  %0AOrden:%0A$orderItems %0ATotal: %24${widget.total}';
 
                           openWhatsapp(orderMessage);
 

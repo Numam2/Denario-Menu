@@ -150,7 +150,6 @@ class StoreCheckoutState extends State<StoreCheckout> {
   String clarificationMessage =
       '** Para confirmar la reserva por favor envíe el mensaje por whatsapp en el siguiente paso y nos pondremos en contacto lo antes posible para coordinar el pago';
 
-
   @override
   void initState() {
     super.initState();
@@ -2539,8 +2538,14 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                     if (reservationTime != null) {
                                       if (_formKey.currentState!.validate()) {
                                         for (var i in data['Items']) {
-                                          orderItems = orderItems +
-                                              ('${i['Quantity']} ${i['Name']}%0A');
+                                          if (i['Options'] != null &&
+                                              !i['Options'].isEmpty) {
+                                            orderItems = orderItems +
+                                                ('${i['Quantity']} ${i['Name']} (${i['Options'].join(', ')}) %0A');
+                                          } else {
+                                            orderItems = orderItems +
+                                                ('${i['Quantity']} ${i['Name']}%0A');
+                                          }
                                         }
 
                                         //%20 = Space //%0A Another Line
@@ -2549,7 +2554,7 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                         String reservedTime =
                                             '${DateFormat.yMMMd().format(selectedDate)} ${DateFormat.Hm().format(selectedDate)}';
                                         orderMessage =
-                                            'Nombre: $name %0ATipo de Orden: Encargo %0ANro. Teléfono: $phone %0Aemail: $email%0AFecha de reserva: $reservedTime  %0AOrden:%0A$orderItems %0ATotal: %24${widget.total}';
+                                            'Nombre: $name %0ATipo de Orden: Reserva %0ANro. Teléfono: $phone %0Aemail: $email%0AFecha de reserva: $reservedTime  %0AOrden:%0A$orderItems %0ATotal: %24${widget.total}';
 
                                         DatabaseService().scheduleSale(
                                             widget.businessID,

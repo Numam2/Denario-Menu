@@ -534,8 +534,14 @@ class _AddToCartPageState extends State<AddToCartPage> {
                           //Add
                           IconButton(
                             onPressed: () {
-                              if (widget.product.currentStock! >=
-                                  quantity + 1) {
+                              if (widget.product.controlStock!) {
+                                if (widget.product.currentStock! >=
+                                    quantity + 1) {
+                                  setState(() {
+                                    quantity = quantity + 1;
+                                  });
+                                }
+                              } else {
                                 setState(() {
                                   quantity = quantity + 1;
                                 });

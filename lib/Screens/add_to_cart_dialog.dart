@@ -853,12 +853,19 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                               //Add
                               IconButton(
                                 onPressed: () {
-                                  if (widget.product.currentStock! >=
+                                  if(widget.product.controlStock!){
+                                    if (widget.product.currentStock! >=
                                       quantity + 1) {
                                     setState(() {
                                       quantity = quantity + 1;
                                     });
                                   }
+                                  } else {
+                                    setState(() {
+                                      quantity = quantity + 1;
+                                    });
+                                  }
+                                  
                                 },
                                 icon: const Icon(Icons.add_circle_outline),
                                 iconSize: 24,
@@ -973,12 +980,18 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                     //Add
                                     IconButton(
                                       onPressed: () {
-                                        if (widget.product.currentStock! >=
-                                            quantity + 1) {
-                                          setState(() {
-                                            quantity = quantity + 1;
-                                          });
-                                        }
+                                        if(widget.product.controlStock!){
+                                    if (widget.product.currentStock! >=
+                                      quantity + 1) {
+                                    setState(() {
+                                      quantity = quantity + 1;
+                                    });
+                                  }
+                                  } else {
+                                    setState(() {
+                                      quantity = quantity + 1;
+                                    });
+                                  }
                                       },
                                       icon:
                                           const Icon(Icons.add_circle_outline),
@@ -1107,12 +1120,18 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                       //Add
                                       IconButton(
                                         onPressed: () {
-                                          if (widget.product.currentStock! >=
-                                              quantity + 1) {
-                                            setState(() {
-                                              quantity = quantity + 1;
-                                            });
-                                          }
+                                          if(widget.product.controlStock!){
+                                    if (widget.product.currentStock! >=
+                                      quantity + 1) {
+                                    setState(() {
+                                      quantity = quantity + 1;
+                                    });
+                                  }
+                                  } else {
+                                    setState(() {
+                                      quantity = quantity + 1;
+                                    });
+                                  }
                                         },
                                         icon: const Icon(
                                             Icons.add_circle_outline),

@@ -69,8 +69,8 @@ class _StoreHomeState extends State<StoreHome> {
         businessProvider == null) {
       return Center(
         child: Container(
-          height: 100,
-          width: 100,
+          height: 200,
+          width: 200,
           decoration: BoxDecoration(
               image:
                   DecorationImage(image: AssetImage('images/Logo negro.png'))),

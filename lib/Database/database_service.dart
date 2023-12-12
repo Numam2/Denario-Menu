@@ -338,7 +338,7 @@ class DatabaseService {
     });
   }
 
-  void scheduleSale(
+  Future scheduleSale(
       businessID,
       String transactionID,
       subTotal,

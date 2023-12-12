@@ -26,6 +26,7 @@ class MyApp extends StatelessWidget {
         title: 'Mi Denario',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
+            brightness: Brightness.light,
             colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.grey)
                 .copyWith(background: Colors.white)),
         home: InitialConfig(

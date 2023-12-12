@@ -72,7 +72,7 @@ class StoreCheckoutState extends State<StoreCheckout> {
         confirmText: 'Guardar',
         cancelText: 'Cancelar',
         initialDate: DateTime.now().add(const Duration(days: 1)),
-        firstDate: DateTime.now(),
+        firstDate: DateTime.now().add(const Duration(days: 1)),
         lastDate: DateTime.now().add(const Duration(days: 150)),
         builder: ((context, child) {
           return Theme(
@@ -149,6 +149,10 @@ class StoreCheckoutState extends State<StoreCheckout> {
 
   String clarificationMessage =
       '** Para confirmar la reserva por favor envíe el mensaje por whatsapp en el siguiente paso y nos pondremos en contacto lo antes posible para coordinar el pago';
+  bool loading = false;
+  String errorMessage =
+      'Ups! Ocurrió un error, puede ser la conexión. Intentalo de nuevo';
+  bool showError = false;
 
   @override
   void initState() {
@@ -1566,41 +1570,868 @@ class StoreCheckoutState extends State<StoreCheckout> {
                       actions: const [
                         SizedBox(width: 50),
                       ]),
-                  body: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 20, horizontal: 20),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              //Delivery info
-                              Expanded(
-                                flex: 6,
-                                child: Form(
-                                  key: _formKey,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(30),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: const BorderRadius.all(
-                                          Radius.circular(12)),
-                                      boxShadow: <BoxShadow>[
-                                        BoxShadow(
-                                          color: Colors.grey.shade300,
-                                          offset: const Offset(0.0, 0.0),
-                                          blurRadius: 10.0,
-                                        )
+                  body: Stack(
+                    children: [
+                      SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 20, horizontal: 20),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  //Delivery info
+                                  Expanded(
+                                    flex: 6,
+                                    child: Form(
+                                      key: _formKey,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(30),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(12)),
+                                          boxShadow: <BoxShadow>[
+                                            BoxShadow(
+                                              color: Colors.grey.shade300,
+                                              offset: const Offset(0.0, 0.0),
+                                              blurRadius: 10.0,
+                                            )
+                                          ],
+                                        ),
+                                        child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              //Name
+                                              TextFormField(
+                                                focusNode: nameNode,
+                                                autofocus: true,
+                                                validator: (val) {
+                                                  if (val == null ||
+                                                      val.isEmpty) {
+                                                    return "Agregá un nombre";
+                                                  } else {
+                                                    return null;
+                                                  }
+                                                },
+                                                inputFormatters: [
+                                                  LengthLimitingTextInputFormatter(
+                                                      45)
+                                                ],
+                                                cursorColor: Colors.grey,
+                                                style: const TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 14),
+                                                decoration: InputDecoration(
+                                                  label: const Text(
+                                                      'Nombre y apellido'),
+                                                  labelStyle: const TextStyle(
+                                                      color: Colors.grey,
+                                                      fontSize: 12),
+                                                  border: OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12.0),
+                                                    borderSide:
+                                                        const BorderSide(
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                  errorBorder:
+                                                      OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12.0),
+                                                    borderSide:
+                                                        const BorderSide(
+                                                      color: Colors.red,
+                                                    ),
+                                                  ),
+                                                  focusedBorder:
+                                                      OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12.0),
+                                                    borderSide:
+                                                        const BorderSide(
+                                                      color: Colors.green,
+                                                    ),
+                                                  ),
+                                                ),
+                                                keyboardType:
+                                                    TextInputType.text,
+                                                onFieldSubmitted: (term) {
+                                                  nameNode.unfocus();
+                                                  openSchedule();
+                                                },
+                                                onChanged: (val) {
+                                                  setState(() => name = val);
+                                                },
+                                                textInputAction:
+                                                    TextInputAction.next,
+                                                onEditingComplete: () {
+                                                  nameNode.unfocus();
+                                                  addressNode.requestFocus();
+                                                },
+                                              ),
+                                              const SizedBox(height: 20),
+                                              //Fecha
+                                              const Text(
+                                                'Agendar para:',
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.w400,
+                                                    fontSize: 12,
+                                                    color: Colors.black45),
+                                              ),
+                                              const SizedBox(height: 10),
+                                              //Date
+                                              Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: Container(
+                                                      height: 45,
+                                                      decoration: BoxDecoration(
+                                                        border: Border.all(
+                                                            color: Colors.grey),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(12.0),
+                                                      ),
+                                                      child: OutlinedButton(
+                                                        onPressed: openSchedule,
+                                                        style: OutlinedButton.styleFrom(
+                                                            side: const BorderSide(
+                                                                color: Colors
+                                                                    .transparent)),
+                                                        child: Row(
+                                                          children: [
+                                                            Text(
+                                                              DateFormat(
+                                                                      'dd/MM/yyyy')
+                                                                  .format(
+                                                                      selectedDate),
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .start,
+                                                              style:
+                                                                  const TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w400,
+                                                                fontSize: 16,
+                                                                color: Colors
+                                                                    .black,
+                                                              ),
+                                                            ),
+                                                            const Spacer(),
+                                                            SizedBox(
+                                                              height: 20,
+                                                              width: 20,
+                                                              child: IconButton(
+                                                                splashRadius: 1,
+                                                                color: Colors
+                                                                    .black,
+                                                                onPressed:
+                                                                    openSchedule,
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(0),
+                                                                tooltip:
+                                                                    'Seleccionar fecha',
+                                                                iconSize: 18,
+                                                                icon: const Icon(
+                                                                    Icons
+                                                                        .calendar_month),
+                                                              ),
+                                                            )
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  //Time
+                                                  Expanded(
+                                                    child: Container(
+                                                      height: 45,
+                                                      decoration: BoxDecoration(
+                                                        border: Border.all(
+                                                            color: Colors.grey),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(12.0),
+                                                      ),
+                                                      child: OutlinedButton(
+                                                        onPressed: openTime,
+                                                        style: OutlinedButton.styleFrom(
+                                                            side: const BorderSide(
+                                                                color: Colors
+                                                                    .transparent)),
+                                                        child: Row(
+                                                          children: [
+                                                            Text(
+                                                              DateFormat(
+                                                                      'HH:mm')
+                                                                  .format(
+                                                                      selectedDate),
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .start,
+                                                              style:
+                                                                  const TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w400,
+                                                                fontSize: 16,
+                                                                color: Colors
+                                                                    .black,
+                                                              ),
+                                                            ),
+                                                            const Spacer(),
+                                                            SizedBox(
+                                                              height: 20,
+                                                              width: 20,
+                                                              child: IconButton(
+                                                                color: Colors
+                                                                    .black,
+                                                                splashRadius: 1,
+                                                                onPressed:
+                                                                    openTime,
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(0),
+                                                                tooltip:
+                                                                    'Horario',
+                                                                iconSize: 18,
+                                                                icon: const Icon(
+                                                                    Icons
+                                                                        .av_timer),
+                                                              ),
+                                                            )
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 15),
+                                              //Contacto
+                                              // Tlf y mail
+                                              const Row(
+                                                children: [
+                                                  Text(
+                                                    'Contacto',
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                        fontSize: 12,
+                                                        color: Colors.black45),
+                                                  ),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 10),
+                                              //Tlf
+                                              Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: SizedBox(
+                                                      height: 45,
+                                                      child: IntlPhoneField(
+                                                        focusNode: phoneNode,
+                                                        keyboardType:
+                                                            TextInputType
+                                                                .number,
+                                                        style: const TextStyle(
+                                                            color: Colors.black,
+                                                            fontSize: 14),
+                                                        textInputAction:
+                                                            TextInputAction
+                                                                .next,
+                                                        decoration:
+                                                            InputDecoration(
+                                                                focusedBorder:
+                                                                    OutlineInputBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              12.0),
+                                                                  borderSide:
+                                                                      const BorderSide(
+                                                                    color: Colors
+                                                                        .green,
+                                                                  ),
+                                                                ),
+                                                                border:
+                                                                    OutlineInputBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              12.0),
+                                                                  borderSide:
+                                                                      const BorderSide(
+                                                                    color: Colors
+                                                                        .grey,
+                                                                  ),
+                                                                )),
+                                                        languageCode: "es",
+                                                        initialCountryCode:
+                                                            'AR',
+                                                        disableLengthCheck:
+                                                            true,
+                                                        initialValue: '',
+                                                        showCountryFlag: false,
+                                                        inputFormatters: [
+                                                          FilteringTextInputFormatter
+                                                              .digitsOnly
+                                                        ],
+                                                        onChanged: (nO) {
+                                                          setState(() => phone =
+                                                              nO.completeNumber);
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  //Mail
+                                                  Expanded(
+                                                    child: TextFormField(
+                                                      keyboardType:
+                                                          TextInputType
+                                                              .emailAddress,
+                                                      style: const TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 14),
+                                                      cursorColor: Colors.grey,
+                                                      focusNode: _emailNode,
+                                                      textInputAction:
+                                                          TextInputAction.next,
+                                                      decoration:
+                                                          InputDecoration(
+                                                        hintText:
+                                                            'email (opcional)',
+                                                        hintStyle:
+                                                            const TextStyle(
+                                                                color:
+                                                                    Colors.grey,
+                                                                fontSize: 12),
+                                                        prefixIcon: const Icon(
+                                                          Icons.mail_outline,
+                                                          color: Colors.grey,
+                                                        ),
+                                                        errorStyle: TextStyle(
+                                                            color: Colors
+                                                                .redAccent[700],
+                                                            fontSize: 12),
+                                                        border:
+                                                            OutlineInputBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      12.0),
+                                                          borderSide:
+                                                              const BorderSide(
+                                                            color: Colors.grey,
+                                                          ),
+                                                        ),
+                                                        focusedBorder:
+                                                            OutlineInputBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      12.0),
+                                                          borderSide:
+                                                              const BorderSide(
+                                                            color: Colors.green,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      onFieldSubmitted: (term) {
+                                                        _emailNode.unfocus();
+                                                        _noteNode
+                                                            .requestFocus();
+                                                      },
+                                                      onChanged: (val) {
+                                                        setState(
+                                                            () => email = val);
+                                                      },
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 15),
+                                              //Nota
+                                              const Text(
+                                                'Nota',
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.w400,
+                                                    fontSize: 12,
+                                                    color: Colors.black45),
+                                              ),
+                                              const SizedBox(height: 10),
+                                              TextFormField(
+                                                maxLines: 4,
+                                                style: const TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 16),
+                                                cursorColor: Colors.grey,
+                                                focusNode: _noteNode,
+                                                textInputAction:
+                                                    TextInputAction.next,
+                                                decoration: InputDecoration(
+                                                  hintText: 'Agrega una nota',
+                                                  hintStyle: const TextStyle(
+                                                      fontSize: 14),
+                                                  border: OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12.0),
+                                                    borderSide:
+                                                        const BorderSide(
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                  focusedBorder:
+                                                      OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12.0),
+                                                    borderSide:
+                                                        const BorderSide(
+                                                      color: Colors.green,
+                                                    ),
+                                                  ),
+                                                ),
+                                                onFieldSubmitted: (term) {
+                                                  _noteNode.unfocus();
+                                                },
+                                                onChanged: (val) {
+                                                  setState(() {
+                                                    note = val;
+                                                  });
+                                                },
+                                              ),
+                                              const SizedBox(height: 20),
+                                              (showError)
+                                                  ? Padding(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          vertical: 10),
+                                                      child: SizedBox(
+                                                          width:
+                                                              double.infinity,
+                                                          child: Text(
+                                                              errorMessage,
+                                                              style:
+                                                                  const TextStyle(
+                                                                color: Colors
+                                                                    .redAccent,
+                                                                fontSize: 12,
+                                                              ))))
+                                                  : const SizedBox(),
+
+                                              //Button
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.end,
+                                                children: [
+                                                  Expanded(
+                                                    child: SizedBox(
+                                                      child: Text(
+                                                        clarificationMessage,
+                                                        textAlign:
+                                                            TextAlign.left,
+                                                        maxLines: 5,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        style: const TextStyle(
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .normal,
+                                                            fontSize: 12,
+                                                            color:
+                                                                Colors.black87),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 15),
+                                                  ReserveButton(
+                                                    widget.businessID!,
+                                                    widget.businessPhone,
+                                                    selectedDate,
+                                                    _formKey,
+                                                    data,
+                                                    widget.total,
+                                                    name,
+                                                    note,
+                                                    address,
+                                                    email,
+                                                    phone,
+                                                    reservationTime,
+                                                    pageController,
+                                                  ),
+                                                ],
+                                              )
+                                            ]),
+                                      ),
+                                    ),
+                                  ),
+
+                                  const SizedBox(width: 40),
+                                  //Items
+                                  Expanded(
+                                    flex: 3,
+                                    child: SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.3,
+                                        height: 450,
+                                        child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              //Title
+                                              const Text(
+                                                'Mi Pedido',
+                                                textAlign: TextAlign.left,
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 18.0,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 15),
+                                              //List of Products
+                                              Expanded(
+                                                child: Container(
+                                                  padding:
+                                                      const EdgeInsets.all(20),
+                                                  child: ListView.builder(
+                                                      shrinkWrap: true,
+                                                      itemCount:
+                                                          data["Items"].length,
+                                                      itemBuilder:
+                                                          (context, i) {
+                                                        final cartList =
+                                                            data["Items"];
+
+                                                        return Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .only(
+                                                                  bottom: 10.0),
+                                                          child: Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .start,
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .center,
+                                                              children: [
+                                                                //Column Name + Qty
+                                                                Expanded(
+                                                                  child: Column(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .start,
+                                                                    crossAxisAlignment:
+                                                                        CrossAxisAlignment
+                                                                            .start,
+                                                                    children: [
+                                                                      //Name
+                                                                      Container(
+                                                                        constraints:
+                                                                            const BoxConstraints(maxWidth: 150),
+                                                                        child: Text(
+                                                                            '${cartList[i]['Name']} (${cartList[i]['Quantity']})'),
+                                                                      ),
+                                                                      //Options
+                                                                      (cartList[i]['Options']
+                                                                              .isEmpty)
+                                                                          ? const SizedBox()
+                                                                          // : SizedBox(),
+                                                                          : Padding(
+                                                                              padding: const EdgeInsets.symmetric(vertical: 5),
+                                                                              child: Text(cartList[i]['Options'].join(', '), maxLines: 6, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                                                                            ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                                //Amount
+                                                                const SizedBox(
+                                                                    width: 10),
+                                                                Text(formatCurrency
+                                                                    .format(cartList[
+                                                                            i][
+                                                                        'Total Price'])),
+                                                              ]),
+                                                        );
+                                                      }),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 10),
+                                              const Divider(
+                                                  color: Colors.grey,
+                                                  thickness: 0.5,
+                                                  indent: 15,
+                                                  endIndent: 15),
+                                              const SizedBox(height: 10),
+                                              //Total
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  const Text(
+                                                    'Total',
+                                                    textAlign: TextAlign.left,
+                                                    style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontSize: 18.0,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                    ),
+                                                  ),
+                                                  const Spacer(),
+                                                  const Text(
+                                                    'ARS',
+                                                    textAlign: TextAlign.left,
+                                                    style: TextStyle(
+                                                      color: Colors.grey,
+                                                      fontSize: 14.0,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  Text(
+                                                    formatCurrency
+                                                        .format(widget.total),
+                                                    textAlign: TextAlign.right,
+                                                    style: const TextStyle(
+                                                      color: Colors.black,
+                                                      fontSize: 18.0,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 20),
+                                            ])),
+                                  ),
+                                ]),
+                          ),
+                        ),
+                      ),
+                      //Loading?
+                      loading
+                          ? Container(
+                              width: double.infinity,
+                              height: double.infinity,
+                              color: Colors.grey.withOpacity(0.5),
+                              child: Center(
+                                  child: CircularProgressIndicator(
+                                color: Colors.blueGrey.shade900,
+                              )))
+                          : const SizedBox()
+                    ],
+                  ),
+                );
+              } else {
+                return Scaffold(
+                  appBar: AppBar(
+                    backgroundColor: Colors.white,
+                    centerTitle: true,
+                    leading: IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.arrow_back, color: Colors.black),
+                        iconSize: 24),
+                    actions: const [
+                      SizedBox(width: 50),
+                    ],
+                    title: const Center(
+                      child: Text(
+                        'Reservar',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  body: Stack(
+                    children: [
+                      PageView(
+                        controller: pageController,
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: [
+                          //Time/Date
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 15, horizontal: 20),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // Datos
+                                Expanded(
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        //Fecha
+                                        const Row(
+                                          children: [
+                                            Text(
+                                              'Agendar para:',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 10),
+                                        //Calendar
+                                        Theme(
+                                          data: Theme.of(context).copyWith(
+                                            colorScheme:
+                                                const ColorScheme.light(
+                                              primary: Colors
+                                                  .black, // header background color
+                                              onPrimary: Colors
+                                                  .white, // header text color
+                                              onSurface: Colors
+                                                  .black, // body text color
+                                            ),
+                                            textButtonTheme:
+                                                TextButtonThemeData(
+                                              style: TextButton.styleFrom(
+                                                foregroundColor: Colors
+                                                    .black, // button text color
+                                              ),
+                                            ),
+                                          ),
+                                          child: CalendarDatePicker(
+                                              initialDate: DateTime.now()
+                                                  .add(const Duration(days: 1)),
+                                              firstDate: DateTime.now()
+                                                  .add(const Duration(days: 1)),
+                                              lastDate: DateTime.now().add(
+                                                  const Duration(days: 150)),
+                                              onDateChanged:
+                                                  (DateTime? pickedDate) {
+                                                if (pickedDate != null) {
+                                                  setState(() {
+                                                    reservationTime = null;
+                                                    selectedDate = DateTime(
+                                                        pickedDate.year,
+                                                        pickedDate.month,
+                                                        pickedDate.day,
+                                                        10);
+                                                  });
+                                                }
+                                              }),
+                                        ),
+                                        const SizedBox(height: 10),
+
+                                        ///Times as grid
+                                        ///If !Opens alert not available
+                                        ///Create list of half hours from open hour to close hour
+                                        const Text(
+                                          'Horarios disponibles',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 15),
+                                        (widget.businessSchedule[selectedDate.weekday - 1]['Opens'])
+                                            ? OpeningHoursGrid(
+                                                widget.businessSchedule[selectedDate.weekday - 1]
+                                                    ['Open']['Hour'],
+                                                widget.businessSchedule[selectedDate.weekday - 1]
+                                                    ['Open']['Minute'],
+                                                widget.businessSchedule[selectedDate.weekday - 1]
+                                                    ['Close']['Hour'],
+                                                widget.businessSchedule[selectedDate.weekday - 1]
+                                                    ['Close']['Minute'],
+                                                setTime,
+                                                reservationTime)
+                                            : const SizedBox(
+                                                height: 50,
+                                                width: double.infinity,
+                                                child: Center(
+                                                    child: Text('No hay horarios disponibles este día',
+                                                        style: TextStyle(color: Colors.grey, fontSize: 14)))),
+                                        const SizedBox(height: 20),
                                       ],
                                     ),
-                                    child: Column(
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                //Button
+                                ReserveButton(
+                                    widget.businessID!,
+                                    widget.businessPhone,
+                                    selectedDate,
+                                    _formKey,
+                                    data,
+                                    widget.total,
+                                    name,
+                                    note,
+                                    address,
+                                    email,
+                                    phone,
+                                    reservationTime,
+                                    pageController),
+                              ],
+                            ),
+                          ),
+                          //Checkout
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 15, horizontal: 20),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // Datos
+                                Expanded(
+                                  child: SingleChildScrollView(
+                                    child: Form(
+                                      key: _formKey,
+                                      child: Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.start,
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
+                                          Text(
+                                            'Para el ${DateFormat.yMd().format(selectedDate)}, ${DateFormat.Hm().format(selectedDate)}',
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                                color: Colors.black),
+                                          ),
+                                          const SizedBox(height: 15),
                                           //Name
+                                          const SizedBox(height: 5),
                                           TextFormField(
                                             focusNode: nameNode,
                                             autofocus: true,
@@ -1663,134 +2494,6 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                             },
                                           ),
                                           const SizedBox(height: 20),
-                                          //Fecha
-                                          const Text(
-                                            'Agendar para:',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.w400,
-                                                fontSize: 12,
-                                                color: Colors.black45),
-                                          ),
-                                          const SizedBox(height: 10),
-                                          //Date
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: Container(
-                                                  height: 45,
-                                                  decoration: BoxDecoration(
-                                                    border: Border.all(
-                                                        color: Colors.grey),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            12.0),
-                                                  ),
-                                                  child: OutlinedButton(
-                                                    onPressed: openSchedule,
-                                                    style: OutlinedButton.styleFrom(
-                                                        side: const BorderSide(
-                                                            color: Colors
-                                                                .transparent)),
-                                                    child: Row(
-                                                      children: [
-                                                        Text(
-                                                          DateFormat(
-                                                                  'dd/MM/yyyy')
-                                                              .format(
-                                                                  selectedDate),
-                                                          textAlign:
-                                                              TextAlign.start,
-                                                          style:
-                                                              const TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.w400,
-                                                            fontSize: 16,
-                                                            color: Colors.black,
-                                                          ),
-                                                        ),
-                                                        const Spacer(),
-                                                        SizedBox(
-                                                          height: 20,
-                                                          width: 20,
-                                                          child: IconButton(
-                                                            splashRadius: 1,
-                                                            color: Colors.black,
-                                                            onPressed:
-                                                                openSchedule,
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .all(0),
-                                                            tooltip:
-                                                                'Seleccionar fecha',
-                                                            iconSize: 18,
-                                                            icon: const Icon(Icons
-                                                                .calendar_month),
-                                                          ),
-                                                        )
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 10),
-                                              //Time
-                                              Expanded(
-                                                child: Container(
-                                                  height: 45,
-                                                  decoration: BoxDecoration(
-                                                    border: Border.all(
-                                                        color: Colors.grey),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            12.0),
-                                                  ),
-                                                  child: OutlinedButton(
-                                                    onPressed: openTime,
-                                                    style: OutlinedButton.styleFrom(
-                                                        side: const BorderSide(
-                                                            color: Colors
-                                                                .transparent)),
-                                                    child: Row(
-                                                      children: [
-                                                        Text(
-                                                          DateFormat('HH:mm')
-                                                              .format(
-                                                                  selectedDate),
-                                                          textAlign:
-                                                              TextAlign.start,
-                                                          style:
-                                                              const TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.w400,
-                                                            fontSize: 16,
-                                                            color: Colors.black,
-                                                          ),
-                                                        ),
-                                                        const Spacer(),
-                                                        SizedBox(
-                                                          height: 20,
-                                                          width: 20,
-                                                          child: IconButton(
-                                                            color: Colors.black,
-                                                            splashRadius: 1,
-                                                            onPressed: openTime,
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .all(0),
-                                                            tooltip: 'Horario',
-                                                            iconSize: 18,
-                                                            icon: const Icon(
-                                                                Icons.av_timer),
-                                                          ),
-                                                        )
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 15),
                                           //Contacto
                                           // Tlf y mail
                                           const Row(
@@ -1806,125 +2509,65 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                           ),
                                           const SizedBox(height: 10),
                                           //Tlf
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: SizedBox(
-                                                  height: 45,
-                                                  child: IntlPhoneField(
-                                                    focusNode: phoneNode,
-                                                    keyboardType:
-                                                        TextInputType.number,
-                                                    style: const TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize: 14),
-                                                    textInputAction:
-                                                        TextInputAction.next,
-                                                    decoration: InputDecoration(
-                                                        focusedBorder:
-                                                            OutlineInputBorder(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      12.0),
-                                                          borderSide:
-                                                              const BorderSide(
-                                                            color: Colors.green,
-                                                          ),
-                                                        ),
-                                                        border:
-                                                            OutlineInputBorder(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      12.0),
-                                                          borderSide:
-                                                              const BorderSide(
-                                                            color: Colors.grey,
-                                                          ),
-                                                        )),
-                                                    languageCode: "es",
-                                                    initialCountryCode: 'AR',
-                                                    disableLengthCheck: true,
-                                                    initialValue: '',
-                                                    showCountryFlag: false,
-                                                    inputFormatters: [
-                                                      FilteringTextInputFormatter
-                                                          .digitsOnly
-                                                    ],
-                                                    onChanged: (nO) {
-                                                      setState(() => phone =
-                                                          nO.completeNumber);
-                                                    },
+                                          SizedBox(
+                                            height: 45,
+                                            width: double.infinity,
+                                            child: IntlPhoneField(
+                                              focusNode: phoneNode,
+                                              keyboardType:
+                                                  TextInputType.number,
+                                              style: const TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 14),
+                                              textInputAction:
+                                                  TextInputAction.next,
+                                              decoration: InputDecoration(
+                                                  focusedBorder:
+                                                      OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12.0),
+                                                    borderSide:
+                                                        const BorderSide(
+                                                      color: Colors.green,
+                                                    ),
                                                   ),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 10),
-                                              //Mail
-                                              Expanded(
-                                                child: TextFormField(
-                                                  keyboardType: TextInputType
-                                                      .emailAddress,
-                                                  style: const TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 14),
-                                                  cursorColor: Colors.grey,
-                                                  focusNode: _emailNode,
-                                                  textInputAction:
-                                                      TextInputAction.next,
-                                                  decoration: InputDecoration(
-                                                    hintText:
-                                                        'email (opcional)',
-                                                    hintStyle: const TextStyle(
-                                                        color: Colors.grey,
-                                                        fontSize: 12),
-                                                    prefixIcon: const Icon(
-                                                      Icons.mail_outline,
+                                                  border: OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12.0),
+                                                    borderSide:
+                                                        const BorderSide(
                                                       color: Colors.grey,
                                                     ),
-                                                    errorStyle: TextStyle(
-                                                        color: Colors
-                                                            .redAccent[700],
-                                                        fontSize: 12),
-                                                    border: OutlineInputBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              12.0),
-                                                      borderSide:
-                                                          const BorderSide(
-                                                        color: Colors.grey,
-                                                      ),
-                                                    ),
-                                                    focusedBorder:
-                                                        OutlineInputBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              12.0),
-                                                      borderSide:
-                                                          const BorderSide(
-                                                        color: Colors.green,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  onFieldSubmitted: (term) {
-                                                    _emailNode.unfocus();
-                                                    _noteNode.requestFocus();
-                                                  },
-                                                  onChanged: (val) {
-                                                    setState(() => email = val);
-                                                  },
-                                                ),
+                                                  )),
+                                              languageCode: "es",
+                                              initialCountryCode: 'AR',
+                                              disableLengthCheck: true,
+                                              initialValue: '',
+                                              showCountryFlag: false,
+                                              inputFormatters: [
+                                                FilteringTextInputFormatter
+                                                    .digitsOnly
+                                              ],
+                                              onChanged: (nO) {
+                                                setState(() =>
+                                                    phone = nO.completeNumber);
+                                              },
+                                            ),
+                                          ),
+                                          const SizedBox(height: 10),
+                                          //Nota
+                                          const Row(
+                                            children: [
+                                              Text(
+                                                'Nota',
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.w400,
+                                                    fontSize: 12,
+                                                    color: Colors.black45),
                                               ),
                                             ],
-                                          ),
-                                          const SizedBox(height: 15),
-                                          //Nota
-                                          const Text(
-                                            'Nota',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.w400,
-                                                fontSize: 12,
-                                                color: Colors.black45),
                                           ),
                                           const SizedBox(height: 10),
                                           TextFormField(
@@ -1935,7 +2578,7 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                             cursorColor: Colors.grey,
                                             focusNode: _noteNode,
                                             textInputAction:
-                                                TextInputAction.next,
+                                                TextInputAction.done,
                                             decoration: InputDecoration(
                                               hintText: 'Agrega una nota',
                                               hintStyle:
@@ -1965,654 +2608,156 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                             },
                                           ),
                                           const SizedBox(height: 20),
-                                          //Button
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.end,
-                                            children: [
-                                              Expanded(
-                                                child: SizedBox(
-                                                  child: Text(
-                                                    clarificationMessage,
-                                                    textAlign: TextAlign.left,
-                                                    maxLines: 5,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: const TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.normal,
-                                                        fontSize: 12,
-                                                        color: Colors.black87),
-                                                  ),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 15),
-                                              ReserveButton(
-                                                  widget.businessID!,
-                                                  widget.businessPhone,
-                                                  selectedDate,
-                                                  _formKey,
-                                                  data,
-                                                  widget.total,
-                                                  name,
-                                                  note,
-                                                  address,
-                                                  email,
-                                                  phone,
-                                                  reservationTime,
-                                                  pageController),
-                                            ],
-                                          )
-                                        ]),
+                                          //Message
+                                          SizedBox(
+                                            width: double.infinity,
+                                            child: Text(
+                                              clarificationMessage,
+                                              textAlign: TextAlign.left,
+                                              maxLines: 5,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.normal,
+                                                  fontSize: 12,
+                                                  color: Colors.black87),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-
-                              const SizedBox(width: 40),
-                              //Items
-                              Expanded(
-                                flex: 3,
-                                child: SizedBox(
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                    height: 450,
-                                    child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          //Title
-                                          const Text(
-                                            'Mi Pedido',
-                                            textAlign: TextAlign.left,
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 18.0,
-                                              fontWeight: FontWeight.w400,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 15),
-                                          //List of Products
-                                          Expanded(
-                                            child: Container(
-                                              padding: const EdgeInsets.all(20),
-                                              child: ListView.builder(
-                                                  shrinkWrap: true,
-                                                  itemCount:
-                                                      data["Items"].length,
-                                                  itemBuilder: (context, i) {
-                                                    final cartList =
-                                                        data["Items"];
-
-                                                    return Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              bottom: 10.0),
-                                                      child: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .start,
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            //Column Name + Qty
-                                                            Expanded(
-                                                              child: Column(
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .start,
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
-                                                                children: [
-                                                                  //Name
-                                                                  Container(
-                                                                    constraints:
-                                                                        const BoxConstraints(
-                                                                            maxWidth:
-                                                                                150),
-                                                                    child: Text(
-                                                                        '${cartList[i]['Name']} (${cartList[i]['Quantity']})'),
-                                                                  ),
-                                                                  //Options
-                                                                  (cartList[i][
-                                                                              'Options']
-                                                                          .isEmpty)
-                                                                      ? const SizedBox()
-                                                                      // : SizedBox(),
-                                                                      : Padding(
-                                                                          padding: const EdgeInsets
-                                                                              .symmetric(
-                                                                              vertical: 5),
-                                                                          child: Text(
-                                                                              cartList[i]['Options'].join(', '),
-                                                                              maxLines: 6,
-                                                                              overflow: TextOverflow.ellipsis,
-                                                                              style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                                                                        ),
-                                                                ],
-                                                              ),
-                                                            ),
-                                                            //Amount
-                                                            const SizedBox(
-                                                                width: 10),
-                                                            Text(formatCurrency
-                                                                .format(cartList[
-                                                                        i][
-                                                                    'Total Price'])),
-                                                          ]),
-                                                    );
-                                                  }),
-                                            ),
-                                          ),
-                                          const SizedBox(height: 10),
-                                          const Divider(
-                                              color: Colors.grey,
-                                              thickness: 0.5,
-                                              indent: 15,
-                                              endIndent: 15),
-                                          const SizedBox(height: 10),
-                                          //Total
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                            children: [
-                                              const Text(
-                                                'Total',
-                                                textAlign: TextAlign.left,
-                                                style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 18.0,
-                                                  fontWeight: FontWeight.w400,
-                                                ),
-                                              ),
-                                              const Spacer(),
-                                              const Text(
-                                                'ARS',
-                                                textAlign: TextAlign.left,
-                                                style: TextStyle(
-                                                  color: Colors.grey,
-                                                  fontSize: 14.0,
-                                                  fontWeight: FontWeight.w400,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 10),
-                                              Text(
-                                                formatCurrency
-                                                    .format(widget.total),
-                                                textAlign: TextAlign.right,
+                                const SizedBox(height: 10),
+                                (showError)
+                                    ? Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 10),
+                                        child: SizedBox(
+                                            width: double.infinity,
+                                            child: Text(errorMessage,
                                                 style: const TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 18.0,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 20),
-                                        ])),
-                              ),
-                            ]),
-                      ),
-                    ),
-                  ),
-                );
-              } else {
-                return Scaffold(
-                  appBar: AppBar(
-                    backgroundColor: Colors.white,
-                    centerTitle: true,
-                    leading: IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.arrow_back, color: Colors.black),
-                        iconSize: 24),
-                    actions: const [
-                      SizedBox(width: 50),
-                    ],
-                    title: const Center(
-                      child: Text(
-                        'Reservar',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  body: PageView(
-                    controller: pageController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      //Time/Date
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 15, horizontal: 20),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            // Datos
-                            Expanded(
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    //Fecha
-                                    const Row(
-                                      children: [
-                                        Text(
-                                          'Agendar para:',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 10),
-                                    //Calendar
-                                    Theme(
-                                      data: Theme.of(context).copyWith(
-                                        colorScheme: const ColorScheme.light(
-                                          primary: Colors
-                                              .black, // header background color
-                                          onPrimary:
-                                              Colors.white, // header text color
-                                          onSurface:
-                                              Colors.black, // body text color
-                                        ),
-                                        textButtonTheme: TextButtonThemeData(
-                                          style: TextButton.styleFrom(
-                                            foregroundColor: Colors
-                                                .black, // button text color
-                                          ),
-                                        ),
+                                                  color: Colors.redAccent,
+                                                  fontSize: 12,
+                                                ))))
+                                    : const SizedBox(),
+                                //Button
+                                SizedBox(
+                                  height: 45,
+                                  width: double.infinity,
+                                  child: OutlinedButton(
+                                      style: OutlinedButton.styleFrom(
+                                        backgroundColor: Colors.black,
+                                        side: const BorderSide(
+                                            color: Colors.black, width: 1),
                                       ),
-                                      child: CalendarDatePicker(
-                                          initialDate: DateTime.now()
-                                              .add(const Duration(days: 1)),
-                                          firstDate: DateTime.now(),
-                                          lastDate: DateTime.now()
-                                              .add(const Duration(days: 150)),
-                                          onDateChanged:
-                                              (DateTime? pickedDate) {
-                                            if (pickedDate != null) {
+                                      onPressed: () {
+                                        setState(() {
+                                          loading = true;
+                                        });
+                                        if (reservationTime != null) {
+                                          if (_formKey.currentState!
+                                              .validate()) {
+                                            for (var i in data['Items']) {
+                                              if (i['Options'] != null &&
+                                                  !i['Options'].isEmpty) {
+                                                orderItems = orderItems +
+                                                    ('${i['Quantity']} ${i['Name']} (${i['Options'].join(', ')}) %0A');
+                                              } else {
+                                                orderItems = orderItems +
+                                                    ('${i['Quantity']} ${i['Name']}%0A');
+                                              }
+                                            }
+
+                                            //%20 = Space //%0A Another Line
+                                            //%3A = : //%24 = $
+                                            try {
+                                              String reservedTime =
+                                                  '${DateFormat.yMMMd().format(selectedDate)} ${DateFormat.Hm().format(selectedDate)}';
+                                              orderMessage =
+                                                  'Nombre: $name %0ATipo de Orden: Reserva %0ANro. Teléfono: $phone %0Aemail: $email%0AFecha de reserva: $reservedTime  %0AOrden:%0A$orderItems %0ATotal: %24${widget.total}';
+
+                                              DatabaseService()
+                                                  .scheduleSale(
+                                                      widget.businessID,
+                                                      // ignore: prefer_interpolation_to_compose_strings
+                                                      '00' +
+                                                          (DateTime.now().day)
+                                                              .toString() +
+                                                          (DateTime.now().month)
+                                                              .toString() +
+                                                          (DateTime.now().year)
+                                                              .toString() +
+                                                          (DateTime.now().hour)
+                                                              .toString() +
+                                                          (DateTime.now()
+                                                                  .minute)
+                                                              .toString() +
+                                                          (DateTime.now()
+                                                                  .millisecond)
+                                                              .toString(),
+                                                      widget.total,
+                                                      0,
+                                                      0,
+                                                      widget.total,
+                                                      data['Items'],
+                                                      name,
+                                                      selectedDate,
+                                                      {
+                                                        'Name': name,
+                                                        'Address': address,
+                                                        'Phone': phone,
+                                                        'email': email,
+                                                      },
+                                                      0,
+                                                      widget.total,
+                                                      note)
+                                                  .then((value) async {
+                                                openWhatsapp(
+                                                    widget.businessPhone);
+                                                bloc.removeAllFromCart();
+                                                setState(() {
+                                                  showError = false;
+                                                });
+                                                Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            OrderSuccessful(widget
+                                                                .businessID)));
+                                              });
+                                            } catch (e) {
                                               setState(() {
-                                                reservationTime = null;
-                                                selectedDate = DateTime(
-                                                    pickedDate.year,
-                                                    pickedDate.month,
-                                                    pickedDate.day,
-                                                    10);
+                                                showError = true;
                                               });
                                             }
-                                          }),
-                                    ),
-                                    const SizedBox(height: 10),
-
-                                    ///Times as grid
-                                    ///If !Opens alert not available
-                                    ///Create list of half hours from open hour to close hour
-                                    const Text(
-                                      'Horarios disponibles',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 15),
-                                    (widget.businessSchedule[selectedDate.weekday - 1]
-                                            ['Opens'])
-                                        ? OpeningHoursGrid(
-                                            widget.businessSchedule[selectedDate.weekday - 1]
-                                                ['Open']['Hour'],
-                                            widget.businessSchedule[selectedDate.weekday - 1]
-                                                ['Open']['Minute'],
-                                            widget.businessSchedule[selectedDate.weekday - 1]
-                                                ['Close']['Hour'],
-                                            widget.businessSchedule[selectedDate.weekday - 1]
-                                                ['Close']['Minute'],
-                                            setTime,
-                                            reservationTime)
-                                        : const SizedBox(
-                                            height: 50,
-                                            width: double.infinity,
-                                            child: Center(
-                                                child: Text('No hay horarios disponibles este día',
-                                                    style: TextStyle(color: Colors.grey, fontSize: 14)))),
-                                    const SizedBox(height: 20),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            //Button
-                            ReserveButton(
-                                widget.businessID!,
-                                widget.businessPhone,
-                                selectedDate,
-                                _formKey,
-                                data,
-                                widget.total,
-                                name,
-                                note,
-                                address,
-                                email,
-                                phone,
-                                reservationTime,
-                                pageController),
-                          ],
-                        ),
-                      ),
-                      //Checkout
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 15, horizontal: 20),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            // Datos
-                            Expanded(
-                              child: SingleChildScrollView(
-                                child: Form(
-                                  key: _formKey,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Para el ${DateFormat.yMd().format(selectedDate)}, ${DateFormat.Hm().format(selectedDate)}',
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
-                                            color: Colors.black),
-                                      ),
-                                      const SizedBox(height: 15),
-                                      //Name
-                                      const SizedBox(height: 5),
-                                      TextFormField(
-                                        focusNode: nameNode,
-                                        autofocus: true,
-                                        validator: (val) {
-                                          if (val == null || val.isEmpty) {
-                                            return "Agregá un nombre";
-                                          } else {
-                                            return null;
-                                          }
-                                        },
-                                        inputFormatters: [
-                                          LengthLimitingTextInputFormatter(45)
-                                        ],
-                                        cursorColor: Colors.grey,
-                                        style: const TextStyle(
-                                            color: Colors.black, fontSize: 14),
-                                        decoration: InputDecoration(
-                                          label:
-                                              const Text('Nombre y apellido'),
-                                          labelStyle: const TextStyle(
-                                              color: Colors.grey, fontSize: 12),
-                                          border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(12.0),
-                                            borderSide: const BorderSide(
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                          errorBorder: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(12.0),
-                                            borderSide: const BorderSide(
-                                              color: Colors.red,
-                                            ),
-                                          ),
-                                          focusedBorder: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(12.0),
-                                            borderSide: const BorderSide(
-                                              color: Colors.green,
-                                            ),
-                                          ),
-                                        ),
-                                        keyboardType: TextInputType.text,
-                                        onFieldSubmitted: (term) {
-                                          nameNode.unfocus();
-                                          openSchedule();
-                                        },
-                                        onChanged: (val) {
-                                          setState(() => name = val);
-                                        },
-                                        textInputAction: TextInputAction.next,
-                                        onEditingComplete: () {
-                                          nameNode.unfocus();
-                                          addressNode.requestFocus();
-                                        },
-                                      ),
-                                      const SizedBox(height: 20),
-                                      //Contacto
-                                      // Tlf y mail
-                                      const Row(
-                                        children: [
-                                          Text(
-                                            'Contacto',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.w400,
-                                                fontSize: 12,
-                                                color: Colors.black45),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 10),
-                                      //Tlf
-                                      SizedBox(
-                                        height: 45,
-                                        width: double.infinity,
-                                        child: IntlPhoneField(
-                                          focusNode: phoneNode,
-                                          keyboardType: TextInputType.number,
-                                          style: const TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 14),
-                                          textInputAction: TextInputAction.next,
-                                          decoration: InputDecoration(
-                                              focusedBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(12.0),
-                                                borderSide: const BorderSide(
-                                                  color: Colors.green,
-                                                ),
-                                              ),
-                                              border: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(12.0),
-                                                borderSide: const BorderSide(
-                                                  color: Colors.grey,
-                                                ),
-                                              )),
-                                          languageCode: "es",
-                                          initialCountryCode: 'AR',
-                                          disableLengthCheck: true,
-                                          initialValue: '',
-                                          showCountryFlag: false,
-                                          inputFormatters: [
-                                            FilteringTextInputFormatter
-                                                .digitsOnly
-                                          ],
-                                          onChanged: (nO) {
-                                            setState(() =>
-                                                phone = nO.completeNumber);
-                                          },
-                                        ),
-                                      ),
-                                      const SizedBox(height: 10),
-                                      //Nota
-                                      const Row(
-                                        children: [
-                                          Text(
-                                            'Nota',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.w400,
-                                                fontSize: 12,
-                                                color: Colors.black45),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 10),
-                                      TextFormField(
-                                        maxLines: 4,
-                                        style: const TextStyle(
-                                            color: Colors.black, fontSize: 16),
-                                        cursorColor: Colors.grey,
-                                        focusNode: _noteNode,
-                                        textInputAction: TextInputAction.done,
-                                        decoration: InputDecoration(
-                                          hintText: 'Agrega una nota',
-                                          hintStyle:
-                                              const TextStyle(fontSize: 14),
-                                          border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(12.0),
-                                            borderSide: const BorderSide(
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                          focusedBorder: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(12.0),
-                                            borderSide: const BorderSide(
-                                              color: Colors.green,
-                                            ),
-                                          ),
-                                        ),
-                                        onFieldSubmitted: (term) {
-                                          _noteNode.unfocus();
-                                        },
-                                        onChanged: (val) {
-                                          setState(() {
-                                            note = val;
-                                          });
-                                        },
-                                      ),
-                                      const SizedBox(height: 20),
-                                      //Message
-                                      SizedBox(
-                                        width: double.infinity,
-                                        child: Text(
-                                          clarificationMessage,
-                                          textAlign: TextAlign.left,
-                                          maxLines: 5,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.normal,
-                                              fontSize: 12,
-                                              color: Colors.black87),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            //Button
-                            SizedBox(
-                              height: 45,
-                              width: double.infinity,
-                              child: OutlinedButton(
-                                  style: OutlinedButton.styleFrom(
-                                    backgroundColor: Colors.black,
-                                    side: const BorderSide(
-                                        color: Colors.black, width: 1),
-                                  ),
-                                  onPressed: () {
-                                    if (reservationTime != null) {
-                                      if (_formKey.currentState!.validate()) {
-                                        for (var i in data['Items']) {
-                                          if (i['Options'] != null &&
-                                              !i['Options'].isEmpty) {
-                                            orderItems = orderItems +
-                                                ('${i['Quantity']} ${i['Name']} (${i['Options'].join(', ')}) %0A');
-                                          } else {
-                                            orderItems = orderItems +
-                                                ('${i['Quantity']} ${i['Name']}%0A');
                                           }
                                         }
-
-                                        //%20 = Space //%0A Another Line
-                                        //%3A = : //%24 = $
-
-                                        String reservedTime =
-                                            '${DateFormat.yMMMd().format(selectedDate)} ${DateFormat.Hm().format(selectedDate)}';
-                                        orderMessage =
-                                            'Nombre: $name %0ATipo de Orden: Reserva %0ANro. Teléfono: $phone %0Aemail: $email%0AFecha de reserva: $reservedTime  %0AOrden:%0A$orderItems %0ATotal: %24${widget.total}';
-
-                                        DatabaseService().scheduleSale(
-                                            widget.businessID,
-                                            // ignore: prefer_interpolation_to_compose_strings
-                                            '00' +
-                                                (DateTime.now().day)
-                                                    .toString() +
-                                                (DateTime.now().month)
-                                                    .toString() +
-                                                (DateTime.now().year)
-                                                    .toString() +
-                                                (DateTime.now().hour)
-                                                    .toString() +
-                                                (DateTime.now().minute)
-                                                    .toString() +
-                                                (DateTime.now().millisecond)
-                                                    .toString(),
-                                            widget.total,
-                                            0,
-                                            0,
-                                            widget.total,
-                                            data['Items'],
-                                            name,
-                                            selectedDate,
-                                            {
-                                              'Name': name,
-                                              'Address': address,
-                                              'Phone': phone,
-                                              'email': email,
-                                            },
-                                            0,
-                                            widget.total,
-                                            note);
-
-                                        openWhatsapp(widget.businessPhone);
-
-                                        bloc.removeAllFromCart();
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    OrderSuccessful(
-                                                        widget.businessID)));
-                                      }
-                                    }
-                                  },
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Center(
-                                        child: Text(
-                                      'Pedir',
-                                      style: TextStyle(color: Colors.white),
-                                    )),
-                                  )),
+                                      },
+                                      child: const Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Center(
+                                            child: Text(
+                                          'Pedir',
+                                          style: TextStyle(color: Colors.white),
+                                        )),
+                                      )),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
+                      //Loading?
+                      loading
+                          ? Container(
+                              width: double.infinity,
+                              height: double.infinity,
+                              color: Colors.grey.withOpacity(0.5),
+                              child: Center(
+                                  child: CircularProgressIndicator(
+                                color: Colors.blueGrey.shade900,
+                              )))
+                          : const SizedBox()
                     ],
                   ),
                 );

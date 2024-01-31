@@ -4,6 +4,7 @@ import 'package:menu_denario/Database/database_service.dart';
 import 'package:menu_denario/Database/ticket.dart';
 import 'package:menu_denario/Screens/orders_successful.dart';
 import 'package:url_launcher/url_launcher.dart';
+// ignore: depend_on_referenced_packages
 import 'package:intl/intl.dart';
 
 class ReserveButton extends StatefulWidget {
@@ -110,47 +111,52 @@ class _ReserveButtonState extends State<ReserveButton> {
                             }
                           }
 
-                          String reservedTime =
-                              '${DateFormat.yMMMd().format(widget.selectedDate)} ${DateFormat.Hm().format(widget.selectedDate)}';
-                          var orderMessage =
-                              'Nombre: ${widget.name} %0ATipo de Orden: Reserva %0ANro. Teléfono: ${widget.phone} %0Aemail: ${widget.email}%0AFecha de reserva: $reservedTime  %0AOrden:%0A$orderItems %0ATotal: %24${widget.total}';
+                          try {
+                            String reservedTime =
+                                '${DateFormat.yMMMd().format(widget.selectedDate)} ${DateFormat.Hm().format(widget.selectedDate)}';
+                            var orderMessage =
+                                'Nombre: ${widget.name} %0ATipo de Orden: Reserva %0ANro. Teléfono: ${widget.phone} %0Aemail: ${widget.email}%0AFecha de reserva: $reservedTime  %0AOrden:%0A$orderItems %0ATotal: %24${widget.total}';
 
-                          DatabaseService()
-                              .scheduleSale(
-                                  widget.businessID,
-                                  // ignore: prefer_interpolation_to_compose_strings
-                                  '00' +
-                                      (DateTime.now().day).toString() +
-                                      (DateTime.now().month).toString() +
-                                      (DateTime.now().year).toString() +
-                                      (DateTime.now().hour).toString() +
-                                      (DateTime.now().minute).toString() +
-                                      (DateTime.now().millisecond).toString(),
-                                  widget.total,
-                                  0,
-                                  0,
-                                  widget.total,
-                                  widget.data['Items'],
-                                  widget.name,
-                                  widget.selectedDate,
-                                  {
-                                    'Name': widget.name,
-                                    'Address': widget.address,
-                                    'Phone': widget.phone,
-                                    'email': widget.email,
-                                  },
-                                  0,
-                                  widget.total,
-                                  widget.note)
-                              .then((value) {
-                            openWhatsapp(orderMessage);
-                            bloc.removeAllFromCart();
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        OrderSuccessful(widget.businessID)));
-                          });
+                            DatabaseService()
+                                .scheduleSale(
+                                    widget.businessID,
+                                    // ignore: prefer_interpolation_to_compose_strings
+                                    '00' +
+                                        (DateTime.now().day).toString() +
+                                        (DateTime.now().month).toString() +
+                                        (DateTime.now().year).toString() +
+                                        (DateTime.now().hour).toString() +
+                                        (DateTime.now().minute).toString() +
+                                        (DateTime.now().millisecond).toString(),
+                                    widget.total,
+                                    widget.data['Discount'],
+                                    widget.data['Discount Code'],
+                                    0,
+                                    widget.total,
+                                    widget.data['Items'],
+                                    widget.name,
+                                    widget.selectedDate,
+                                    {
+                                      'Name': widget.name,
+                                      'Address': widget.address,
+                                      'Phone': widget.phone,
+                                      'email': widget.email,
+                                    },
+                                    0,
+                                    widget.total,
+                                    widget.note)
+                                .then((value) async {
+                              openWhatsapp(orderMessage);
+                              bloc.removeAllFromCart();
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          OrderSuccessful(widget.businessID)));
+                            });
+                          } catch (e) {
+                            print('Error');
+                          }
                         }
                       },
                       child: const Padding(

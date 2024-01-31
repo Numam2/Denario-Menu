@@ -26,6 +26,25 @@ class TicketBloc {
     'Image': '',
   };
 
+  ///Get SubTotal
+  double get subtotalTicketAmount {
+    double sum = 0.0;
+    for (var item in ticketItems['Items']) {
+      sum += item['Price'] * item['Quantity'];
+    }
+    return sum;
+  }
+
+  ///Get Total
+  double get totalTicketAmount {
+    double sum = 0.0;
+    for (var item in ticketItems['Items']) {
+      sum += item['Price'] * item['Quantity'];
+    }
+    sum = sum - ticketItems['Discount'] - ticketItems['IVA'];
+    return sum;
+  }
+
   /// [retrieveOrder] removes items from the cart, back to the shop
   void retrieveOrder(orderName, paymentType, items, discount, tax, color) {
     ticketItems['Order Name'] = orderName;
@@ -104,6 +123,13 @@ class TicketBloc {
   //Edit Discount Amount
   void setDiscountAmount(double amount) {
     ticketItems['Discount'] = amount;
+
+    ticketStreamController.sink.add(ticketItems);
+  }
+
+  //Edit Discount Code
+  void setDiscountCode(String code) {
+    ticketItems['Discount Code'] = code;
 
     ticketStreamController.sink.add(ticketItems);
   }

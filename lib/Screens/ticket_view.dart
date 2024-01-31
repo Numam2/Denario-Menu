@@ -142,6 +142,19 @@ class _TicketViewState extends State<TicketView> {
                                 final cartList = data["Items"];
                                 orderDetail = cartList;
 
+                                final List<String> selectedOptions = [];
+                                if (snapshot.data["Items"][i]
+                                            ['Selected Options'] !=
+                                        null &&
+                                    !snapshot
+                                        .data["Items"][i]['Selected Options']
+                                        .isEmpty) {
+                                  snapshot.data["Items"][i]['Selected Options']
+                                      .forEach((k, v) {
+                                    selectedOptions.add('$k: ${v.join(', ')}');
+                                  });
+                                }
+
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 10.0),
                                   child: Row(
@@ -204,7 +217,13 @@ class _TicketViewState extends State<TicketView> {
                                                     Text(cartList[i]['Name']),
                                               ),
                                               //Options
-                                              (cartList[i]['Options'].isEmpty)
+                                              (snapshot.data["Items"][i][
+                                                              'Selected Options'] ==
+                                                          null ||
+                                                      snapshot
+                                                          .data["Items"][i][
+                                                              'Selected Options']
+                                                          .isEmpty)
                                                   ? const SizedBox()
                                                   // : SizedBox(),
                                                   : Padding(
@@ -212,8 +231,8 @@ class _TicketViewState extends State<TicketView> {
                                                           .symmetric(
                                                           vertical: 5),
                                                       child: Text(
-                                                          cartList[i]['Options']
-                                                              .join(', '),
+                                                          selectedOptions.join(
+                                                              ', '),
                                                           maxLines: 6,
                                                           overflow: TextOverflow
                                                               .ellipsis,
@@ -278,51 +297,44 @@ class _TicketViewState extends State<TicketView> {
                         ),
                       ),
                       const SizedBox(height: 15),
-                      //Actions (Save, Process)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          //Pagar
-                          Expanded(
-                              child: SizedBox(
-                            height: 40,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: (data["Items"].length > 0)
-                                    ? Colors.black
-                                    : Colors.grey.shade300,
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(8)),
-                                ),
-                              ),
-                              onPressed: () {
-                                if (data["Items"].length > 0) {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => StoreCheckout(
-                                              total,
-                                              widget.businessID,
-                                              widget.businessPhone,
-                                              widget.storeType!,
-                                              widget.businessSchedule)));
-                                }
-                              },
-                              child: Center(
-                                  child: Text(
-                                      (ticketConcept == 'Ticket')
-                                          ? 'Pagar ${formatCurrency.format(total)}'
-                                          : 'Registrar',
-                                      style: TextStyle(
-                                          color: (data["Items"].length > 0)
-                                              ? Colors.white
-                                              : Colors.grey,
-                                          fontWeight: FontWeight.w400))),
+                      //Checkout
+                      SizedBox(
+                        width: double.infinity,
+                        height: 40,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: (data["Items"].length > 0)
+                                ? Colors.black
+                                : Colors.grey.shade300,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(8)),
                             ),
-                          )),
-                        ],
+                          ),
+                          onPressed: () {
+                            if (data["Items"].length > 0) {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => StoreCheckout(
+                                          total,
+                                          widget.businessID,
+                                          widget.businessPhone,
+                                          widget.storeType!,
+                                          widget.businessSchedule)));
+                            }
+                          },
+                          child: Center(
+                              child: Text(
+                                  (ticketConcept == 'Ticket')
+                                      ? 'Pagar ${formatCurrency.format(total)}'
+                                      : 'Registrar',
+                                  style: TextStyle(
+                                      color: (data["Items"].length > 0)
+                                          ? Colors.white
+                                          : Colors.grey,
+                                      fontWeight: FontWeight.w400))),
+                        ),
                       )
                     ]));
           } else {

@@ -20,21 +20,25 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
   double basePrice = 0;
   List selectedTags = [];
   final formatCurrency = NumberFormat.simpleCurrency();
+  Map<String, dynamic> selectedProductOptions = {};
+  List availableOptions = [];
+  List<ProductOptions> productOptions = [];
 
   double totalAmount(
     double basePrice,
-    List selectedTags,
+    Map selectedOptions,
   ) {
     double total = 0;
     List<double> additionalsList = [];
     double additionalAmount = 0;
 
     //Serch for base price
-    for (var x in widget.product.productOptions) {
+    for (var x in productOptions) {
       if (x.priceStructure == 'Aditional') {
         for (var i = 0; i < x.priceOptions.length; i++) {
-          if (selectedTags.contains(x.priceOptions[i]['Option'])) {
-            additionalsList.add(x.priceOptions[i]['Price']);
+          if (selectedOptions.containsKey(x.title) &&
+              selectedOptions[x.title].contains(x.priceOptions[i]['Option'])) {
+            additionalsList.add(x.priceOptions[i]['Price'].toDouble());
           }
         }
       }
@@ -69,6 +73,75 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
   double totalCost = 0;
   List ingredients = [];
 
+  void addOption(int i, int x) {
+    //If
+    if (selectedProductOptions.containsKey(productOptions[i].title)) {
+      //If the title option in not selected
+      if (!selectedProductOptions[productOptions[i].title]
+          .contains(productOptions[i].priceOptions[x]['Option'])) {
+        //Add the option to the title's list if multiple choice
+        if (productOptions[i].multipleOptions) {
+          setState(() {
+            selectedProductOptions[productOptions[i].title]
+                .add(productOptions[i].priceOptions[x]['Option']);
+          });
+        } else {
+          //Add and remove others
+          setState(() {
+            selectedProductOptions[productOptions[i].title] = [
+              productOptions[i].priceOptions[x]['Option']
+            ];
+          });
+          if (productOptions[i].priceStructure == 'Complete') {
+            setState(() {
+              basePrice = productOptions[i].priceOptions[x]['Price'];
+            });
+          }
+        }
+        if (widget.product.productOptions[i].mandatory) {
+          setState(() {
+            mandatoryOptions[widget.product.productOptions[i].title] = true;
+          });
+        }
+      } else {
+        //Remove the option from the title's list
+        setState(() {
+          selectedProductOptions[productOptions[i].title]
+              .remove(productOptions[i].priceOptions[x]['Option']);
+        });
+
+        //Price config
+        if (productOptions[i].priceStructure == 'Complete') {
+          setState(() {
+            basePrice = widget.product.price;
+          });
+        }
+
+        if (widget.product.productOptions[i].mandatory) {
+          setState(() {
+            mandatoryOptions[widget.product.productOptions[i].title] = false;
+          });
+        }
+      }
+    } else {
+      setState(() {
+        selectedProductOptions[productOptions[i].title] = [
+          productOptions[i].priceOptions[x]['Option']
+        ];
+      });
+      if (productOptions[i].priceStructure == 'Complete') {
+        setState(() {
+          basePrice = productOptions[i].priceOptions[x]['Price'];
+        });
+      }
+      if (widget.product.productOptions[i].mandatory) {
+        setState(() {
+          mandatoryOptions[widget.product.productOptions[i].title] = true;
+        });
+      }
+    }
+  }
+
   @override
   void initState() {
     ingredients = widget.product.ingredients!;
@@ -89,6 +162,18 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
           }
         }
       }
+    }
+
+    productOptions = widget.product.productOptions;
+    for (int i = 0; i < widget.product.productOptions.length; i++) {
+      // List options = List.from(widget.product.productOptions![i].priceOptions);
+      availableOptions.add({
+        'Title': widget.product.productOptions[i].title,
+        'Mandatory': widget.product.productOptions[i].mandatory,
+        'Multiple Options': widget.product.productOptions[i].multipleOptions,
+        'Price Structure': widget.product.productOptions[i].priceStructure,
+        'Price Options': widget.product.productOptions[i].priceOptions,
+      });
     }
 
     if (widget.product.priceType == 'Precio por margen') {
@@ -216,8 +301,8 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                   SizedBox(
                                     width: double.infinity,
                                     child: Text(
-                                      formatCurrency.format(
-                                          totalAmount(basePrice, selectedTags)),
+                                      formatCurrency.format(totalAmount(
+                                          basePrice, selectedProductOptions)),
                                       textAlign: TextAlign.left,
                                       style: const TextStyle(
                                         color: Colors.black,
@@ -375,97 +460,16 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                                                         //Button
                                                                         (widget.product.productOptions[i].multipleOptions)
                                                                             ? IconButton(
-                                                                                onPressed: () {
-                                                                                  if (!selectedTags.contains(widget.product.productOptions[i].priceOptions[x]['Option'])) {
-                                                                                    //Add new
-                                                                                    setState(() {
-                                                                                      selectedTags.add(widget.product.productOptions[i].priceOptions[x]['Option']);
-                                                                                    });
-                                                                                    //Add price
-                                                                                    if (widget.product.productOptions[i].priceStructure == 'Complete') {
-                                                                                      setState(() {
-                                                                                        basePrice = widget.product.productOptions[i].priceOptions[x]['Price'];
-                                                                                      });
-                                                                                    }
-                                                                                    if (widget.product.productOptions[i].mandatory) {
-                                                                                      setState(() {
-                                                                                        mandatoryOptions[widget.product.productOptions[i].title] = true;
-                                                                                      });
-                                                                                    }
-                                                                                  } else {
-                                                                                    setState(() {
-                                                                                      selectedTags.remove(widget.product.productOptions[i].priceOptions[x]['Option']);
-                                                                                    });
-                                                                                    //Add price
-                                                                                    if (widget.product.productOptions[i].priceStructure == 'Complete') {
-                                                                                      setState(() {
-                                                                                        basePrice = widget.product.price;
-                                                                                      });
-                                                                                    }
-                                                                                    //Mandatory
-                                                                                    if (widget.product.productOptions[i].mandatory) {
-                                                                                      bool remove = true;
-                                                                                      for (int y = 0; y < widget.product.productOptions[i].priceOptions.length; y++) {
-                                                                                        if (selectedTags.contains(widget.product.productOptions[i].priceOptions[y]['Option'])) {
-                                                                                          setState(() {
-                                                                                            remove = false;
-                                                                                          });
-                                                                                        }
-                                                                                      }
-                                                                                      if (remove) {
-                                                                                        setState(() {
-                                                                                          mandatoryOptions[widget.product.productOptions[i].title] = false;
-                                                                                        });
-                                                                                      }
-                                                                                    }
-                                                                                  }
-                                                                                },
-                                                                                icon: (selectedTags.contains(widget.product.productOptions[i].priceOptions[x]['Option']))
+                                                                                onPressed: () => addOption(i, x),
+                                                                                icon: (selectedProductOptions.containsKey(productOptions[i].title) && selectedProductOptions[productOptions[i].title].contains(productOptions[i].priceOptions[x]['Option']))
                                                                                     ? Icon(
                                                                                         Icons.check_box,
                                                                                         color: Colors.greenAccent[400],
                                                                                       )
                                                                                     : const Icon(Icons.check_box_outline_blank))
                                                                             : IconButton(
-                                                                                onPressed: () {
-                                                                                  if (!selectedTags.contains(widget.product.productOptions[i].priceOptions[x]['Option'])) {
-                                                                                    //IF SINGLE CHOICE, REMOVE OTHERS
-                                                                                    for (var x in widget.product.productOptions[i].priceOptions) {
-                                                                                      if (selectedTags.contains(x['Option'])) {
-                                                                                        selectedTags.remove(x['Option']);
-                                                                                      }
-                                                                                    }
-
-                                                                                    //Add new
-                                                                                    setState(() {
-                                                                                      selectedTags.add(widget.product.productOptions[i].priceOptions[x]['Option']);
-                                                                                    });
-
-                                                                                    //Add price
-                                                                                    if (widget.product.productOptions[i].priceStructure == 'Complete') {
-                                                                                      setState(() {
-                                                                                        basePrice = widget.product.productOptions[i].priceOptions[x]['Price'];
-                                                                                      });
-                                                                                    }
-                                                                                    //Mandatory
-                                                                                    if (widget.product.productOptions[i].mandatory) {
-                                                                                      setState(() {
-                                                                                        mandatoryOptions[widget.product.productOptions[i].title] = true;
-                                                                                      });
-                                                                                    }
-                                                                                  } else {
-                                                                                    setState(() {
-                                                                                      selectedTags.remove(widget.product.productOptions[i].priceOptions[x]['Option']);
-                                                                                    });
-                                                                                    //Mandatory
-                                                                                    if (widget.product.productOptions[i].mandatory) {
-                                                                                      setState(() {
-                                                                                        mandatoryOptions[widget.product.productOptions[i].title] = false;
-                                                                                      });
-                                                                                    }
-                                                                                  }
-                                                                                },
-                                                                                icon: (selectedTags.contains(widget.product.productOptions[i].priceOptions[x]['Option']))
+                                                                                onPressed: () => addOption(i, x),
+                                                                                icon: (selectedProductOptions.containsKey(productOptions[i].title) && selectedProductOptions[productOptions[i].title].contains(productOptions[i].priceOptions[x]['Option']))
                                                                                     ? Icon(
                                                                                         Icons.circle_sharp,
                                                                                         color: Colors.greenAccent[400],
@@ -684,99 +688,23 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                                                               i]
                                                                           .multipleOptions)
                                                                       ? IconButton(
-                                                                          onPressed:
-                                                                              () {
-                                                                            if (!selectedTags.contains(widget.product.productOptions[i].priceOptions[x]['Option'])) {
-                                                                              //Add new
-                                                                              setState(() {
-                                                                                selectedTags.add(widget.product.productOptions[i].priceOptions[x]['Option']);
-                                                                              });
-                                                                              //Add price
-                                                                              if (widget.product.productOptions[i].priceStructure == 'Complete') {
-                                                                                setState(() {
-                                                                                  basePrice = widget.product.productOptions[i].priceOptions[x]['Price'];
-                                                                                });
-                                                                              }
-                                                                              if (widget.product.productOptions[i].mandatory) {
-                                                                                setState(() {
-                                                                                  mandatoryOptions[widget.product.productOptions[i].title] = true;
-                                                                                });
-                                                                              }
-                                                                            } else {
-                                                                              setState(() {
-                                                                                selectedTags.remove(widget.product.productOptions[i].priceOptions[x]['Option']);
-                                                                              });
-                                                                              //Add price
-                                                                              if (widget.product.productOptions[i].priceStructure == 'Complete') {
-                                                                                setState(() {
-                                                                                  basePrice = widget.product.price;
-                                                                                });
-                                                                              }
-                                                                              //Mandatory
-                                                                              if (widget.product.productOptions[i].mandatory) {
-                                                                                bool remove = true;
-                                                                                for (int y = 0; y < widget.product.productOptions[i].priceOptions.length; y++) {
-                                                                                  if (selectedTags.contains(widget.product.productOptions[i].priceOptions[y]['Option'])) {
-                                                                                    setState(() {
-                                                                                      remove = false;
-                                                                                    });
-                                                                                  }
-                                                                                }
-                                                                                if (remove) {
-                                                                                  setState(() {
-                                                                                    mandatoryOptions[widget.product.productOptions[i].title] = false;
-                                                                                  });
-                                                                                }
-                                                                              }
-                                                                            }
-                                                                          },
-                                                                          icon: (selectedTags.contains(widget.product.productOptions[i].priceOptions[x]['Option']))
-                                                                              ? Icon(
+                                                                          onPressed:() => addOption(
+                                                                            i,
+                                                                            x),
+                                                                          icon: (selectedProductOptions.containsKey(productOptions[i].title) &&
+                                                                                selectedProductOptions[productOptions[i].title].contains(productOptions[i].priceOptions[x][
+                                                                                    'Option']))? Icon(
                                                                                   Icons.check_box,
                                                                                   color: Colors.greenAccent[400],
                                                                                 )
                                                                               : const Icon(Icons.check_box_outline_blank))
                                                                       : IconButton(
-                                                                          onPressed: () {
-                                                                            if (!selectedTags.contains(widget.product.productOptions[i].priceOptions[x]['Option'])) {
-                                                                              //IF SINGLE CHOICE, REMOVE OTHERS
-                                                                              for (var x in widget.product.productOptions[i].priceOptions) {
-                                                                                if (selectedTags.contains(x['Option'])) {
-                                                                                  selectedTags.remove(x['Option']);
-                                                                                }
-                                                                              }
-
-                                                                              //Add new
-                                                                              setState(() {
-                                                                                selectedTags.add(widget.product.productOptions[i].priceOptions[x]['Option']);
-                                                                              });
-
-                                                                              //Add price
-                                                                              if (widget.product.productOptions[i].priceStructure == 'Complete') {
-                                                                                setState(() {
-                                                                                  basePrice = widget.product.productOptions[i].priceOptions[x]['Price'];
-                                                                                });
-                                                                              }
-                                                                              //Mandatory
-                                                                              if (widget.product.productOptions[i].mandatory) {
-                                                                                setState(() {
-                                                                                  mandatoryOptions[widget.product.productOptions[i].title] = true;
-                                                                                });
-                                                                              }
-                                                                            } else {
-                                                                              setState(() {
-                                                                                selectedTags.remove(widget.product.productOptions[i].priceOptions[x]['Option']);
-                                                                              });
-                                                                              //Mandatory
-                                                                              if (widget.product.productOptions[i].mandatory) {
-                                                                                setState(() {
-                                                                                  mandatoryOptions[widget.product.productOptions[i].title] = false;
-                                                                                });
-                                                                              }
-                                                                            }
-                                                                          },
-                                                                          icon: (selectedTags.contains(widget.product.productOptions[i].priceOptions[x]['Option']))
-                                                                              ? Icon(
+                                                                          onPressed: () => addOption(
+                                                                            i,
+                                                                            x),
+                                                                          icon: (selectedProductOptions.containsKey(productOptions[i].title) &&
+                                                                                selectedProductOptions[productOptions[i].title].contains(productOptions[i].priceOptions[x][
+                                                                                    'Option']))? Icon(
                                                                                   Icons.circle_sharp,
                                                                                   color: Colors.greenAccent[400],
                                                                                 )
@@ -853,19 +781,18 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                               //Add
                               IconButton(
                                 onPressed: () {
-                                  if(widget.product.controlStock!){
+                                  if (widget.product.controlStock!) {
                                     if (widget.product.currentStock! >=
-                                      quantity + 1) {
-                                    setState(() {
-                                      quantity = quantity + 1;
-                                    });
-                                  }
+                                        quantity + 1) {
+                                      setState(() {
+                                        quantity = quantity + 1;
+                                      });
+                                    }
                                   } else {
                                     setState(() {
                                       quantity = quantity + 1;
                                     });
                                   }
-                                  
                                 },
                                 icon: const Icon(Icons.add_circle_outline),
                                 iconSize: 24,
@@ -879,7 +806,8 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                             height: 50,
                             child: ElevatedButton(
                                 style: ButtonStyle(
-                                  backgroundColor: (mandatoryOptionsCompleted())
+                                  backgroundColor: (mandatoryOptionsCompleted() &&!(widget.product.controlStock! &&
+                                            widget.product.currentStock! < 1))
                                       ? MaterialStateProperty.all<Color>(
                                           Colors.black)
                                       : MaterialStateProperty.all<Color>(
@@ -904,16 +832,17 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                   ),
                                 ),
                                 onPressed: () {
-                                  if (mandatoryOptionsCompleted()) {
+                                  if (mandatoryOptionsCompleted() && !(widget.product.controlStock! &&
+                                            widget.product.currentStock! < 1)) {
                                     if (quantity > 0) {
                                       bloc.addToCart({
                                         'Name': widget.product.product,
                                         'Category': widget.product.category,
                                         'Price': totalAmount(
-                                            basePrice, selectedTags),
+                                            basePrice, selectedProductOptions),
                                         'Quantity': quantity,
-                                        'Total Price': totalAmount(
-                                                basePrice, selectedTags) *
+                                        'Total Price': totalAmount(basePrice,
+                                                selectedProductOptions) *
                                             quantity,
                                         'Options': selectedTags,
                                         'Image': widget.product.image,
@@ -936,9 +865,10 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                     (widget.product.controlStock! &&
                                             widget.product.currentStock! < 1)
                                         ? 'Fuera de Stock'
-                                        : ' Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedTags) * quantity)}',
+                                        : ' Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedProductOptions) * quantity)}',
                                     style: TextStyle(
-                                        color: (mandatoryOptionsCompleted())
+                                        color: (mandatoryOptionsCompleted() && !(widget.product.controlStock! &&
+                                            widget.product.currentStock! < 1))
                                             ? Colors.white
                                             : Colors.black),
                                   )),
@@ -980,18 +910,18 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                     //Add
                                     IconButton(
                                       onPressed: () {
-                                        if(widget.product.controlStock!){
-                                    if (widget.product.currentStock! >=
-                                      quantity + 1) {
-                                    setState(() {
-                                      quantity = quantity + 1;
-                                    });
-                                  }
-                                  } else {
-                                    setState(() {
-                                      quantity = quantity + 1;
-                                    });
-                                  }
+                                        if (widget.product.controlStock!) {
+                                          if (widget.product.currentStock! >=
+                                              quantity + 1) {
+                                            setState(() {
+                                              quantity = quantity + 1;
+                                            });
+                                          }
+                                        } else {
+                                          setState(() {
+                                            quantity = quantity + 1;
+                                          });
+                                        }
                                       },
                                       icon:
                                           const Icon(Icons.add_circle_outline),
@@ -1011,7 +941,8 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                   child: ElevatedButton(
                                       style: ButtonStyle(
                                         backgroundColor:
-                                            (mandatoryOptionsCompleted())
+                                            (mandatoryOptionsCompleted() && !(widget.product.controlStock! &&
+                                            widget.product.currentStock! < 1))
                                                 ? MaterialStateProperty.all<
                                                     Color>(Colors.black)
                                                 : MaterialStateProperty.all<
@@ -1038,18 +969,24 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                         ),
                                       ),
                                       onPressed: () {
-                                        if (mandatoryOptionsCompleted()) {
+                                        if (mandatoryOptionsCompleted() && !(widget.product.controlStock! &&
+                                                  widget.product.currentStock! <
+                                                      1)) {
                                           if (quantity > 0) {
                                             bloc.addToCart({
                                               'Name': widget.product.product,
                                               'Category':
                                                   widget.product.category,
-                                              'Price': totalAmount(
-                                                  basePrice, selectedTags),
+                                              'Base Price': widget.product.price,
+                                              'Price': totalAmount(basePrice,
+                                                  selectedProductOptions),
                                               'Quantity': quantity,
                                               'Total Price': totalAmount(
-                                                      basePrice, selectedTags) *
+                                                      basePrice,
+                                                      selectedProductOptions) *
                                                   quantity,
+                                              'Available Options': availableOptions,
+                                              'Selected Options': selectedProductOptions,
                                               'Options': selectedTags,
                                               'Image': widget.product.image,
                                               'Supplies':
@@ -1074,10 +1011,12 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                                   widget.product.currentStock! <
                                                       1)
                                               ? 'Fuera de Stock'
-                                              : 'Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedTags) * quantity)}',
+                                              : 'Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedProductOptions) * quantity)}',
                                           style: TextStyle(
                                               color:
-                                                  (mandatoryOptionsCompleted())
+                                                  (mandatoryOptionsCompleted() && !(widget.product.controlStock! &&
+                                                  widget.product.currentStock! <
+                                                      1))
                                                       ? Colors.white
                                                       : Colors.black),
                                         )),
@@ -1120,18 +1059,18 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                       //Add
                                       IconButton(
                                         onPressed: () {
-                                          if(widget.product.controlStock!){
-                                    if (widget.product.currentStock! >=
-                                      quantity + 1) {
-                                    setState(() {
-                                      quantity = quantity + 1;
-                                    });
-                                  }
-                                  } else {
-                                    setState(() {
-                                      quantity = quantity + 1;
-                                    });
-                                  }
+                                          if (widget.product.controlStock!) {
+                                            if (widget.product.currentStock! >=
+                                                quantity + 1) {
+                                              setState(() {
+                                                quantity = quantity + 1;
+                                              });
+                                            }
+                                          } else {
+                                            setState(() {
+                                              quantity = quantity + 1;
+                                            });
+                                          }
                                         },
                                         icon: const Icon(
                                             Icons.add_circle_outline),
@@ -1149,7 +1088,8 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                 child: ElevatedButton(
                                     style: ButtonStyle(
                                       backgroundColor:
-                                          (mandatoryOptionsCompleted())
+                                          (mandatoryOptionsCompleted() && !(widget.product.controlStock! &&
+                                            widget.product.currentStock! < 1))
                                               ? MaterialStateProperty.all<
                                                   Color>(Colors.black)
                                               : MaterialStateProperty.all<
@@ -1173,17 +1113,23 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                       ),
                                     ),
                                     onPressed: () {
-                                      if (mandatoryOptionsCompleted()) {
+                                      if (mandatoryOptionsCompleted() && !(widget.product.controlStock! &&
+                                                  widget.product.currentStock! <
+                                                      1)) {
                                         if (quantity > 0) {
                                           bloc.addToCart({
                                             'Name': widget.product.product,
                                             'Category': widget.product.category,
-                                            'Price': totalAmount(
-                                                basePrice, selectedTags),
+                                            'Base Price': widget.product.price,
+                                            'Price': totalAmount(basePrice,
+                                                selectedProductOptions),
                                             'Quantity': quantity,
                                             'Total Price': totalAmount(
-                                                    basePrice, selectedTags) *
+                                                    basePrice,
+                                                    selectedProductOptions) *
                                                 quantity,
+                                            'Available Options': availableOptions,
+                                            'Selected Options': selectedProductOptions,
                                             'Options': selectedTags,
                                             'Image': widget.product.image,
                                             'Supplies':
@@ -1208,9 +1154,11 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                                 widget.product.currentStock! <
                                                     1)
                                             ? 'Fuera de Stock'
-                                            : 'Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedTags) * quantity)}',
+                                            : 'Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedProductOptions) * quantity)}',
                                         style: TextStyle(
-                                            color: (mandatoryOptionsCompleted())
+                                            color: (mandatoryOptionsCompleted() && !(widget.product.controlStock! &&
+                                                  widget.product.currentStock! <
+                                                      1))
                                                 ? Colors.white
                                                 : Colors.black),
                                       )),

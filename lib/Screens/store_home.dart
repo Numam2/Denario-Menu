@@ -137,6 +137,12 @@ class _StoreHomeState extends State<StoreHome> {
         {'Social Media': 'Twitter', 'Link': '', 'Active': false}
       ];
     }
+
+    TimeOfDay closeTime = TimeOfDay(
+        hour: businessSchedule[DateTime.now().weekday - 1]['Close']['Hour'],
+        minute: businessSchedule[DateTime.now().weekday - 1]['Close']
+            ['Minute']);
+
     if (storeType != 'Catálogo') {
       return Scaffold(
         key: _scaffoldKey,
@@ -366,7 +372,7 @@ class _StoreHomeState extends State<StoreHome> {
                                                                       .center,
                                                             )
                                                           : Text(
-                                                              'Abierto hasta las ${businessSchedule[DateTime.now().weekday - 1]['Close']['Hour']}',
+                                                              'Abierto hasta las ${closeTime.format(context)}',
                                                               style: TextStyle(
                                                                   color: Colors
                                                                       .grey,
@@ -513,7 +519,7 @@ class _StoreHomeState extends State<StoreHome> {
                                                               TextAlign.center,
                                                         )
                                                       : Text(
-                                                          'Abierto hasta las ${businessSchedule[DateTime.now().weekday - 1]['Close']['Hour']}',
+                                                         'Abierto hasta las ${closeTime.format(context)}',
                                                           style: TextStyle(
                                                               color:
                                                                   Colors.grey,
@@ -979,7 +985,7 @@ class _StoreHomeState extends State<StoreHome> {
                                                                       .center,
                                                             )
                                                           : Text(
-                                                              'Abierto hasta las ${businessSchedule[DateTime.now().weekday - 1]['Close']['Hour']}',
+                                                              'Abierto hasta las ${closeTime.format(context)}',
                                                               style: TextStyle(
                                                                   color: Colors
                                                                       .grey,
@@ -1126,7 +1132,7 @@ class _StoreHomeState extends State<StoreHome> {
                                                               TextAlign.center,
                                                         )
                                                       : Text(
-                                                          'Abierto hasta las ${businessSchedule[DateTime.now().weekday - 1]['Close']['Hour']}',
+                                                          'Abierto hasta las ${closeTime.format(context)}',
                                                           style: TextStyle(
                                                               color:
                                                                   Colors.grey,

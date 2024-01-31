@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:menu_denario/Screens/add_discount_dialog.dart';
 import 'package:menu_denario/Screens/opening_hours_grid.dart';
 import 'package:menu_denario/Screens/orders_successful.dart';
 import 'package:menu_denario/Screens/reserve_button.dart';
@@ -153,6 +154,18 @@ class StoreCheckoutState extends State<StoreCheckout> {
   String errorMessage =
       'Ups! Ocurrió un error, puede ser la conexión. Intentalo de nuevo';
   bool showError = false;
+
+  void setLoading(bool load) {
+    setState(() {
+      loading = load;
+    });
+  }
+
+  void setShowError(bool show) {
+    setState(() {
+      showError = show;
+    });
+  }
 
   @override
   void initState() {
@@ -806,6 +819,59 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                 children: [
                                                   SizedBox(
                                                     height: 45,
+                                                    width: 200,
+                                                    child: OutlinedButton(
+                                                      style: OutlinedButton
+                                                          .styleFrom(
+                                                        foregroundColor: Colors
+                                                            .grey.shade300,
+                                                        shape:
+                                                            const RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                                  Radius
+                                                                      .circular(
+                                                                          12)),
+                                                        ),
+                                                      ),
+                                                      onPressed: () {
+                                                        showDialog(
+                                                            context: context,
+                                                            builder: (context) {
+                                                              return AddDiscountDialog(
+                                                                  widget
+                                                                      .businessID!);
+                                                            });
+                                                      },
+                                                      child: const Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          Icon(
+                                                            Icons.sell_outlined,
+                                                            size: 21,
+                                                            color: Colors.grey,
+                                                          ),
+                                                          SizedBox(width: 5),
+                                                          Text(
+                                                              'Código promocional',
+                                                              style: TextStyle(
+                                                                  color: Colors
+                                                                      .grey,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w400)),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  SizedBox(
+                                                    height: 45,
                                                     width: 150,
                                                     child: OutlinedButton(
                                                         style: OutlinedButton
@@ -835,7 +901,7 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                             }
 
                                                             orderMessage =
-                                                                'Nombre: $name %0ADelivery/Retiro: $orderType %0ADirección: $address Timbre: $apt %0ANro. Teléfono: $phone %0AMedio de Pago: $paymentType %0A%0AOrden:%0A$orderItems %0ATotal: %24${widget.total}';
+                                                                'Nombre: $name %0ADelivery/Retiro: $orderType %0ADirección: $address Timbre: $apt %0ANro. Teléfono: $phone %0AMedio de Pago: $paymentType %0A%0AOrden:%0A$orderItems %0ATotal: %24${formatCurrency.format(bloc.totalTicketAmount)}';
 
                                                             DatabaseService().saveOrder(
                                                                 '${widget.businessID}',
@@ -844,8 +910,10 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                                 phone,
                                                                 data['Items'],
                                                                 paymentType,
-                                                                widget.total,
-                                                                orderType);
+                                                                bloc.totalTicketAmount,
+                                                                orderType,
+                                                                data['Discount'],
+                                                                data['Discount Code']);
 
                                                             openWhatsapp(widget
                                                                 .businessPhone);
@@ -981,6 +1049,78 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                 ),
                                               ),
                                               const SizedBox(height: 10),
+                                              (data['Discount'] != null &&
+                                                      data['Discount'] > 0)
+                                                  ? Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .start,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                          const Icon(
+                                                            Icons.sell_outlined,
+                                                            size: 16,
+                                                            color: Colors.grey,
+                                                          ),
+                                                          const SizedBox(
+                                                              width: 5),
+                                                          //Column Name + Qty
+                                                          (snapshot.data[
+                                                                      "Discount Code"] !=
+                                                                  '')
+                                                              ? Container(
+                                                                  constraints:
+                                                                      const BoxConstraints(
+                                                                          maxWidth:
+                                                                              150),
+                                                                  child: Text(
+                                                                    snapshot.data[
+                                                                        "Discount Code"],
+                                                                    style: TextStyle(
+                                                                        color: Colors
+                                                                            .grey
+                                                                            .shade700),
+                                                                  ),
+                                                                )
+                                                              : Container(
+                                                                  constraints:
+                                                                      const BoxConstraints(
+                                                                          maxWidth:
+                                                                              150),
+                                                                  child: Text(
+                                                                    'Descuento',
+                                                                    style: TextStyle(
+                                                                        color: Colors
+                                                                            .grey
+                                                                            .shade700),
+                                                                  ),
+                                                                ),
+                                                          //Amount
+                                                          const Spacer(),
+                                                          Text(
+                                                              formatCurrency
+                                                                  .format(snapshot
+                                                                          .data[
+                                                                      "Discount"]),
+                                                              style: TextStyle(
+                                                                  color: Colors
+                                                                      .grey
+                                                                      .shade700)),
+                                                          const SizedBox(
+                                                              width: 10),
+                                                          //Delete
+                                                          IconButton(
+                                                              onPressed: () => bloc
+                                                                  .setDiscountAmount(
+                                                                      0),
+                                                              icon: const Icon(
+                                                                  Icons.close),
+                                                              iconSize: 14)
+                                                        ])
+                                                  : const SizedBox(),
+                                              const SizedBox(height: 10),
                                               const Divider(
                                                   color: Colors.grey,
                                                   thickness: 0.5,
@@ -1015,8 +1155,8 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                   ),
                                                   const SizedBox(width: 10),
                                                   Text(
-                                                    formatCurrency
-                                                        .format(widget.total),
+                                                    formatCurrency.format(
+                                                        bloc.totalTicketAmount),
                                                     textAlign: TextAlign.right,
                                                     style: const TextStyle(
                                                       color: Colors.black,
@@ -1473,6 +1613,49 @@ class StoreCheckoutState extends State<StoreCheckout> {
                             ),
                           ),
                         ),
+                        //Coupon
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          height: 40,
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.grey.shade300,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(12)),
+                              ),
+                            ),
+                            onPressed: () {
+                              showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AddDiscountDialog(
+                                        widget.businessID!);
+                                  });
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.sell_outlined,
+                                  size: 21,
+                                  color: Colors.grey,
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                    (data['Discount'] != null &&
+                                            data['Discount'] > 0)
+                                        ? '${snapshot.data["Discount Code"]} (${formatCurrency.format(snapshot.data["Discount"])})'
+                                        : 'Código promocional',
+                                    style: const TextStyle(
+                                        color: Colors.grey,
+                                        fontWeight: FontWeight.w400)),
+                              ],
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 10),
                         //Button
                         SizedBox(
@@ -1502,11 +1685,13 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                       phone,
                                       data['Items'],
                                       paymentType,
-                                      widget.total,
-                                      orderType);
+                                      bloc.totalTicketAmount,
+                                      orderType,
+                                                                data['Discount'],
+                                                                data['Discount Code']);
 
                                   orderMessage =
-                                      'Nombre: $name %0ADelivery/Retiro: $orderType %0ADirección: $address Timbre: $apt %0ANro. Teléfono: $phone %0AMedio de Pago: $paymentType %0A%0AOrden:%0A$orderItems %0ATotal: %24${widget.total}';
+                                      'Nombre: $name %0ADelivery/Retiro: $orderType %0ADirección: $address Timbre: $apt %0ANro. Teléfono: $phone %0AMedio de Pago: $paymentType %0A%0AOrden:%0A$orderItems %0ATotal: %24${formatCurrency.format(bloc.totalTicketAmount)}';
 
                                   openWhatsapp(widget.businessPhone);
                                   //Create order in Firestore "Saved"
@@ -1523,12 +1708,12 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                   });
                                 }
                               },
-                              child: const Padding(
-                                padding: EdgeInsets.all(8.0),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
                                 child: Center(
                                     child: Text(
-                                  'Pedir',
-                                  style: TextStyle(color: Colors.white),
+                                  'Pedir (${formatCurrency.format(bloc.totalTicketAmount)})',
+                                  style: const TextStyle(color: Colors.white),
                                 )),
                               )),
                         ),
@@ -2061,21 +2246,73 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                     ),
                                                   ),
                                                   const SizedBox(width: 15),
-                                                  ReserveButton(
-                                                    widget.businessID!,
-                                                    widget.businessPhone,
-                                                    selectedDate,
-                                                    _formKey,
-                                                    data,
-                                                    widget.total,
-                                                    name,
-                                                    note,
-                                                    address,
-                                                    email,
-                                                    phone,
-                                                    reservationTime,
-                                                    pageController,
+                                                  SizedBox(
+                                                    height: 45,
+                                                    width: 200,
+                                                    child: OutlinedButton(
+                                                      style: OutlinedButton
+                                                          .styleFrom(
+                                                        foregroundColor: Colors
+                                                            .grey.shade300,
+                                                        shape:
+                                                            const RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                                  Radius
+                                                                      .circular(
+                                                                          12)),
+                                                        ),
+                                                      ),
+                                                      onPressed: () {
+                                                        showDialog(
+                                                            context: context,
+                                                            builder: (context) {
+                                                              return AddDiscountDialog(
+                                                                  widget
+                                                                      .businessID!);
+                                                            });
+                                                      },
+                                                      child: const Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          Icon(
+                                                            Icons.sell_outlined,
+                                                            size: 21,
+                                                            color: Colors.grey,
+                                                          ),
+                                                          SizedBox(width: 5),
+                                                          Text(
+                                                              'Código promocional',
+                                                              style: TextStyle(
+                                                                  color: Colors
+                                                                      .grey,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w400)),
+                                                        ],
+                                                      ),
+                                                    ),
                                                   ),
+                                                  const SizedBox(width: 10),
+                                                  ReserveButton(
+                                                      widget.businessID!,
+                                                      widget.businessPhone,
+                                                      selectedDate,
+                                                      _formKey,
+                                                      data,
+                                                      bloc.totalTicketAmount,
+                                                      name,
+                                                      note,
+                                                      address,
+                                                      email,
+                                                      phone,
+                                                      reservationTime,
+                                                      pageController),
                                                 ],
                                               )
                                             ]),
@@ -2178,6 +2415,78 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                 ),
                                               ),
                                               const SizedBox(height: 10),
+                                              (data['Discount'] != null &&
+                                                      data['Discount'] > 0)
+                                                  ? Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .start,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                          const Icon(
+                                                            Icons.sell_outlined,
+                                                            size: 16,
+                                                            color: Colors.grey,
+                                                          ),
+                                                          const SizedBox(
+                                                              width: 5),
+                                                          //Column Name + Qty
+                                                          (snapshot.data[
+                                                                      "Discount Code"] !=
+                                                                  '')
+                                                              ? Container(
+                                                                  constraints:
+                                                                      const BoxConstraints(
+                                                                          maxWidth:
+                                                                              150),
+                                                                  child: Text(
+                                                                    snapshot.data[
+                                                                        "Discount Code"],
+                                                                    style: TextStyle(
+                                                                        color: Colors
+                                                                            .grey
+                                                                            .shade700),
+                                                                  ),
+                                                                )
+                                                              : Container(
+                                                                  constraints:
+                                                                      const BoxConstraints(
+                                                                          maxWidth:
+                                                                              150),
+                                                                  child: Text(
+                                                                    'Descuento',
+                                                                    style: TextStyle(
+                                                                        color: Colors
+                                                                            .grey
+                                                                            .shade700),
+                                                                  ),
+                                                                ),
+                                                          //Amount
+                                                          const Spacer(),
+                                                          Text(
+                                                              formatCurrency
+                                                                  .format(snapshot
+                                                                          .data[
+                                                                      "Discount"]),
+                                                              style: TextStyle(
+                                                                  color: Colors
+                                                                      .grey
+                                                                      .shade700)),
+                                                          const SizedBox(
+                                                              width: 10),
+                                                          //Delete
+                                                          IconButton(
+                                                              onPressed: () => bloc
+                                                                  .setDiscountAmount(
+                                                                      0),
+                                                              icon: const Icon(
+                                                                  Icons.close),
+                                                              iconSize: 14)
+                                                        ])
+                                                  : const SizedBox(),
+                                              const SizedBox(height: 10),
                                               const Divider(
                                                   color: Colors.grey,
                                                   thickness: 0.5,
@@ -2212,8 +2521,8 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                   ),
                                                   const SizedBox(width: 10),
                                                   Text(
-                                                    formatCurrency
-                                                        .format(widget.total),
+                                                    formatCurrency.format(
+                                                        bloc.totalTicketAmount),
                                                     textAlign: TextAlign.right,
                                                     style: const TextStyle(
                                                       color: Colors.black,
@@ -2640,6 +2949,52 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                   fontSize: 12,
                                                 ))))
                                     : const SizedBox(),
+                                //Coupon
+                                const SizedBox(height: 10),
+                                SizedBox(
+                                  height: 40,
+                                  width: double.infinity,
+                                  child: OutlinedButton(
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: Colors.grey.shade300,
+                                      shape: const RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(12)),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return AddDiscountDialog(
+                                                widget.businessID!);
+                                          });
+                                    },
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        const Icon(
+                                          Icons.sell_outlined,
+                                          size: 21,
+                                          color: Colors.grey,
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Text(
+                                            (data['Discount'] != null &&
+                                                    data['Discount'] > 0)
+                                                ? '${snapshot.data["Discount Code"]} (${formatCurrency.format(snapshot.data["Discount"])})'
+                                                : 'Código promocional',
+                                            style: const TextStyle(
+                                                color: Colors.grey,
+                                                fontWeight: FontWeight.w400)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
                                 //Button
                                 SizedBox(
                                   height: 45,
@@ -2651,9 +3006,7 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                             color: Colors.black, width: 1),
                                       ),
                                       onPressed: () {
-                                        setState(() {
-                                          loading = true;
-                                        });
+                                        setLoading(true);
                                         if (reservationTime != null) {
                                           if (_formKey.currentState!
                                               .validate()) {
@@ -2674,7 +3027,7 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                               String reservedTime =
                                                   '${DateFormat.yMMMd().format(selectedDate)} ${DateFormat.Hm().format(selectedDate)}';
                                               orderMessage =
-                                                  'Nombre: $name %0ATipo de Orden: Reserva %0ANro. Teléfono: $phone %0Aemail: $email%0AFecha de reserva: $reservedTime  %0AOrden:%0A$orderItems %0ATotal: %24${widget.total}';
+                                                  'Nombre: $name %0ATipo de Orden: Reserva %0ANro. Teléfono: $phone %0Aemail: $email%0AFecha de reserva: $reservedTime  %0AOrden:%0A$orderItems %0ATotal: %24${formatCurrency.format(bloc.totalTicketAmount)}';
 
                                               DatabaseService()
                                                   .scheduleSale(
@@ -2695,10 +3048,11 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                           (DateTime.now()
                                                                   .millisecond)
                                                               .toString(),
-                                                      widget.total,
+                                                      bloc.subtotalTicketAmount,
+                                                      data['Discount'],
+                                                      data['Discount Code'],
                                                       0,
-                                                      0,
-                                                      widget.total,
+                                                      bloc.totalTicketAmount,
                                                       data['Items'],
                                                       name,
                                                       selectedDate,
@@ -2709,7 +3063,7 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                         'email': email,
                                                       },
                                                       0,
-                                                      widget.total,
+                                                      bloc.totalTicketAmount,
                                                       note)
                                                   .then((value) async {
                                                 openWhatsapp(
@@ -2726,19 +3080,21 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                                 .businessID)));
                                               });
                                             } catch (e) {
-                                              setState(() {
-                                                showError = true;
-                                              });
+                                              setShowError(true);
+                                              setLoading(false);
                                             }
+                                          } else {
+                                            setLoading(false);
                                           }
                                         }
                                       },
-                                      child: const Padding(
-                                        padding: EdgeInsets.all(8.0),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
                                         child: Center(
                                             child: Text(
-                                          'Pedir',
-                                          style: TextStyle(color: Colors.white),
+                                          'Pedir (${formatCurrency.format(bloc.totalTicketAmount)})',
+                                          style: const TextStyle(
+                                              color: Colors.white),
                                         )),
                                       )),
                                 ),

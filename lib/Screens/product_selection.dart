@@ -142,7 +142,8 @@ class _ProductSelectionState extends State<ProductSelection> {
                       }
                     },
                     child: Container(
-                      padding: const EdgeInsets.all(15.0),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 15.0, horizontal: 5),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,7 +164,7 @@ class _ProductSelectionState extends State<ProductSelection> {
                                     decoration: BoxDecoration(
                                       borderRadius: const BorderRadius.all(
                                           Radius.circular(12)),
-                                      color: Colors.grey[400],
+                                      color: Colors.grey.shade300,
                                     ),
                                     child: Center(
                                       child: Text(
@@ -175,7 +176,7 @@ class _ProductSelectionState extends State<ProductSelection> {
                                       ),
                                     )),
                           ),
-                          const SizedBox(width: 15),
+                          const SizedBox(width: 20),
                           //Description
                           Expanded(
                             child: SizedBox(

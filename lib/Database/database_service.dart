@@ -246,7 +246,7 @@ class DatabaseService {
 
   //Create Order
   Future createOrder(String businessID, orderName, address, phone, orderDetail,
-      paymentType, total, String orderType) async {
+      paymentType, total, String orderType, discount, discountCode) async {
     return await FirebaseFirestore.instance
         .collection('ERP')
         .doc(businessID)
@@ -257,7 +257,8 @@ class DatabaseService {
       'Address': address,
       'Phone': phone,
       'Saved Date': DateTime.now(),
-      'Discount': 0,
+      'Discount': discount,
+      'Discount Code': discountCode,
       'IVA': 0,
       'Items': orderDetail,
       'Payment Type': paymentType,
@@ -267,7 +268,7 @@ class DatabaseService {
   }
 
   void saveOrder(String businessID, orderName, address, phone, orderDetail,
-      paymentType, total, String orderType) async {
+      paymentType, total, String orderType, discount, discountCode) async {
     /////////////////////////// Update Product Stock ///////////////////////////
 
     for (var i = 0; i < orderDetail.length; i++) {
@@ -294,7 +295,7 @@ class DatabaseService {
       }
     }
     createOrder(businessID, orderName, address, phone, orderDetail, paymentType,
-        total, orderType);
+        total, orderType, discount, discountCode);
   }
 
   /// Schedule
@@ -303,6 +304,7 @@ class DatabaseService {
       String transactionID,
       subTotal,
       discount,
+      discountCode,
       tax,
       total,
       orderDetail,
@@ -319,6 +321,7 @@ class DatabaseService {
         .doc(transactionID)
         .set({
       'Discount': discount,
+      'Discount Code': discountCode,
       'IVA': tax,
       'Items': orderDetail,
       'Order Name': orderName,
@@ -343,6 +346,7 @@ class DatabaseService {
       String transactionID,
       subTotal,
       discount,
+      discountCode,
       tax,
       total,
       orderDetail,
@@ -382,6 +386,7 @@ class DatabaseService {
         transactionID,
         subTotal,
         discount,
+        discountCode,
         tax,
         total,
         orderDetail,

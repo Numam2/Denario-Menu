@@ -129,22 +129,39 @@ class FeaturedProducts extends StatelessWidget {
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          vertical: 15.0, horizontal: 10),
+                          vertical: 15.0, horizontal: 0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           //Fotos
                           Expanded(
-                              child: Container(
-                            decoration: BoxDecoration(
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(12)),
-                                color: Colors.grey[100],
-                                image: DecorationImage(
-                                    image: NetworkImage(product[i].image),
-                                    fit: BoxFit.cover)),
-                          )),
+                            child: (product[i].image != '')
+                                ? Container(
+                                    decoration: BoxDecoration(
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(12)),
+                                        color: Colors.grey[100],
+                                        image: DecorationImage(
+                                            image:
+                                                NetworkImage(product[i].image),
+                                            fit: BoxFit.cover)))
+                                : Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(12)),
+                                      color: Colors.grey.shade300,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        product[i].product.substring(0, 2),
+                                        style: const TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 28,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    )),
+                          ),
                           const SizedBox(width: 15),
                           //Description
                           Expanded(
@@ -286,22 +303,39 @@ class FeaturedProducts extends StatelessWidget {
                       //     border:
                       //         Border.all(color: Colors.grey.shade200)),
                       padding: const EdgeInsets.symmetric(
-                          vertical: 15.0, horizontal: 10),
+                          vertical: 15.0, horizontal: 0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           //Fotos
                           Expanded(
-                              child: Container(
-                            decoration: BoxDecoration(
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(12)),
-                                color: Colors.grey[100],
-                                image: DecorationImage(
-                                    image: NetworkImage(product[i].image),
-                                    fit: BoxFit.cover)),
-                          )),
+                            child: (product[i].image != '')
+                                ? Container(
+                                    decoration: BoxDecoration(
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(12)),
+                                        color: Colors.grey[100],
+                                        image: DecorationImage(
+                                            image:
+                                                NetworkImage(product[i].image),
+                                            fit: BoxFit.cover)))
+                                : Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(12)),
+                                      color: Colors.grey.shade300,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        product[i].product.substring(0, 2),
+                                        style: const TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 28,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    )),
+                          ),
                           const SizedBox(width: 15),
                           //Description
                           Expanded(

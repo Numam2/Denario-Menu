@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
             brightness: Brightness.light,
             colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.grey)
-                .copyWith(background: Colors.white)),
+                .copyWith(surface: Colors.white)),
         home: InitialConfig(
           Uri.base.queryParameters['id'],
           storeType: Uri.base.queryParameters['type'] ?? 'Menu',

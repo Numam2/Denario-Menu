@@ -105,15 +105,17 @@ class FeaturedProducts extends StatelessWidget {
                 width: 400,
                 child: ElevatedButton(
                     style: ButtonStyle(
+                      shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12))),
                       backgroundColor:
-                          MaterialStateProperty.all<Color>(Colors.white),
-                      overlayColor: MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                          if (states.contains(MaterialState.hovered)) {
+                          WidgetStateProperty.all<Color>(Colors.white),
+                      overlayColor: WidgetStateProperty.resolveWith<Color>(
+                        (Set<WidgetState> states) {
+                          if (states.contains(WidgetState.hovered)) {
                             return Colors.white70;
                           }
-                          if (states.contains(MaterialState.focused) ||
-                              states.contains(MaterialState.pressed)) {
+                          if (states.contains(WidgetState.focused) ||
+                              states.contains(WidgetState.pressed)) {
                             return Colors.white54;
                           }
                           return Colors.black; // Defer to the widget's default.
@@ -274,15 +276,17 @@ class FeaturedProducts extends StatelessWidget {
                 width: 400,
                 child: ElevatedButton(
                     style: ButtonStyle(
+                      shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12))),
                       backgroundColor:
-                          MaterialStateProperty.all<Color>(Colors.white),
-                      overlayColor: MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                          if (states.contains(MaterialState.hovered)) {
+                          WidgetStateProperty.all<Color>(Colors.white),
+                      overlayColor: WidgetStateProperty.resolveWith<Color>(
+                        (Set<WidgetState> states) {
+                          if (states.contains(WidgetState.hovered)) {
                             return Colors.white70;
                           }
-                          if (states.contains(MaterialState.focused) ||
-                              states.contains(MaterialState.pressed)) {
+                          if (states.contains(WidgetState.focused) ||
+                              states.contains(WidgetState.pressed)) {
                             return Colors.white54;
                           }
                           return Colors.black; // Defer to the widget's default.

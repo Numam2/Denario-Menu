@@ -901,7 +901,7 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                             }
 
                                                             orderMessage =
-                                                                'Nombre: $name %0ADelivery/Retiro: $orderType %0ADirección: $address Timbre: $apt %0ANro. Teléfono: $phone %0AMedio de Pago: $paymentType %0A%0AOrden:%0A$orderItems %0ATotal: %24${formatCurrency.format(bloc.totalTicketAmount)}';
+                                                                'Nombre: $name %0ADelivery/Retiro: $orderType %0ADirección: $address Timbre: $apt %0ANro. Teléfono: $phone %0AMedio de Pago: $paymentType %0A%0AOrden:%0A$orderItems %0ATotal: ${formatCurrency.format(bloc.totalTicketAmount)}';
 
                                                             DatabaseService().saveOrder(
                                                                 '${widget.businessID}',
@@ -1691,7 +1691,7 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                                 data['Discount Code']);
 
                                   orderMessage =
-                                      'Nombre: $name %0ADelivery/Retiro: $orderType %0ADirección: $address Timbre: $apt %0ANro. Teléfono: $phone %0AMedio de Pago: $paymentType %0A%0AOrden:%0A$orderItems %0ATotal: %24${formatCurrency.format(bloc.totalTicketAmount)}';
+                                      'Nombre: $name %0ADelivery/Retiro: $orderType %0ADirección: $address Timbre: $apt %0ANro. Teléfono: $phone %0AMedio de Pago: $paymentType %0A%0AOrden:%0A$orderItems %0ATotal: ${formatCurrency.format(bloc.totalTicketAmount)}';
 
                                   openWhatsapp(widget.businessPhone);
                                   //Create order in Firestore "Saved"
@@ -3027,7 +3027,7 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                               String reservedTime =
                                                   '${DateFormat.yMMMd().format(selectedDate)} ${DateFormat.Hm().format(selectedDate)}';
                                               orderMessage =
-                                                  'Nombre: $name %0ATipo de Orden: Reserva %0ANro. Teléfono: $phone %0Aemail: $email%0AFecha de reserva: $reservedTime  %0AOrden:%0A$orderItems %0ATotal: %24${formatCurrency.format(bloc.totalTicketAmount)}';
+                                                  'Nombre: $name %0ATipo de Orden: Reserva %0ANro. Teléfono: $phone %0Aemail: $email%0AFecha de reserva: $reservedTime  %0AOrden:%0A$orderItems %0ATotal: ${formatCurrency.format(bloc.totalTicketAmount)}';
 
                                               DatabaseService()
                                                   .scheduleSale(

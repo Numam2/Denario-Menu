@@ -100,10 +100,10 @@ class _AddToCartPageState extends State<AddToCartPage> {
           }
         }
         if (widget.product.productOptions[i].mandatory) {
-        setState(() {
-          mandatoryOptions[widget.product.productOptions[i].title] = true;
-        });
-      }
+          setState(() {
+            mandatoryOptions[widget.product.productOptions[i].title] = true;
+          });
+        }
       } else {
         //Remove the option from the title's list
         setState(() {
@@ -119,10 +119,10 @@ class _AddToCartPageState extends State<AddToCartPage> {
         }
 
         if (widget.product.productOptions[i].mandatory) {
-        setState(() {
-          mandatoryOptions[widget.product.productOptions[i].title] = false;
-        });
-      }
+          setState(() {
+            mandatoryOptions[widget.product.productOptions[i].title] = false;
+          });
+        }
       }
     } else {
       setState(() {
@@ -559,19 +559,19 @@ class _AddToCartPageState extends State<AddToCartPage> {
                     width: double.infinity,
                     child: ElevatedButton(
                         style: ButtonStyle(
-                          backgroundColor: (mandatoryOptionsCompleted() && !(widget.product.controlStock! &&
-                                            widget.product.currentStock! < 1))
-                              ? MaterialStateProperty.all<Color>(Colors.black)
-                              : MaterialStateProperty.all<Color>(
+                          backgroundColor: (mandatoryOptionsCompleted() &&
+                                  !(widget.product.controlStock! &&
+                                      widget.product.currentStock! < 1))
+                              ? WidgetStateProperty.all<Color>(Colors.black)
+                              : WidgetStateProperty.all<Color>(
                                   Colors.grey.shade300),
-                          overlayColor:
-                              MaterialStateProperty.resolveWith<Color>(
-                            (Set<MaterialState> states) {
-                              if (states.contains(MaterialState.hovered)) {
+                          overlayColor: WidgetStateProperty.resolveWith<Color>(
+                            (Set<WidgetState> states) {
+                              if (states.contains(WidgetState.hovered)) {
                                 return Colors.grey.shade300;
                               }
-                              if (states.contains(MaterialState.focused) ||
-                                  states.contains(MaterialState.pressed)) {
+                              if (states.contains(WidgetState.focused) ||
+                                  states.contains(WidgetState.pressed)) {
                                 return Colors.grey.shade200;
                               }
                               return Colors
@@ -580,8 +580,9 @@ class _AddToCartPageState extends State<AddToCartPage> {
                           ),
                         ),
                         onPressed: () {
-                          if (mandatoryOptionsCompleted() && !(widget.product.controlStock! &&
-                                            widget.product.currentStock! < 1)) {
+                          if (mandatoryOptionsCompleted() &&
+                              !(widget.product.controlStock! &&
+                                  widget.product.currentStock! < 1)) {
                             if (quantity > 0) {
                               bloc.addToCart({
                                 'Name': widget.product.product,
@@ -617,7 +618,8 @@ class _AddToCartPageState extends State<AddToCartPage> {
                                 ? 'Fuera de Stock'
                                 : 'Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedProductOptions) * quantity)}',
                             style: TextStyle(
-                                color: (mandatoryOptionsCompleted() && !(widget.product.controlStock! &&
+                                color: (mandatoryOptionsCompleted() &&
+                                        !(widget.product.controlStock! &&
                                             widget.product.currentStock! < 1))
                                     ? Colors.white
                                     : Colors.black),

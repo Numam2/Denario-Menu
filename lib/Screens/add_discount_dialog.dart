@@ -25,7 +25,6 @@ class _AddDiscountDialogState extends State<AddDiscountDialog> {
           .get();
       return snapshot;
     } catch (e) {
-      print('Error fetching document: $e');
       return null;
     }
   }
@@ -116,6 +115,7 @@ class _AddDiscountDialogState extends State<AddDiscountDialog> {
                                     bloc.setDiscountAmount(discount);
                                     bloc.setDiscountCode(data['Code']);
                                   });
+                                  if (!context.mounted) return;
                                   Navigator.of(context).pop();
                                 } else {
                                   setState(() {
@@ -199,6 +199,7 @@ class _AddDiscountDialogState extends State<AddDiscountDialog> {
                                   bloc.setDiscountAmount(discount);
                                   bloc.setDiscountCode(data['Code']);
                                 });
+                                if (!context.mounted) return;
                                 Navigator.of(context).pop();
                               } else {
                                 setState(() {

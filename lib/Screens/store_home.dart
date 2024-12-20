@@ -35,7 +35,7 @@ class _StoreHomeState extends State<StoreHome> {
   int businessPhone = 0;
   void openLink(rrss) {
     if (rrss['Social Media'] == 'Whatsapp') {
-      var whatsapp = Uri.parse("https://wa.me/${rrss['Link']}?text=Hola!");
+      var whatsapp = Uri.parse("https://wa.me/${rrss['Link']}?text=Hola%21");
       launchUrl(whatsapp);
     } else {
       var link = Uri.parse(rrss['Link']);
@@ -519,7 +519,7 @@ class _StoreHomeState extends State<StoreHome> {
                                                               TextAlign.center,
                                                         )
                                                       : Text(
-                                                         'Abierto hasta las ${closeTime.format(context)}',
+                                                          'Abierto hasta las ${closeTime.format(context)}',
                                                           style: TextStyle(
                                                               color:
                                                                   Colors.grey,
@@ -597,6 +597,9 @@ class _StoreHomeState extends State<StoreHome> {
                       radius: 37,
                       backgroundColor: Colors.white,
                       child: TextButton(
+                          style: TextButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5))),
                           onPressed: () {
                             _scaffoldKey.currentState!.openEndDrawer();
                           },
@@ -650,7 +653,7 @@ class _StoreHomeState extends State<StoreHome> {
               //Categories
               (display == 'Categorized')
                   ? SliverAppBar(
-                      backgroundColor: Theme.of(context).colorScheme.background,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
                       elevation: 5,
                       pinned: true,
                       automaticallyImplyLeading: false,
@@ -673,21 +676,21 @@ class _StoreHomeState extends State<StoreHome> {
                                   style: ButtonStyle(
                                     backgroundColor:
                                         (selectedCategory == categories[i])
-                                            ? MaterialStateProperty.all<Color>(
+                                            ? WidgetStateProperty.all<Color>(
                                                 Colors.black)
-                                            : MaterialStateProperty.all<Color>(
+                                            : WidgetStateProperty.all<Color>(
                                                 Colors.transparent),
-                                    overlayColor: MaterialStateProperty
-                                        .resolveWith<Color>(
-                                      (Set<MaterialState> states) {
+                                    overlayColor:
+                                        WidgetStateProperty.resolveWith<Color>(
+                                      (Set<WidgetState> states) {
                                         if (states
-                                            .contains(MaterialState.hovered)) {
+                                            .contains(WidgetState.hovered)) {
                                           return Colors.grey.shade300;
                                         }
                                         if (states.contains(
-                                                MaterialState.focused) ||
+                                                WidgetState.focused) ||
                                             states.contains(
-                                                MaterialState.pressed)) {
+                                                WidgetState.pressed)) {
                                           return Colors.grey.shade200;
                                         }
                                         return Colors
@@ -1223,7 +1226,7 @@ class _StoreHomeState extends State<StoreHome> {
               //Categories
               (display == 'Categorized')
                   ? SliverAppBar(
-                      backgroundColor: Theme.of(context).colorScheme.background,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
                       elevation: 5,
                       pinned: true,
                       automaticallyImplyLeading: false,
@@ -1246,21 +1249,21 @@ class _StoreHomeState extends State<StoreHome> {
                                   style: ButtonStyle(
                                     backgroundColor:
                                         (selectedCategory == categories[i])
-                                            ? MaterialStateProperty.all<Color>(
+                                            ? WidgetStateProperty.all<Color>(
                                                 Colors.black)
-                                            : MaterialStateProperty.all<Color>(
+                                            : WidgetStateProperty.all<Color>(
                                                 Colors.transparent),
-                                    overlayColor: MaterialStateProperty
-                                        .resolveWith<Color>(
-                                      (Set<MaterialState> states) {
+                                    overlayColor:
+                                        WidgetStateProperty.resolveWith<Color>(
+                                      (Set<WidgetState> states) {
                                         if (states
-                                            .contains(MaterialState.hovered)) {
+                                            .contains(WidgetState.hovered)) {
                                           return Colors.grey.shade300;
                                         }
                                         if (states.contains(
-                                                MaterialState.focused) ||
+                                                WidgetState.focused) ||
                                             states.contains(
-                                                MaterialState.pressed)) {
+                                                WidgetState.pressed)) {
                                           return Colors.grey.shade200;
                                         }
                                         return Colors

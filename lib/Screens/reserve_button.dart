@@ -115,7 +115,7 @@ class _ReserveButtonState extends State<ReserveButton> {
                             String reservedTime =
                                 '${DateFormat.yMMMd().format(widget.selectedDate)} ${DateFormat.Hm().format(widget.selectedDate)}';
                             var orderMessage =
-                                'Nombre: ${widget.name} %0ATipo de Orden: Reserva %0ANro. Teléfono: ${widget.phone} %0Aemail: ${widget.email}%0AFecha de reserva: $reservedTime  %0AOrden:%0A$orderItems %0ATotal: %24${widget.total}';
+                                'Nombre: ${widget.name} %0ATipo de Orden: Reserva %0ANro. Teléfono: ${widget.phone} %0Aemail: ${widget.email}%0AFecha de reserva: $reservedTime  %0AOrden:%0A$orderItems %0ATotal: ${widget.total}';
 
                             DatabaseService()
                                 .scheduleSale(
@@ -155,7 +155,7 @@ class _ReserveButtonState extends State<ReserveButton> {
                                           OrderSuccessful(widget.businessID)));
                             });
                           } catch (e) {
-                            print('Error');
+                            //do nothing
                           }
                         }
                       },

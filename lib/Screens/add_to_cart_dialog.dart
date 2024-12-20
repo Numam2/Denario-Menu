@@ -688,23 +688,19 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                                                               i]
                                                                           .multipleOptions)
                                                                       ? IconButton(
-                                                                          onPressed:() => addOption(
-                                                                            i,
-                                                                            x),
-                                                                          icon: (selectedProductOptions.containsKey(productOptions[i].title) &&
-                                                                                selectedProductOptions[productOptions[i].title].contains(productOptions[i].priceOptions[x][
-                                                                                    'Option']))? Icon(
+                                                                          onPressed: () => addOption(
+                                                                              i,
+                                                                              x),
+                                                                          icon: (selectedProductOptions.containsKey(productOptions[i].title) && selectedProductOptions[productOptions[i].title].contains(productOptions[i].priceOptions[x]['Option']))
+                                                                              ? Icon(
                                                                                   Icons.check_box,
                                                                                   color: Colors.greenAccent[400],
                                                                                 )
                                                                               : const Icon(Icons.check_box_outline_blank))
                                                                       : IconButton(
-                                                                          onPressed: () => addOption(
-                                                                            i,
-                                                                            x),
-                                                                          icon: (selectedProductOptions.containsKey(productOptions[i].title) &&
-                                                                                selectedProductOptions[productOptions[i].title].contains(productOptions[i].priceOptions[x][
-                                                                                    'Option']))? Icon(
+                                                                          onPressed: () => addOption(i, x),
+                                                                          icon: (selectedProductOptions.containsKey(productOptions[i].title) && selectedProductOptions[productOptions[i].title].contains(productOptions[i].priceOptions[x]['Option']))
+                                                                              ? Icon(
                                                                                   Icons.circle_sharp,
                                                                                   color: Colors.greenAccent[400],
                                                                                 )
@@ -802,28 +798,31 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                           const Spacer(),
                           //Add to order button
                           SizedBox(
-                            width: 200,
+                            width: 250,
                             height: 50,
                             child: ElevatedButton(
                                 style: ButtonStyle(
-                                  backgroundColor: (mandatoryOptionsCompleted() &&!(widget.product.controlStock! &&
-                                            widget.product.currentStock! < 1))
-                                      ? MaterialStateProperty.all<Color>(
-                                          Colors.black)
-                                      : MaterialStateProperty.all<Color>(
-                                          Colors.grey.shade300),
+                                  backgroundColor:
+                                      (mandatoryOptionsCompleted() &&
+                                              !(widget.product.controlStock! &&
+                                                  widget.product.currentStock! <
+                                                      1))
+                                          ? WidgetStateProperty.all<Color>(
+                                              Colors.black)
+                                          : WidgetStateProperty.all<Color>(
+                                              Colors.grey.shade300),
                                   overlayColor:
-                                      MaterialStateProperty.resolveWith<Color>(
-                                    (Set<MaterialState> states) {
+                                      WidgetStateProperty.resolveWith<Color>(
+                                    (Set<WidgetState> states) {
                                       if (states
-                                          .contains(MaterialState.hovered)) {
+                                          .contains(WidgetState.hovered)) {
                                         return Colors.grey.shade300;
                                       }
 
-                                      if (states.contains(
-                                              MaterialState.focused) ||
-                                          states.contains(
-                                              MaterialState.pressed)) {
+                                      if (states
+                                              .contains(WidgetState.focused) ||
+                                          states
+                                              .contains(WidgetState.pressed)) {
                                         return Colors.grey.shade200;
                                       }
                                       return Colors
@@ -832,8 +831,9 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                   ),
                                 ),
                                 onPressed: () {
-                                  if (mandatoryOptionsCompleted() && !(widget.product.controlStock! &&
-                                            widget.product.currentStock! < 1)) {
+                                  if (mandatoryOptionsCompleted() &&
+                                      !(widget.product.controlStock! &&
+                                          widget.product.currentStock! < 1)) {
                                     if (quantity > 0) {
                                       bloc.addToCart({
                                         'Name': widget.product.product,
@@ -867,8 +867,12 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                         ? 'Fuera de Stock'
                                         : ' Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedProductOptions) * quantity)}',
                                     style: TextStyle(
-                                        color: (mandatoryOptionsCompleted() && !(widget.product.controlStock! &&
-                                            widget.product.currentStock! < 1))
+                                        color: (mandatoryOptionsCompleted() &&
+                                                !(widget.product
+                                                        .controlStock! &&
+                                                    widget.product
+                                                            .currentStock! <
+                                                        1))
                                             ? Colors.white
                                             : Colors.black),
                                   )),
@@ -935,31 +939,39 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                               ),
                               //Add to order button
                               Expanded(
-                                flex: 4,
+                                flex: 5,
                                 child: SizedBox(
                                   height: 50,
                                   child: ElevatedButton(
                                       style: ButtonStyle(
+                                        shape: WidgetStateProperty.all(
+                                            RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12))),
                                         backgroundColor:
-                                            (mandatoryOptionsCompleted() && !(widget.product.controlStock! &&
-                                            widget.product.currentStock! < 1))
-                                                ? MaterialStateProperty.all<
+                                            (mandatoryOptionsCompleted() &&
+                                                    !(widget.product
+                                                            .controlStock! &&
+                                                        widget.product
+                                                                .currentStock! <
+                                                            1))
+                                                ? WidgetStateProperty.all<
                                                     Color>(Colors.black)
-                                                : MaterialStateProperty.all<
+                                                : WidgetStateProperty.all<
                                                         Color>(
                                                     Colors.grey.shade300),
-                                        overlayColor: MaterialStateProperty
+                                        overlayColor: WidgetStateProperty
                                             .resolveWith<Color>(
-                                          (Set<MaterialState> states) {
+                                          (Set<WidgetState> states) {
                                             if (states.contains(
-                                                MaterialState.hovered)) {
+                                                WidgetState.hovered)) {
                                               return Colors.grey.shade300;
                                             }
 
                                             if (states.contains(
-                                                    MaterialState.focused) ||
+                                                    WidgetState.focused) ||
                                                 states.contains(
-                                                    MaterialState.pressed)) {
+                                                    WidgetState.pressed)) {
                                               return Colors.grey.shade200;
                                             }
 
@@ -969,15 +981,17 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                         ),
                                       ),
                                       onPressed: () {
-                                        if (mandatoryOptionsCompleted() && !(widget.product.controlStock! &&
-                                                  widget.product.currentStock! <
-                                                      1)) {
+                                        if (mandatoryOptionsCompleted() &&
+                                            !(widget.product.controlStock! &&
+                                                widget.product.currentStock! <
+                                                    1)) {
                                           if (quantity > 0) {
                                             bloc.addToCart({
                                               'Name': widget.product.product,
                                               'Category':
                                                   widget.product.category,
-                                              'Base Price': widget.product.price,
+                                              'Base Price':
+                                                  widget.product.price,
                                               'Price': totalAmount(basePrice,
                                                   selectedProductOptions),
                                               'Quantity': quantity,
@@ -985,8 +999,10 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                                       basePrice,
                                                       selectedProductOptions) *
                                                   quantity,
-                                              'Available Options': availableOptions,
-                                              'Selected Options': selectedProductOptions,
+                                              'Available Options':
+                                                  availableOptions,
+                                              'Selected Options':
+                                                  selectedProductOptions,
                                               'Options': selectedTags,
                                               'Image': widget.product.image,
                                               'Supplies':
@@ -1004,7 +1020,8 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                         }
                                       },
                                       child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 4.0, vertical: 8),
                                         child: Center(
                                             child: Text(
                                           (widget.product.controlStock! &&
@@ -1013,12 +1030,14 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                               ? 'Fuera de Stock'
                                               : 'Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedProductOptions) * quantity)}',
                                           style: TextStyle(
-                                              color:
-                                                  (mandatoryOptionsCompleted() && !(widget.product.controlStock! &&
-                                                  widget.product.currentStock! <
-                                                      1))
-                                                      ? Colors.white
-                                                      : Colors.black),
+                                              color: (mandatoryOptionsCompleted() &&
+                                                      !(widget.product
+                                                              .controlStock! &&
+                                                          widget.product
+                                                                  .currentStock! <
+                                                              1))
+                                                  ? Colors.white
+                                                  : Colors.black),
                                         )),
                                       )),
                                 ),
@@ -1087,24 +1106,32 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                 width: double.infinity,
                                 child: ElevatedButton(
                                     style: ButtonStyle(
+                                      shape: WidgetStateProperty.all(
+                                          RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12))),
                                       backgroundColor:
-                                          (mandatoryOptionsCompleted() && !(widget.product.controlStock! &&
-                                            widget.product.currentStock! < 1))
-                                              ? MaterialStateProperty.all<
-                                                  Color>(Colors.black)
-                                              : MaterialStateProperty.all<
-                                                  Color>(Colors.grey.shade300),
-                                      overlayColor: MaterialStateProperty
+                                          (mandatoryOptionsCompleted() &&
+                                                  !(widget.product
+                                                          .controlStock! &&
+                                                      widget.product
+                                                              .currentStock! <
+                                                          1))
+                                              ? WidgetStateProperty.all<Color>(
+                                                  Colors.black)
+                                              : WidgetStateProperty.all<Color>(
+                                                  Colors.grey.shade300),
+                                      overlayColor: WidgetStateProperty
                                           .resolveWith<Color>(
-                                        (Set<MaterialState> states) {
-                                          if (states.contains(
-                                              MaterialState.hovered)) {
+                                        (Set<WidgetState> states) {
+                                          if (states
+                                              .contains(WidgetState.hovered)) {
                                             return Colors.grey.shade300;
                                           }
                                           if (states.contains(
-                                                  MaterialState.focused) ||
+                                                  WidgetState.focused) ||
                                               states.contains(
-                                                  MaterialState.pressed)) {
+                                                  WidgetState.pressed)) {
                                             return Colors.grey.shade200;
                                           }
                                           return Colors
@@ -1113,9 +1140,10 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                       ),
                                     ),
                                     onPressed: () {
-                                      if (mandatoryOptionsCompleted() && !(widget.product.controlStock! &&
-                                                  widget.product.currentStock! <
-                                                      1)) {
+                                      if (mandatoryOptionsCompleted() &&
+                                          !(widget.product.controlStock! &&
+                                              widget.product.currentStock! <
+                                                  1)) {
                                         if (quantity > 0) {
                                           bloc.addToCart({
                                             'Name': widget.product.product,
@@ -1128,8 +1156,10 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                                     basePrice,
                                                     selectedProductOptions) *
                                                 quantity,
-                                            'Available Options': availableOptions,
-                                            'Selected Options': selectedProductOptions,
+                                            'Available Options':
+                                                availableOptions,
+                                            'Selected Options':
+                                                selectedProductOptions,
                                             'Options': selectedTags,
                                             'Image': widget.product.image,
                                             'Supplies':
@@ -1156,9 +1186,12 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                             ? 'Fuera de Stock'
                                             : 'Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedProductOptions) * quantity)}',
                                         style: TextStyle(
-                                            color: (mandatoryOptionsCompleted() && !(widget.product.controlStock! &&
-                                                  widget.product.currentStock! <
-                                                      1))
+                                            color: (mandatoryOptionsCompleted() &&
+                                                    !(widget.product
+                                                            .controlStock! &&
+                                                        widget.product
+                                                                .currentStock! <
+                                                            1))
                                                 ? Colors.white
                                                 : Colors.black),
                                       )),

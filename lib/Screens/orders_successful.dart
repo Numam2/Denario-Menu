@@ -5,7 +5,7 @@ import 'package:menu_denario/initial_config.dart';
 
 class OrderSuccessful extends StatelessWidget {
   final String? businessID;
-  const OrderSuccessful(this.businessID, {Key? key}) : super(key: key);
+  const OrderSuccessful(this.businessID, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +41,7 @@ class OrderSuccessful extends StatelessWidget {
               width: 400,
               child: Text(
                 'Recibimos tu orden en nuestro local y pronto estaremos confirmando por whatsapp al número que agregaste para coordinar los detalles',
-                maxLines: 2,
+                maxLines: 4,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     color: Colors.grey,

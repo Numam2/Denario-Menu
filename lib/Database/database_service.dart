@@ -290,7 +290,7 @@ class DatabaseService {
             });
           }
         } catch (error) {
-          print('Error updating Total Sales Value: $error');
+          //do nothing
         }
       }
     }
@@ -377,7 +377,7 @@ class DatabaseService {
             });
           }
         } catch (error) {
-          print('Error updating Total Sales Value: $error');
+          //do nothing
         }
       }
     }

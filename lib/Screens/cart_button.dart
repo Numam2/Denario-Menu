@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:menu_denario/Database/ticket.dart';
 
 class CartButton extends StatelessWidget {
-  const CartButton({Key? key}) : super(key: key);
+  const CartButton({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 // ignore: depend_on_referenced_packages
 import 'package:intl/intl.dart';
 import 'package:menu_denario/Models/products.dart';
 import 'package:menu_denario/Screens/add_to_cart_dialog.dart';
 import 'package:menu_denario/Screens/add_to_cart_page.dart';
-import 'package:provider/provider.dart';
 
 class ProductSelection extends StatefulWidget {
   final bool open;
   final String storeType;
-  const ProductSelection(this.open, this.storeType, {super.key});
+  final List<Products> productList;
+  const ProductSelection(this.open, this.storeType, this.productList,
+      {super.key});
   @override
   // ignore: library_private_types_in_public_api
   _ProductSelectionState createState() => _ProductSelectionState();
@@ -20,6 +20,7 @@ class _ProductSelectionState extends State<ProductSelection> {
   final formatCurrency = NumberFormat.simpleCurrency();
   bool productExists = false;
   final Key productListKey = const Key('productList');
+  late List<Products> product;
 
   void addToCart(product) {
     showDialog(
@@ -75,7 +76,7 @@ class _ProductSelectionState extends State<ProductSelection> {
 
   @override
   Widget build(BuildContext context) {
-    final product = Provider.of<List<Products>>(context);
+    product = widget.productList;
 
     if (product.isEmpty) {
       return SliverList(

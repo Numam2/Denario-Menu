@@ -21,34 +21,31 @@ class _AddToCartPageState extends State<AddToCartPage> {
   double basePrice = 0;
   List selectedTags = [];
   final formatCurrency = NumberFormat.simpleCurrency();
-  Map<String, dynamic> selectedProductOptions = {};
+  List<Map<String, dynamic>> selectedProductOptions = [];
   List availableOptions = [];
   List<ProductOptions> productOptions = [];
 
-  double totalAmount(
-    double basePrice,
-    Map selectedOptions,
+  num totalAmount(
+    num basePrice,
+    List<Map> selectedOptions,
   ) {
-    double total = 0;
+    num total = 0;
     List<double> additionalsList = [];
-    double additionalAmount = 0;
+    num additionalAmount = 0;
 
     //Serch for base price
-    productOptions.forEach((x) {
-      if (x.priceStructure == 'Aditional') {
-        for (var i = 0; i < x.priceOptions.length; i++) {
-          if (selectedOptions.containsKey(x.title) &&
-              selectedOptions[x.title].contains(x.priceOptions[i]['Option'])) {
-            additionalsList.add(x.priceOptions[i]['Price'].toDouble());
-          }
+    for (var option in selectedOptions) {
+      if (option['Price Structure'] == 'Aditional') {
+        for (var x = 0; x < option['Prices'].length; x++) {
+          additionalsList.add(option['Prices'][x].toDouble());
         }
       }
-    });
+    }
 
     //Add up
-    additionalsList.forEach((y) {
+    for (var y in additionalsList) {
       additionalAmount = additionalAmount + y;
-    });
+    }
 
     total = basePrice + additionalAmount;
 
@@ -74,72 +71,197 @@ class _AddToCartPageState extends State<AddToCartPage> {
   double totalCost = 0;
   List ingredients = [];
 
+  String selectedSize = '';
+  List singleSizesList = [];
+  int? selectedOptionIndex;
+  String sku = '';
+  num? productStock;
+
   void addOption(int i, int x) {
     //If
-    if (selectedProductOptions.containsKey(productOptions[i].title)) {
+    if (selectedProductOptions
+        .any((option) => option['Title'] == productOptions[i].title)) {
+      //Identify and declare index
+      int optIndex = selectedProductOptions
+          .indexWhere((option) => option['Title'] == productOptions[i].title);
       //If the title option in not selected
-      if (!selectedProductOptions[productOptions[i].title]
+      if (!selectedProductOptions[optIndex]['Selected Options']
           .contains(productOptions[i].priceOptions[x]['Option'])) {
         //Add the option to the title's list if multiple choice
         if (productOptions[i].multipleOptions) {
           setState(() {
-            selectedProductOptions[productOptions[i].title]
+            selectedProductOptions[optIndex]['Selected Options']
                 .add(productOptions[i].priceOptions[x]['Option']);
+            if (productOptions[i].priceStructure == 'Aditional') {
+              setState(() {
+                selectedProductOptions[optIndex]['Prices']
+                    .add(productOptions[i].priceOptions[x]['Price']);
+              });
+            }
           });
         } else {
           //Add and remove others
           setState(() {
-            selectedProductOptions[productOptions[i].title] = [
+            selectedProductOptions[optIndex]['Selected Options'] = [
               productOptions[i].priceOptions[x]['Option']
             ];
           });
-          if (productOptions[i].priceStructure == 'Complete') {
+
+          if (productOptions[i].priceStructure == 'Aditional') {
+            setState(() {
+              selectedProductOptions[optIndex]
+                  ['Prices'] = [productOptions[i].priceOptions[x]['Price']];
+            });
+          } else if (productOptions[i].priceStructure == 'Complete') {
             setState(() {
               basePrice = productOptions[i].priceOptions[x]['Price'];
             });
           }
         }
-        if (widget.product.productOptions[i].mandatory) {
+        //Select SKU If applicable
+        if (productOptions[i].priceOptions[x]['SKU'] != null &&
+            productOptions[i].priceOptions[x]['SKU'] != '') {
           setState(() {
-            mandatoryOptions[widget.product.productOptions[i].title] = true;
+            sku = productOptions[i].priceOptions[x]['SKU'];
+            productStock = productOptions[i].priceOptions[x]['Stock'];
           });
+        }
+        // Add sizes if applicable
+        if (productOptions[i].priceOptions[x]['Sizes'] != null &&
+            productOptions[i].priceOptions[x]['Sizes'].isNotEmpty) {
+          singleSizesList = [];
+          for (var y = 0;
+              y < productOptions[i].priceOptions[x]['Sizes'].length;
+              y++) {
+            singleSizesList.add(productOptions[i].priceOptions[x]['Sizes'][y]);
+          }
+          selectedOptionIndex = optIndex;
+        } else {
+          singleSizesList = [];
         }
       } else {
         //Remove the option from the title's list
-        setState(() {
-          selectedProductOptions[productOptions[i].title]
-              .remove(productOptions[i].priceOptions[x]['Option']);
-        });
-
-        //Price config
-        if (productOptions[i].priceStructure == 'Complete') {
+        if (productOptions[i].priceStructure == 'Aditional') {
+          //Remove the option from the options list
+          if (selectedProductOptions[optIndex]['Selected Options'].length > 1) {
+            setState(() {
+              //Remove from selectedOptions
+              selectedProductOptions[optIndex]['Selected Options'].removeWhere(
+                  (option) =>
+                      option == productOptions[i].priceOptions[x]['Option']);
+              //Remove from prices
+              selectedProductOptions[optIndex]['Prices'].removeAt(
+                  selectedProductOptions[optIndex]['Prices'].indexWhere(
+                      (price) =>
+                          price == productOptions[i].priceOptions[x]['Price']));
+            });
+          } else {
+            setState(() {
+              //Remove the option
+              selectedProductOptions.removeAt(optIndex);
+              productStock = null;
+            });
+          }
+        } else {
           setState(() {
             basePrice = widget.product.price;
           });
+          //Remove the option from the options list
+          if (selectedProductOptions[optIndex]['Selected Options'].length > 1) {
+            setState(() {
+              //Remove from selectedOptions
+              selectedProductOptions[optIndex]['Selected Options'].removeWhere(
+                  (opt) => opt == productOptions[i].priceOptions[x]['Option']);
+              //Remove from prices
+              selectedProductOptions[optIndex]['Prices'].removeAt(
+                  selectedProductOptions[optIndex]['Prices'].indexWhere(
+                      (item) =>
+                          item = productOptions[i].priceOptions[x]['Price']));
+            });
+          } else {
+            //Remove the option
+            selectedProductOptions.removeAt(optIndex);
+          }
         }
-
-        if (widget.product.productOptions[i].mandatory) {
-          setState(() {
-            mandatoryOptions[widget.product.productOptions[i].title] = false;
-          });
-        }
+        //Remove sizes config
+        setState(() {
+          singleSizesList = [];
+          selectedOptionIndex = null;
+          if (productOptions[i].priceOptions[x]['SKU'] != null &&
+              productOptions[i].priceOptions[x]['SKU'] != '') {
+            sku = '';
+          }
+        });
       }
     } else {
-      setState(() {
-        selectedProductOptions[productOptions[i].title] = [
-          productOptions[i].priceOptions[x]['Option']
-        ];
-      });
-      if (productOptions[i].priceStructure == 'Complete') {
+      // //Add price config
+      if (productOptions[i].priceStructure == 'Aditional') {
+        //Add maintaining base price
+        setState(() {
+          selectedProductOptions.add({
+            //Title, Price Structure, Price, Selected Options [], Size
+            'Title': productOptions[i].title,
+            'Price Structure': productOptions[i].priceStructure,
+            'Prices': [productOptions[i].priceOptions[x]['Price']],
+            'Selected Options': [
+              productOptions[i].priceOptions[x]['Option'],
+            ],
+            'Size': null,
+          });
+        });
+      } else if (productOptions[i].priceStructure == 'Complete') {
+        //Add with full option price
         setState(() {
           basePrice = productOptions[i].priceOptions[x]['Price'];
+          setState(() {
+            selectedProductOptions.add({
+              //Title, Price Structure, Price, Selected Options [], Size
+              'Title': productOptions[i].title,
+              'Price Structure': productOptions[i].priceStructure,
+              'Prices': [0],
+              'Selected Options': [
+                productOptions[i].priceOptions[x]['Option'],
+              ],
+              'Size': null,
+            });
+          });
         });
-      }
-      if (widget.product.productOptions[i].mandatory) {
+      } else {
+        //Add but no price
         setState(() {
-          mandatoryOptions[widget.product.productOptions[i].title] = true;
+          selectedProductOptions.add({
+            //Title, Price Structure, Price, Selected Options [], Size
+            'Title': productOptions[i].title,
+            'Price Structure': productOptions[i].priceStructure,
+            'Prices': [0],
+            'Selected Options': [
+              productOptions[i].priceOptions[x]['Option'],
+            ],
+            'Size': null,
+          });
         });
       }
+      //Select SKU If applicable
+      if (productOptions[i].priceOptions[x]['SKU'] != null &&
+          productOptions[i].priceOptions[x]['SKU'] != '') {
+        setState(() {
+          sku = productOptions[i].priceOptions[x]['SKU'];
+          productStock = productOptions[i].priceOptions[x]['Stock'];
+        });
+      }
+      setState(() {
+        // Add sizes if applicable
+        selectedOptionIndex = selectedProductOptions.length - 1;
+        if (productOptions[i].priceOptions[x]['Sizes'] != null &&
+            productOptions[i].priceOptions[x]['Sizes'].isNotEmpty) {
+          singleSizesList = [];
+          for (var y = 0;
+              y < productOptions[i].priceOptions[x]['Sizes'].length;
+              y++) {
+            singleSizesList.add(productOptions[i].priceOptions[x]['Sizes'][y]);
+          }
+        }
+      });
     }
   }
 
@@ -431,20 +553,16 @@ class _AddToCartPageState extends State<AddToCartPage> {
                                                                         onPressed: () => addOption(
                                                                             i,
                                                                             x),
-                                                                        icon: (selectedProductOptions.containsKey(productOptions[i].title) &&
-                                                                                selectedProductOptions[productOptions[i].title].contains(productOptions[i].priceOptions[x][
-                                                                                    'Option']))
+                                                                        icon: (selectedProductOptions.any((option) =>
+                                                                                (option['Title'] == productOptions[i].title && option['Selected Options'].contains(productOptions[i].priceOptions[x]['Option']))))
                                                                             ? Icon(
                                                                                 Icons.check_box,
                                                                                 color: Colors.greenAccent[400],
                                                                               )
-                                                                            : const Icon(Icons
-                                                                                .check_box_outline_blank))
+                                                                            : const Icon(Icons.check_box_outline_blank))
                                                                     : IconButton(
-                                                                        onPressed:
-                                                                            () =>
-                                                                                addOption(i, x),
-                                                                        icon: (selectedProductOptions.containsKey(productOptions[i].title) && selectedProductOptions[productOptions[i].title].contains(productOptions[i].priceOptions[x]['Option']))
+                                                                        onPressed: () => addOption(i, x),
+                                                                        icon: (selectedProductOptions.any((option) => (option['Title'] == productOptions[i].title && option['Selected Options'].contains(productOptions[i].priceOptions[x]['Option']))))
                                                                             ? Icon(
                                                                                 Icons.circle_sharp,
                                                                                 color: Colors.greenAccent[400],
@@ -466,6 +584,81 @@ class _AddToCartPageState extends State<AddToCartPage> {
                                     );
                                   }),
                             ),
+                      //Size List
+                      (singleSizesList.isNotEmpty)
+                          ? const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 10),
+                              child: Text(
+                                'Talle',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    color: Colors.black),
+                              ),
+                            )
+                          : const SizedBox(),
+                      (singleSizesList.isNotEmpty)
+                          ? SizedBox(
+                              width: double.infinity,
+                              child: Wrap(
+                                alignment: WrapAlignment.start,
+                                children:
+                                    List.generate(singleSizesList.length, (a) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 5),
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                          padding: EdgeInsets.zero,
+                                          shape: const CircleBorder(),
+                                          side: BorderSide(
+                                              color: (selectedSize ==
+                                                      singleSizesList[a]
+                                                          ['Size'])
+                                                  ? Colors.greenAccent
+                                                  : Colors.grey.shade300,
+                                              width: (selectedSize ==
+                                                      singleSizesList[a]
+                                                          ['Size'])
+                                                  ? 2
+                                                  : 1)),
+                                      onPressed: () {
+                                        setState(() {
+                                          selectedSize =
+                                              singleSizesList[a]['Size'];
+                                          if (selectedOptionIndex != null) {
+                                            selectedProductOptions[
+                                                        selectedOptionIndex!]
+                                                    ['Size'] =
+                                                singleSizesList[a]['Size'];
+                                          }
+                                        });
+                                        if (singleSizesList[a]['SKU'] != null &&
+                                            singleSizesList[a]['SKU'] != '') {
+                                          setState(() {
+                                            sku = singleSizesList[a]['SKU'];
+                                            productStock =
+                                                singleSizesList[a]['Stock'];
+                                          });
+                                        }
+                                      },
+                                      child: Text(
+                                        '${singleSizesList[a]['Size']}',
+                                        style: TextStyle(
+                                            color: (selectedSize ==
+                                                    singleSizesList[a]['Size'])
+                                                ? Colors.black
+                                                : Colors.grey,
+                                            fontWeight: (selectedSize ==
+                                                    singleSizesList[a]['Size'])
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                            fontSize: 14),
+                                      ),
+                                    ),
+                                  );
+                                }),
+                              ))
+                          : const SizedBox(),
                       const SizedBox(height: 15),
                       //Action
                       (widget.product.productOptions.isEmpty)
@@ -533,8 +726,8 @@ class _AddToCartPageState extends State<AddToCartPage> {
                           IconButton(
                             onPressed: () {
                               if (widget.product.controlStock!) {
-                                if (widget.product.currentStock! >=
-                                    quantity + 1) {
+                                if (productStock != null &&
+                                    productStock! >= quantity + 1) {
                                   setState(() {
                                     quantity = quantity + 1;
                                   });
@@ -561,7 +754,8 @@ class _AddToCartPageState extends State<AddToCartPage> {
                         style: ButtonStyle(
                           backgroundColor: (mandatoryOptionsCompleted() &&
                                   !(widget.product.controlStock! &&
-                                      widget.product.currentStock! < 1))
+                                      (productStock == null ||
+                                          productStock! < 1)))
                               ? WidgetStateProperty.all<Color>(Colors.black)
                               : WidgetStateProperty.all<Color>(
                                   Colors.grey.shade300),
@@ -582,7 +776,8 @@ class _AddToCartPageState extends State<AddToCartPage> {
                         onPressed: () {
                           if (mandatoryOptionsCompleted() &&
                               !(widget.product.controlStock! &&
-                                  widget.product.currentStock! < 1)) {
+                                  (productStock == null ||
+                                      productStock! < 1))) {
                             if (quantity > 0) {
                               bloc.addToCart({
                                 'Name': widget.product.product,
@@ -602,6 +797,7 @@ class _AddToCartPageState extends State<AddToCartPage> {
                                 'Control Stock': widget.product.controlStock,
                                 'Product ID': widget.product.productID,
                                 'Stock Updated': true,
+                                'SKU': sku
                               });
                             }
 
@@ -614,13 +810,17 @@ class _AddToCartPageState extends State<AddToCartPage> {
                           child: Center(
                               child: Text(
                             (widget.product.controlStock! &&
-                                    widget.product.currentStock! < 1)
-                                ? 'Fuera de Stock'
-                                : 'Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedProductOptions) * quantity)}',
+                                    productStock == null)
+                                ? 'Seleccionar opción'
+                                : (widget.product.controlStock! &&
+                                        productStock! < 1)
+                                    ? 'Fuera de Stock'
+                                    : 'Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedProductOptions) * quantity)}',
                             style: TextStyle(
                                 color: (mandatoryOptionsCompleted() &&
                                         !(widget.product.controlStock! &&
-                                            widget.product.currentStock! < 1))
+                                            (productStock == null ||
+                                                productStock! < 1)))
                                     ? Colors.white
                                     : Colors.black),
                           )),

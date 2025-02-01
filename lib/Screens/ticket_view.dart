@@ -146,13 +146,31 @@ class _TicketViewState extends State<TicketView> {
                                 if (snapshot.data["Items"][i]
                                             ['Selected Options'] !=
                                         null &&
-                                    !snapshot
+                                    snapshot
                                         .data["Items"][i]['Selected Options']
-                                        .isEmpty) {
-                                  snapshot.data["Items"][i]['Selected Options']
-                                      .forEach((k, v) {
-                                    selectedOptions.add('$k: ${v.join(', ')}');
-                                  });
+                                        .isNotEmpty) {
+                                  for (var x = 0;
+                                      x <
+                                          snapshot
+                                              .data["Items"][i]
+                                                  ['Selected Options']
+                                              .length;
+                                      x++) {
+                                    if (snapshot.data["Items"][i]
+                                                    ['Selected Options'][x]
+                                                ['Size'] !=
+                                            null &&
+                                        snapshot.data["Items"][i]
+                                                    ['Selected Options'][x]
+                                                ['Size'] !=
+                                            '') {
+                                      selectedOptions.add(
+                                          '${snapshot.data["Items"][i]['Selected Options'][x]['Selected Options'].join(', ')} | Talle ${snapshot.data["Items"][i]['Selected Options'][x]['Size']}');
+                                    } else {
+                                      selectedOptions.add(
+                                          '${snapshot.data["Items"][i]['Selected Options'][x]['Selected Options'].join(', ')}');
+                                    }
+                                  }
                                 }
 
                                 return Padding(

@@ -142,12 +142,15 @@ class DatabaseService {
           doc.data().toString().contains('Allow Reservation')
               ? doc['Allow Reservation']
               : false,
+          doc.data().toString().contains('List of SKU')
+              ? doc['List of SKU']
+              : [],
         );
       }).toList();
     } catch (e) {
       return snapshot.docs.map((doc) {
         return Products('', 0, '', '', '', [], false, doc.id, '', [], false,
-            false, false, [], [], 0, '', false, 0, 0, true, false);
+            false, false, [], [], 0, '', false, 0, 0, true, false, []);
       }).toList();
     }
   }
@@ -283,17 +286,62 @@ class DatabaseService {
 
         final prdDoc = await prdRef.get();
 
-        try {
-          if (prdDoc.exists) {
-            prdRef.update({
-              'Current Stock': FieldValue.increment(-orderDetail[i]["Quantity"])
-            });
+        //Find whether SKU belongs to Product, 1st level Option, Option's size
+        if (orderDetail[i]['SKU'] == prdDoc['Code']) {
+          try {
+            if (prdDoc.exists) {
+              prdRef.update({
+                'Current Stock':
+                    FieldValue.increment(-orderDetail[i]["Quantity"])
+              });
+            }
+          } catch (error) {
+            print('Error updating Total Sales Value: $error');
           }
-        } catch (error) {
-          //do nothing
+        } else {
+          //Else if - for each product option, if Option['SKU'] = SKU || Loop for each Option size
+          List<dynamic> productOptions = prdDoc['Product Options'];
+
+          for (var option in productOptions) {
+            for (var x = 0; x < option['Price Options'].length; x++) {
+              if (option['Price Options'][x]['SKU'] == orderDetail[i]['SKU']) {
+                try {
+                  if (prdDoc.exists) {
+                    option['Price Options'][x]['Stock'] -=
+                        orderDetail[i]["Quantity"];
+                    prdRef.update({'Product Options': productOptions});
+                  }
+                } catch (error) {
+                  print('Error updating 1st Level SKU Stock: $error');
+                }
+              } else {
+                if (option['Price Options'][x]['Sizes'] != null &&
+                    option['Price Options'][x]['Sizes'].isNotEmpty) {
+                  for (var z = 0;
+                      z < option['Price Options'][x]['Sizes'].length;
+                      z++) {
+                    if (option['Price Options'][x]['Sizes'][z]['SKU'] ==
+                        orderDetail[i]['SKU']) {
+                      try {
+                        if (prdDoc.exists) {
+                          option['Price Options'][x]['Sizes'][z]['Stock'] -=
+                              orderDetail[i]["Quantity"];
+                          prdRef.update({'Product Options': productOptions});
+                        }
+                      } catch (error) {
+                        print('Error updating Size Level SKU Stock: $error');
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
+        //Stop loop when SKU is matched
       }
     }
+
     createOrder(businessID, orderName, address, phone, orderDetail, paymentType,
         total, orderType, discount, discountCode);
   }

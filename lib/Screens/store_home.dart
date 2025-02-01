@@ -1,7 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:menu_denario/Database/database_service.dart';
 import 'package:menu_denario/Models/products.dart';
 import 'package:menu_denario/Models/user.dart';
 import 'package:menu_denario/Screens/cart_button.dart';
@@ -45,6 +44,8 @@ class _StoreHomeState extends State<StoreHome> {
 
   late String storeType;
   late String display;
+  bool searchByName = false;
+  String searchName = '';
   //Menu, Reservations and Store, have the same store layout for now
   //Catalog has no cart, only display and contact through whatsapp
 
@@ -63,10 +64,12 @@ class _StoreHomeState extends State<StoreHome> {
   Widget build(BuildContext context) {
     final categoriesProvider = Provider.of<List?>(context);
     final businessProvider = Provider.of<BusinessProfile?>(context);
+    final products = Provider.of<List<Products>?>(context);
 
     if (categoriesProvider == null ||
         categoriesProvider.isEmpty ||
-        businessProvider == null) {
+        businessProvider == null ||
+        products == null) {
       return Center(
         child: Container(
           height: 200,
@@ -613,41 +616,18 @@ class _StoreHomeState extends State<StoreHome> {
               //Featured
               (storeType == 'Menu' || storeType == 'Store')
                   ? SliverToBoxAdapter(
-                      child: SizedBox(
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 20),
-                            child: Text('Destacados',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 21,
-                                    fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                      ),
-                    )
-                  : SliverToBoxAdapter(),
-              (storeType == 'Menu' || storeType == 'Store')
-                  ? SliverToBoxAdapter(
-                      child: StreamProvider<List<Products>>.value(
-                          initialData: const [],
-                          value: DatabaseService()
-                              .featuredProductList(widget.businessID),
-                          child: SizedBox(
-                              height: 240,
-                              width: double.infinity,
-                              child: FeaturedProducts(
-                                  ((businessSchedule[DateTime.now().weekday - 1]
-                                                  ['Open']['Hour'] >
-                                              TimeOfDay.now().hour) ||
-                                          (businessSchedule[
-                                                  DateTime.now().weekday -
-                                                      1]['Close']['Hour'] <
-                                              TimeOfDay.now().hour))
-                                      ? false
-                                      : true))),
+                      child: FeaturedProducts(
+                          ((businessSchedule[DateTime.now().weekday - 1]['Open']
+                                          ['Hour'] >
+                                      TimeOfDay.now().hour) ||
+                                  (businessSchedule[DateTime.now().weekday - 1]
+                                          ['Close']['Hour'] <
+                                      TimeOfDay.now().hour))
+                              ? false
+                              : true,
+                          products
+                              .where((product) => product.featured == true)
+                              .toList()),
                     )
                   : SliverToBoxAdapter(),
               //Categories
@@ -658,110 +638,322 @@ class _StoreHomeState extends State<StoreHome> {
                       pinned: true,
                       automaticallyImplyLeading: false,
                       actions: <Widget>[Container()],
-                      flexibleSpace: SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ListView.builder(
-                            shrinkWrap: true,
-                            physics: BouncingScrollPhysics(),
-                            scrollDirection: Axis.horizontal,
-                            itemCount: categories.length,
-                            itemBuilder: (context, i) {
-                              return Padding(
-                                padding: (i == 0)
-                                    ? EdgeInsets.fromLTRB(15, 5, 5, 5)
-                                    : EdgeInsets.symmetric(
-                                        horizontal: 5, vertical: 5),
-                                child: TextButton(
-                                  style: ButtonStyle(
-                                    backgroundColor:
-                                        (selectedCategory == categories[i])
-                                            ? WidgetStateProperty.all<Color>(
-                                                Colors.black)
-                                            : WidgetStateProperty.all<Color>(
-                                                Colors.transparent),
-                                    overlayColor:
-                                        WidgetStateProperty.resolveWith<Color>(
-                                      (Set<WidgetState> states) {
-                                        if (states
-                                            .contains(WidgetState.hovered)) {
-                                          return Colors.grey.shade300;
-                                        }
-                                        if (states.contains(
-                                                WidgetState.focused) ||
-                                            states.contains(
-                                                WidgetState.pressed)) {
-                                          return Colors.grey.shade200;
-                                        }
-                                        return Colors
-                                            .black; // Defer to the widget's default.
+                      flexibleSpace: (searchByName)
+                          ? Row(
+                              children: [
+                                SizedBox(
+                                  width: MediaQuery.of(context).size.width > 600
+                                      ? 500
+                                      : double.infinity,
+                                  height: 50,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10.0),
+                                    child: TextFormField(
+                                      style: TextStyle(
+                                          color: Colors.black, fontSize: 14),
+                                      validator: (val) => val!.isEmpty
+                                          ? "Agrega un nombre"
+                                          : null,
+                                      expands: false,
+                                      autofocus: true,
+                                      cursorColor: Colors.grey,
+                                      cursorHeight: 18,
+                                      initialValue: '',
+                                      textInputAction: TextInputAction.next,
+                                      decoration: InputDecoration(
+                                        prefixIcon: Icon(
+                                          Icons.search,
+                                          color: Colors.grey,
+                                          size: 16,
+                                        ),
+                                        suffixIcon: IconButton(
+                                            tooltip: 'Cerrar',
+                                            splashRadius: 25,
+                                            onPressed: () {
+                                              setState(() {
+                                                searchByName = false;
+                                                searchName = '';
+                                              });
+                                            },
+                                            icon: Icon(
+                                              Icons.close,
+                                              size: 16,
+                                              color: Colors.grey,
+                                            )),
+                                        errorStyle: TextStyle(
+                                            color: Colors.redAccent[700],
+                                            fontSize: 12),
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12.0),
+                                          borderSide: BorderSide(
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12.0),
+                                          borderSide: BorderSide(
+                                            color: Colors.green,
+                                          ),
+                                        ),
+                                      ),
+                                      onChanged: (val) {
+                                        setState(() => searchName = val);
                                       },
                                     ),
                                   ),
-                                  onPressed: () {
-                                    setState(() {
-                                      selectedCategory = categories[i];
-                                      firstLoad = false;
-                                    });
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 5.0, horizontal: 10),
-                                    child: Center(
-                                      child: Text(
-                                        categories[i],
+                                ),
+                              ],
+                            )
+                          : Row(
+                              children: [
+                                //Search
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 5.0),
+                                  child: IconButton(
+                                      tooltip: 'Buscar',
+                                      splashRadius: 25,
+                                      onPressed: () {
+                                        setState(() {
+                                          searchByName = true;
+                                        });
+                                      },
+                                      icon: Icon(Icons.search, size: 16)),
+                                ),
+                                //List
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 50,
+                                    child: ListView.builder(
+                                        shrinkWrap: true,
+                                        physics: BouncingScrollPhysics(),
+                                        scrollDirection: Axis.horizontal,
+                                        itemCount: categories.length,
+                                        itemBuilder: (context, i) {
+                                          return Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 5, vertical: 5),
+                                            child: TextButton(
+                                              style: ButtonStyle(
+                                                backgroundColor:
+                                                    (selectedCategory ==
+                                                            categories[i])
+                                                        ? WidgetStateProperty
+                                                            .all<Color>(
+                                                                Colors.black)
+                                                        : WidgetStateProperty
+                                                            .all<Color>(Colors
+                                                                .transparent),
+                                                overlayColor:
+                                                    WidgetStateProperty
+                                                        .resolveWith<Color>(
+                                                  (Set<WidgetState> states) {
+                                                    if (states.contains(
+                                                        WidgetState.hovered)) {
+                                                      return Colors
+                                                          .grey.shade300;
+                                                    }
+                                                    if (states.contains(
+                                                            WidgetState
+                                                                .focused) ||
+                                                        states.contains(
+                                                            WidgetState
+                                                                .pressed)) {
+                                                      return Colors
+                                                          .grey.shade200;
+                                                    }
+                                                    return Colors
+                                                        .black; // Defer to the widget's default.
+                                                  },
+                                                ),
+                                              ),
+                                              onPressed: () {
+                                                setState(() {
+                                                  selectedCategory =
+                                                      categories[i];
+                                                  firstLoad = false;
+                                                });
+                                              },
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 5.0,
+                                                        horizontal: 10),
+                                                child: Center(
+                                                  child: Text(
+                                                    categories[i],
+                                                    style: TextStyle(
+                                                        color:
+                                                            (selectedCategory ==
+                                                                    categories[
+                                                                        i])
+                                                                ? Colors.white
+                                                                : Colors.black,
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w400),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }),
+                                  ),
+                                ),
+                              ],
+                            ),
+                    )
+                  : SliverToBoxAdapter(
+                      child: (searchByName)
+                          ? Row(
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width > 600
+                                            ? 500
+                                            : double.infinity,
+                                    height: 50,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10.0),
+                                      child: TextFormField(
                                         style: TextStyle(
-                                            color: (selectedCategory ==
-                                                    categories[i])
-                                                ? Colors.white
-                                                : Colors.black,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400),
+                                            color: Colors.black, fontSize: 14),
+                                        validator: (val) => val!.isEmpty
+                                            ? "Agrega un nombre"
+                                            : null,
+                                        expands: false,
+                                        autofocus: true,
+                                        cursorColor: Colors.grey,
+                                        cursorHeight: 18,
+                                        initialValue: '',
+                                        textInputAction: TextInputAction.next,
+                                        decoration: InputDecoration(
+                                          prefixIcon: Icon(
+                                            Icons.search,
+                                            color: Colors.grey,
+                                            size: 16,
+                                          ),
+                                          suffixIcon: IconButton(
+                                              tooltip: 'Cerrar',
+                                              splashRadius: 25,
+                                              onPressed: () {
+                                                setState(() {
+                                                  searchByName = false;
+                                                  searchName = '';
+                                                });
+                                              },
+                                              icon: Icon(
+                                                Icons.close,
+                                                size: 16,
+                                                color: Colors.grey,
+                                              )),
+                                          errorStyle: TextStyle(
+                                              color: Colors.redAccent[700],
+                                              fontSize: 12),
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12.0),
+                                            borderSide: BorderSide(
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12.0),
+                                            borderSide: BorderSide(
+                                              color: Colors.green,
+                                            ),
+                                          ),
+                                        ),
+                                        onChanged: (val) {
+                                          setState(() => searchName = val);
+                                        },
                                       ),
                                     ),
                                   ),
                                 ),
-                              );
-                            }),
-                      ),
-                    )
-                  : SliverToBoxAdapter(
-                      child: SizedBox(
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 20),
-                            child: Text('Productos',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 21,
-                                    fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                      ),
+                              ],
+                            )
+                          : Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20, vertical: 20),
+                                    child: Text('Productos',
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 21,
+                                            fontWeight: FontWeight.bold)),
+                                  ),
+                                ),
+                                SizedBox(width: 30),
+                                //Search
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 5.0),
+                                  child: IconButton(
+                                      tooltip: 'Buscar',
+                                      splashRadius: 25,
+                                      onPressed: () {
+                                        setState(() {
+                                          searchByName = true;
+                                        });
+                                      },
+                                      icon: Icon(Icons.search, size: 16)),
+                                ),
+                              ],
+                            ),
                     ),
               //Products
-              StreamProvider<List<Products>>.value(
-                  initialData: const [],
-                  value: (storeType == 'Menu')
-                      ? DatabaseService().menuProductList(
-                          selectedCategory, widget.businessID, display)
-                      : (storeType == 'Reservation')
-                          ? DatabaseService().reservationProductList(
-                              selectedCategory, widget.businessID, display)
-                          : DatabaseService().productList(
-                              selectedCategory, widget.businessID, display),
-                  child: ProductSelection(
-                      ((businessSchedule[DateTime.now().weekday - 1]['Open']
-                                      ['Hour'] >
-                                  TimeOfDay.now().hour) ||
-                              (businessSchedule[DateTime.now().weekday - 1]
-                                      ['Close']['Hour'] <
-                                  TimeOfDay.now().hour))
-                          ? false
-                          : true,
-                      storeType)),
+              ProductSelection(
+                  ((businessSchedule[DateTime.now().weekday - 1]['Open']
+                                  ['Hour'] >
+                              TimeOfDay.now().hour) ||
+                          (businessSchedule[DateTime.now().weekday - 1]['Close']
+                                  ['Hour'] <
+                              TimeOfDay.now().hour))
+                      ? false
+                      : true,
+                  storeType,
+                  (searchByName)
+                      ? products
+                          .where((prd) =>
+                              prd.product.toLowerCase() == searchName.toLowerCase() ||
+                              prd.product
+                                  .toLowerCase()
+                                  .contains(searchName.toLowerCase()) ||
+                              prd.category
+                                  .toLowerCase()
+                                  .contains(searchName.toLowerCase()) ||
+                              prd.description
+                                  .toLowerCase()
+                                  .contains(searchName.toLowerCase()))
+                          .toList()
+                      : (storeType == 'Menu')
+                          ? (display == 'Consolidated')
+                              ? products
+                                  .where(
+                                      (product) => product.deliveryMenu == true)
+                                  .toList()
+                              : products
+                                  .where((product) =>
+                                      product.category == selectedCategory &&
+                                      product.deliveryMenu == true)
+                                  .toList()
+                          : (storeType == 'Reservation' && display == 'Categorized')
+                              ? products.where((product) => product.category == selectedCategory && product.allowReservation == true).toList()
+                              : (storeType == 'Reservation' && display != 'Categorized')
+                                  ? products.where((product) => product.allowReservation == true).toList()
+                                  : (display == 'Categorized')
+                                      ? products.where((product) => product.category == selectedCategory).toList()
+                                      : products),
             ],
           ),
         ),
@@ -1215,6 +1407,9 @@ class _StoreHomeState extends State<StoreHome> {
                       child: TextButton(
                           onPressed: () {
                             //Open whatsapp
+                            var whatsapp = Uri.parse(
+                                "https://wa.me/$businessPhone?text=¡Hola!");
+                            launchUrl(whatsapp);
                           },
                           child: Icon(Icons.phone)),
                     ),
@@ -1231,104 +1426,314 @@ class _StoreHomeState extends State<StoreHome> {
                       pinned: true,
                       automaticallyImplyLeading: false,
                       actions: <Widget>[Container()],
-                      flexibleSpace: SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ListView.builder(
-                            shrinkWrap: true,
-                            physics: BouncingScrollPhysics(),
-                            scrollDirection: Axis.horizontal,
-                            itemCount: categories.length,
-                            itemBuilder: (context, i) {
-                              return Padding(
-                                padding: (i == 0)
-                                    ? EdgeInsets.fromLTRB(15, 5, 5, 5)
-                                    : EdgeInsets.symmetric(
-                                        horizontal: 5, vertical: 5),
-                                child: TextButton(
-                                  style: ButtonStyle(
-                                    backgroundColor:
-                                        (selectedCategory == categories[i])
-                                            ? WidgetStateProperty.all<Color>(
-                                                Colors.black)
-                                            : WidgetStateProperty.all<Color>(
-                                                Colors.transparent),
-                                    overlayColor:
-                                        WidgetStateProperty.resolveWith<Color>(
-                                      (Set<WidgetState> states) {
-                                        if (states
-                                            .contains(WidgetState.hovered)) {
-                                          return Colors.grey.shade300;
-                                        }
-                                        if (states.contains(
-                                                WidgetState.focused) ||
-                                            states.contains(
-                                                WidgetState.pressed)) {
-                                          return Colors.grey.shade200;
-                                        }
-                                        return Colors
-                                            .black; // Defer to the widget's default.
-                                      },
+                      flexibleSpace: (searchByName)
+                          ? Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: (MediaQuery.of(context).size.width >
+                                            600)
+                                        ? 500
+                                        : double.infinity,
+                                    height: 50,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10.0),
+                                      child: TextFormField(
+                                        style: TextStyle(
+                                            color: Colors.black, fontSize: 14),
+                                        validator: (val) => val!.isEmpty
+                                            ? "Agrega un nombre"
+                                            : null,
+                                        autofocus: true,
+                                        cursorColor: Colors.grey,
+                                        cursorHeight: 18,
+                                        initialValue: '',
+                                        textInputAction: TextInputAction.next,
+                                        decoration: InputDecoration(
+                                          prefixIcon: Icon(
+                                            Icons.search,
+                                            color: Colors.grey,
+                                            size: 16,
+                                          ),
+                                          suffixIcon: IconButton(
+                                              tooltip: 'Cerrar',
+                                              splashRadius: 25,
+                                              onPressed: () {
+                                                setState(() {
+                                                  searchByName = false;
+                                                  searchName = '';
+                                                });
+                                              },
+                                              icon: Icon(
+                                                Icons.close,
+                                                size: 16,
+                                                color: Colors.grey,
+                                              )),
+                                          errorStyle: TextStyle(
+                                              color: Colors.redAccent[700],
+                                              fontSize: 12),
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12.0),
+                                            borderSide: BorderSide(
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12.0),
+                                            borderSide: BorderSide(
+                                              color: Colors.green,
+                                            ),
+                                          ),
+                                        ),
+                                        onChanged: (val) {
+                                          setState(() => searchName = val);
+                                        },
+                                      ),
                                     ),
                                   ),
-                                  onPressed: () {
-                                    setState(() {
-                                      selectedCategory = categories[i];
-                                      firstLoad = false;
-                                    });
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 5.0, horizontal: 10),
-                                    child: Center(
-                                      child: Text(
-                                        categories[i],
+                                ],
+                              ),
+                            )
+                          : Row(
+                              children: [
+                                //Search
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 5.0),
+                                  child: IconButton(
+                                      tooltip: 'Buscar',
+                                      splashRadius: 25,
+                                      onPressed: () {
+                                        setState(() {
+                                          searchByName = true;
+                                        });
+                                      },
+                                      icon: Icon(Icons.search, size: 16)),
+                                ),
+                                //List
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 50,
+                                    child: ListView.builder(
+                                        shrinkWrap: true,
+                                        physics: BouncingScrollPhysics(),
+                                        scrollDirection: Axis.horizontal,
+                                        itemCount: categories.length,
+                                        itemBuilder: (context, i) {
+                                          return Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 5, vertical: 5),
+                                            child: TextButton(
+                                              style: ButtonStyle(
+                                                backgroundColor:
+                                                    (selectedCategory ==
+                                                            categories[i])
+                                                        ? WidgetStateProperty
+                                                            .all<Color>(
+                                                                Colors.black)
+                                                        : WidgetStateProperty
+                                                            .all<Color>(Colors
+                                                                .transparent),
+                                                overlayColor:
+                                                    WidgetStateProperty
+                                                        .resolveWith<Color>(
+                                                  (Set<WidgetState> states) {
+                                                    if (states.contains(
+                                                        WidgetState.hovered)) {
+                                                      return Colors
+                                                          .grey.shade300;
+                                                    }
+                                                    if (states.contains(
+                                                            WidgetState
+                                                                .focused) ||
+                                                        states.contains(
+                                                            WidgetState
+                                                                .pressed)) {
+                                                      return Colors
+                                                          .grey.shade200;
+                                                    }
+                                                    return Colors
+                                                        .black; // Defer to the widget's default.
+                                                  },
+                                                ),
+                                              ),
+                                              onPressed: () {
+                                                setState(() {
+                                                  selectedCategory =
+                                                      categories[i];
+                                                  firstLoad = false;
+                                                });
+                                              },
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 5.0,
+                                                        horizontal: 10),
+                                                child: Center(
+                                                  child: Text(
+                                                    categories[i],
+                                                    style: TextStyle(
+                                                        color:
+                                                            (selectedCategory ==
+                                                                    categories[
+                                                                        i])
+                                                                ? Colors.white
+                                                                : Colors.black,
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w400),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }),
+                                  ),
+                                ),
+                              ],
+                            ),
+                    )
+                  : SliverToBoxAdapter(
+                      child: (searchByName)
+                          ? Row(
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: SizedBox(
+                                    width: (MediaQuery.of(context).size.width >
+                                            600)
+                                        ? 500
+                                        : double.infinity,
+                                    height: 50,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10.0),
+                                      child: TextFormField(
                                         style: TextStyle(
-                                            color: (selectedCategory ==
-                                                    categories[i])
-                                                ? Colors.white
-                                                : Colors.black,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400),
+                                            color: Colors.black, fontSize: 14),
+                                        validator: (val) => val!.isEmpty
+                                            ? "Agrega un nombre"
+                                            : null,
+                                        autofocus: true,
+                                        cursorColor: Colors.grey,
+                                        cursorHeight: 18,
+                                        initialValue: '',
+                                        textInputAction: TextInputAction.next,
+                                        decoration: InputDecoration(
+                                          prefixIcon: Icon(
+                                            Icons.search,
+                                            color: Colors.grey,
+                                            size: 16,
+                                          ),
+                                          suffixIcon: IconButton(
+                                              tooltip: 'Cerrar',
+                                              splashRadius: 25,
+                                              onPressed: () {
+                                                setState(() {
+                                                  searchByName = false;
+                                                  searchName = '';
+                                                });
+                                              },
+                                              icon: Icon(
+                                                Icons.close,
+                                                size: 16,
+                                                color: Colors.grey,
+                                              )),
+                                          errorStyle: TextStyle(
+                                              color: Colors.redAccent[700],
+                                              fontSize: 12),
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12.0),
+                                            borderSide: BorderSide(
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12.0),
+                                            borderSide: BorderSide(
+                                              color: Colors.green,
+                                            ),
+                                          ),
+                                        ),
+                                        onChanged: (val) {
+                                          setState(() => searchName = val);
+                                        },
                                       ),
                                     ),
                                   ),
                                 ),
-                              );
-                            }),
-                      ),
-                    )
-                  : SliverToBoxAdapter(
-                      child: SizedBox(
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 20),
-                            child: Text('Productos',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 21,
-                                    fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                      ),
+                              ],
+                            )
+                          : Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20, vertical: 20),
+                                    child: Text('Productos',
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 21,
+                                            fontWeight: FontWeight.bold)),
+                                  ),
+                                ),
+                                SizedBox(width: 30),
+                                //Search
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 5.0),
+                                  child: IconButton(
+                                      tooltip: 'Buscar',
+                                      splashRadius: 25,
+                                      onPressed: () {
+                                        setState(() {
+                                          searchByName = true;
+                                        });
+                                      },
+                                      icon: Icon(Icons.search, size: 16)),
+                                ),
+                              ],
+                            ),
                     ),
               //Products
-              StreamProvider<List<Products>>.value(
-                  initialData: const [],
-                  value: DatabaseService().productList(
-                      selectedCategory, widget.businessID, display),
-                  child: ProductSelection(
-                      ((businessSchedule[DateTime.now().weekday - 1]['Open']
-                                      ['Hour'] >
-                                  TimeOfDay.now().hour) ||
-                              (businessSchedule[DateTime.now().weekday - 1]
-                                      ['Close']['Hour'] <
-                                  TimeOfDay.now().hour))
-                          ? false
-                          : true,
-                      storeType)),
+              ProductSelection(
+                  ((businessSchedule[DateTime.now().weekday - 1]['Open']
+                                  ['Hour'] >
+                              TimeOfDay.now().hour) ||
+                          (businessSchedule[DateTime.now().weekday - 1]['Close']
+                                  ['Hour'] <
+                              TimeOfDay.now().hour))
+                      ? false
+                      : true,
+                  storeType,
+                  (searchByName)
+                      ? products
+                          .where((prd) =>
+                              prd.product.toLowerCase() ==
+                                  searchName.toLowerCase() ||
+                              prd.product
+                                  .toLowerCase()
+                                  .contains(searchName.toLowerCase()) ||
+                              prd.category
+                                  .toLowerCase()
+                                  .contains(searchName.toLowerCase()) ||
+                              prd.description
+                                  .toLowerCase()
+                                  .contains(searchName.toLowerCase()))
+                          .toList()
+                      : (display == 'Categorized')
+                          ? products
+                              .where((product) =>
+                                  product.category == selectedCategory)
+                              .toList()
+                          : products),
             ],
           ),
         ),

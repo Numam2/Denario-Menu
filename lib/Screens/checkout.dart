@@ -190,6 +190,13 @@ class StoreCheckoutState extends State<StoreCheckout> {
                 return Scaffold(
                   appBar: AppBar(
                     backgroundColor: Colors.white,
+                    title: const Text(
+                      'Mi pedido',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold),
+                    ),
                     leading: IconButton(
                         onPressed: () => Navigator.of(context).pop(),
                         icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -819,7 +826,6 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                 children: [
                                                   SizedBox(
                                                     height: 45,
-                                                    width: 200,
                                                     child: OutlinedButton(
                                                       style: OutlinedButton
                                                           .styleFrom(
@@ -910,10 +916,13 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                                 phone,
                                                                 data['Items'],
                                                                 paymentType,
-                                                                bloc.totalTicketAmount,
+                                                                bloc
+                                                                    .totalTicketAmount,
                                                                 orderType,
-                                                                data['Discount'],
-                                                                data['Discount Code']);
+                                                                data[
+                                                                    'Discount'],
+                                                                data[
+                                                                    'Discount Code']);
 
                                                             openWhatsapp(widget
                                                                 .businessPhone);
@@ -994,6 +1003,47 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                         final cartList =
                                                             data["Items"];
 
+                                                        final List<String>
+                                                            selectedOptions =
+                                                            [];
+                                                        if (snapshot.data["Items"]
+                                                                        [i][
+                                                                    'Selected Options'] !=
+                                                                null &&
+                                                            snapshot
+                                                                .data["Items"]
+                                                                    [i][
+                                                                    'Selected Options']
+                                                                .isNotEmpty) {
+                                                          for (var x = 0;
+                                                              x <
+                                                                  snapshot
+                                                                      .data[
+                                                                          "Items"]
+                                                                          [i][
+                                                                          'Selected Options']
+                                                                      .length;
+                                                              x++) {
+                                                            if (snapshot.data["Items"][i]
+                                                                            ['Selected Options'][x]
+                                                                        [
+                                                                        'Size'] !=
+                                                                    null &&
+                                                                snapshot.data["Items"][i]
+                                                                            [
+                                                                            'Selected Options'][x]
+                                                                        [
+                                                                        'Size'] !=
+                                                                    '') {
+                                                              selectedOptions.add(
+                                                                  '${snapshot.data["Items"][i]['Selected Options'][x]['Selected Options'].join(', ')} | Talle ${snapshot.data["Items"][i]['Selected Options'][x]['Size']}');
+                                                            } else {
+                                                              selectedOptions.add(
+                                                                  '${snapshot.data["Items"][i]['Selected Options'][x]['Selected Options'].join(', ')}');
+                                                            }
+                                                          }
+                                                        }
+
                                                         return Padding(
                                                           padding:
                                                               const EdgeInsets
@@ -1025,13 +1075,13 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                                             '${cartList[i]['Name']} (${cartList[i]['Quantity']})'),
                                                                       ),
                                                                       //Options
-                                                                      (cartList[i]['Options']
-                                                                              .isEmpty)
+                                                                      (snapshot.data["Items"][i]['Selected Options'] == null ||
+                                                                              snapshot.data["Items"][i]['Selected Options'].isEmpty)
                                                                           ? const SizedBox()
                                                                           // : SizedBox(),
                                                                           : Padding(
                                                                               padding: const EdgeInsets.symmetric(vertical: 5),
-                                                                              child: Text(cartList[i]['Options'].join(', '), maxLines: 6, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                                                                              child: Text(selectedOptions.join(', '), maxLines: 6, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.grey, fontSize: 12)),
                                                                             ),
                                                                     ],
                                                                   ),
@@ -1687,8 +1737,8 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                       paymentType,
                                       bloc.totalTicketAmount,
                                       orderType,
-                                                                data['Discount'],
-                                                                data['Discount Code']);
+                                      data['Discount'],
+                                      data['Discount Code']);
 
                                   orderMessage =
                                       'Nombre: $name %0ADelivery/Retiro: $orderType %0ADirección: $address Timbre: $apt %0ANro. Teléfono: $phone %0AMedio de Pago: $paymentType %0A%0AOrden:%0A$orderItems %0ATotal: ${formatCurrency.format(bloc.totalTicketAmount)}';
@@ -2359,6 +2409,46 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                           (context, i) {
                                                         final cartList =
                                                             data["Items"];
+                                                        final List<String>
+                                                            selectedOptions =
+                                                            [];
+                                                        if (snapshot.data["Items"]
+                                                                        [i][
+                                                                    'Selected Options'] !=
+                                                                null &&
+                                                            snapshot
+                                                                .data["Items"]
+                                                                    [i][
+                                                                    'Selected Options']
+                                                                .isNotEmpty) {
+                                                          for (var x = 0;
+                                                              x <
+                                                                  snapshot
+                                                                      .data[
+                                                                          "Items"]
+                                                                          [i][
+                                                                          'Selected Options']
+                                                                      .length;
+                                                              x++) {
+                                                            if (snapshot.data["Items"][i]
+                                                                            ['Selected Options'][x]
+                                                                        [
+                                                                        'Size'] !=
+                                                                    null &&
+                                                                snapshot.data["Items"][i]
+                                                                            [
+                                                                            'Selected Options'][x]
+                                                                        [
+                                                                        'Size'] !=
+                                                                    '') {
+                                                              selectedOptions.add(
+                                                                  '${snapshot.data["Items"][i]['Selected Options'][x]['Selected Options'].join(', ')} | Talle ${snapshot.data["Items"][i]['Selected Options'][x]['Size']}');
+                                                            } else {
+                                                              selectedOptions.add(
+                                                                  '${snapshot.data["Items"][i]['Selected Options'][x]['Selected Options'].join(', ')}');
+                                                            }
+                                                          }
+                                                        }
 
                                                         return Padding(
                                                           padding:
@@ -2391,13 +2481,13 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                                             '${cartList[i]['Name']} (${cartList[i]['Quantity']})'),
                                                                       ),
                                                                       //Options
-                                                                      (cartList[i]['Options']
+                                                                      (selectedOptions
                                                                               .isEmpty)
                                                                           ? const SizedBox()
                                                                           // : SizedBox(),
                                                                           : Padding(
                                                                               padding: const EdgeInsets.symmetric(vertical: 5),
-                                                                              child: Text(cartList[i]['Options'].join(', '), maxLines: 6, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                                                                              child: Text(selectedOptions.join(', '), maxLines: 6, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.grey, fontSize: 12)),
                                                                             ),
                                                                     ],
                                                                   ),

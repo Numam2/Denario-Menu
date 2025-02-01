@@ -15,13 +15,13 @@ class Products {
   bool showOnMenu;
   bool featured;
   double? iva;
-  //new
   String? priceType;
   bool? controlStock;
   int? currentStock;
   int? lowStockAlert;
   bool? deliveryMenu;
   bool? allowReservation;
+  List? listOfSKU;
 
   Products(
       this.product,
@@ -45,7 +45,8 @@ class Products {
       this.currentStock,
       this.lowStockAlert,
       this.deliveryMenu,
-      this.allowReservation);
+      this.allowReservation,
+      this.listOfSKU);
 }
 
 class ProductOptions {

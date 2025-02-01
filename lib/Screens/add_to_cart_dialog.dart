@@ -20,26 +20,23 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
   double basePrice = 0;
   List selectedTags = [];
   final formatCurrency = NumberFormat.simpleCurrency();
-  Map<String, dynamic> selectedProductOptions = {};
+  List<Map<String, dynamic>> selectedProductOptions = [];
   List availableOptions = [];
   List<ProductOptions> productOptions = [];
 
-  double totalAmount(
-    double basePrice,
-    Map selectedOptions,
+  num totalAmount(
+    num basePrice,
+    List<Map> selectedOptions,
   ) {
-    double total = 0;
+    num total = 0;
     List<double> additionalsList = [];
-    double additionalAmount = 0;
+    num additionalAmount = 0;
 
     //Serch for base price
-    for (var x in productOptions) {
-      if (x.priceStructure == 'Aditional') {
-        for (var i = 0; i < x.priceOptions.length; i++) {
-          if (selectedOptions.containsKey(x.title) &&
-              selectedOptions[x.title].contains(x.priceOptions[i]['Option'])) {
-            additionalsList.add(x.priceOptions[i]['Price'].toDouble());
-          }
+    for (var option in selectedOptions) {
+      if (option['Price Structure'] == 'Aditional') {
+        for (var x = 0; x < option['Prices'].length; x++) {
+          additionalsList.add(option['Prices'][x].toDouble());
         }
       }
     }
@@ -73,72 +70,197 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
   double totalCost = 0;
   List ingredients = [];
 
+  String selectedSize = '';
+  List singleSizesList = [];
+  int? selectedOptionIndex;
+  String sku = '';
+  num? productStock;
+
   void addOption(int i, int x) {
     //If
-    if (selectedProductOptions.containsKey(productOptions[i].title)) {
+    if (selectedProductOptions
+        .any((option) => option['Title'] == productOptions[i].title)) {
+      //Identify and declare index
+      int optIndex = selectedProductOptions
+          .indexWhere((option) => option['Title'] == productOptions[i].title);
       //If the title option in not selected
-      if (!selectedProductOptions[productOptions[i].title]
+      if (!selectedProductOptions[optIndex]['Selected Options']
           .contains(productOptions[i].priceOptions[x]['Option'])) {
         //Add the option to the title's list if multiple choice
         if (productOptions[i].multipleOptions) {
           setState(() {
-            selectedProductOptions[productOptions[i].title]
+            selectedProductOptions[optIndex]['Selected Options']
                 .add(productOptions[i].priceOptions[x]['Option']);
+            if (productOptions[i].priceStructure == 'Aditional') {
+              setState(() {
+                selectedProductOptions[optIndex]['Prices']
+                    .add(productOptions[i].priceOptions[x]['Price']);
+              });
+            }
           });
         } else {
           //Add and remove others
           setState(() {
-            selectedProductOptions[productOptions[i].title] = [
+            selectedProductOptions[optIndex]['Selected Options'] = [
               productOptions[i].priceOptions[x]['Option']
             ];
           });
-          if (productOptions[i].priceStructure == 'Complete') {
+
+          if (productOptions[i].priceStructure == 'Aditional') {
+            setState(() {
+              selectedProductOptions[optIndex]
+                  ['Prices'] = [productOptions[i].priceOptions[x]['Price']];
+            });
+          } else if (productOptions[i].priceStructure == 'Complete') {
             setState(() {
               basePrice = productOptions[i].priceOptions[x]['Price'];
             });
           }
         }
-        if (widget.product.productOptions[i].mandatory) {
+        //Select SKU If applicable
+        if (productOptions[i].priceOptions[x]['SKU'] != null &&
+            productOptions[i].priceOptions[x]['SKU'] != '') {
           setState(() {
-            mandatoryOptions[widget.product.productOptions[i].title] = true;
+            sku = productOptions[i].priceOptions[x]['SKU'];
+            productStock = productOptions[i].priceOptions[x]['Stock'];
           });
+        }
+        // Add sizes if applicable
+        if (productOptions[i].priceOptions[x]['Sizes'] != null &&
+            productOptions[i].priceOptions[x]['Sizes'].isNotEmpty) {
+          singleSizesList = [];
+          for (var y = 0;
+              y < productOptions[i].priceOptions[x]['Sizes'].length;
+              y++) {
+            singleSizesList.add(productOptions[i].priceOptions[x]['Sizes'][y]);
+          }
+          selectedOptionIndex = optIndex;
+        } else {
+          singleSizesList = [];
         }
       } else {
         //Remove the option from the title's list
-        setState(() {
-          selectedProductOptions[productOptions[i].title]
-              .remove(productOptions[i].priceOptions[x]['Option']);
-        });
-
-        //Price config
-        if (productOptions[i].priceStructure == 'Complete') {
+        if (productOptions[i].priceStructure == 'Aditional') {
+          //Remove the option from the options list
+          if (selectedProductOptions[optIndex]['Selected Options'].length > 1) {
+            setState(() {
+              //Remove from selectedOptions
+              selectedProductOptions[optIndex]['Selected Options'].removeWhere(
+                  (option) =>
+                      option == productOptions[i].priceOptions[x]['Option']);
+              //Remove from prices
+              selectedProductOptions[optIndex]['Prices'].removeAt(
+                  selectedProductOptions[optIndex]['Prices'].indexWhere(
+                      (price) =>
+                          price == productOptions[i].priceOptions[x]['Price']));
+            });
+          } else {
+            setState(() {
+              //Remove the option
+              selectedProductOptions.removeAt(optIndex);
+              productStock = null;
+            });
+          }
+        } else {
           setState(() {
             basePrice = widget.product.price;
           });
+          //Remove the option from the options list
+          if (selectedProductOptions[optIndex]['Selected Options'].length > 1) {
+            setState(() {
+              //Remove from selectedOptions
+              selectedProductOptions[optIndex]['Selected Options'].removeWhere(
+                  (opt) => opt == productOptions[i].priceOptions[x]['Option']);
+              //Remove from prices
+              selectedProductOptions[optIndex]['Prices'].removeAt(
+                  selectedProductOptions[optIndex]['Prices'].indexWhere(
+                      (item) =>
+                          item = productOptions[i].priceOptions[x]['Price']));
+            });
+          } else {
+            //Remove the option
+            selectedProductOptions.removeAt(optIndex);
+          }
         }
-
-        if (widget.product.productOptions[i].mandatory) {
-          setState(() {
-            mandatoryOptions[widget.product.productOptions[i].title] = false;
-          });
-        }
+        //Remove sizes config
+        setState(() {
+          singleSizesList = [];
+          selectedOptionIndex = null;
+          if (productOptions[i].priceOptions[x]['SKU'] != null &&
+              productOptions[i].priceOptions[x]['SKU'] != '') {
+            sku = '';
+          }
+        });
       }
     } else {
-      setState(() {
-        selectedProductOptions[productOptions[i].title] = [
-          productOptions[i].priceOptions[x]['Option']
-        ];
-      });
-      if (productOptions[i].priceStructure == 'Complete') {
+      // //Add price config
+      if (productOptions[i].priceStructure == 'Aditional') {
+        //Add maintaining base price
+        setState(() {
+          selectedProductOptions.add({
+            //Title, Price Structure, Price, Selected Options [], Size
+            'Title': productOptions[i].title,
+            'Price Structure': productOptions[i].priceStructure,
+            'Prices': [productOptions[i].priceOptions[x]['Price']],
+            'Selected Options': [
+              productOptions[i].priceOptions[x]['Option'],
+            ],
+            'Size': null,
+          });
+        });
+      } else if (productOptions[i].priceStructure == 'Complete') {
+        //Add with full option price
         setState(() {
           basePrice = productOptions[i].priceOptions[x]['Price'];
+          setState(() {
+            selectedProductOptions.add({
+              //Title, Price Structure, Price, Selected Options [], Size
+              'Title': productOptions[i].title,
+              'Price Structure': productOptions[i].priceStructure,
+              'Prices': [0],
+              'Selected Options': [
+                productOptions[i].priceOptions[x]['Option'],
+              ],
+              'Size': null,
+            });
+          });
         });
-      }
-      if (widget.product.productOptions[i].mandatory) {
+      } else {
+        //Add but no price
         setState(() {
-          mandatoryOptions[widget.product.productOptions[i].title] = true;
+          selectedProductOptions.add({
+            //Title, Price Structure, Price, Selected Options [], Size
+            'Title': productOptions[i].title,
+            'Price Structure': productOptions[i].priceStructure,
+            'Prices': [0],
+            'Selected Options': [
+              productOptions[i].priceOptions[x]['Option'],
+            ],
+            'Size': null,
+          });
         });
       }
+      //Select SKU If applicable
+      if (productOptions[i].priceOptions[x]['SKU'] != null &&
+          productOptions[i].priceOptions[x]['SKU'] != '') {
+        setState(() {
+          sku = productOptions[i].priceOptions[x]['SKU'];
+          productStock = productOptions[i].priceOptions[x]['Stock'];
+        });
+      }
+      setState(() {
+        // Add sizes if applicable
+        selectedOptionIndex = selectedProductOptions.length - 1;
+        if (productOptions[i].priceOptions[x]['Sizes'] != null &&
+            productOptions[i].priceOptions[x]['Sizes'].isNotEmpty) {
+          singleSizesList = [];
+          for (var y = 0;
+              y < productOptions[i].priceOptions[x]['Sizes'].length;
+              y++) {
+            singleSizesList.add(productOptions[i].priceOptions[x]['Sizes'][y]);
+          }
+        }
+      });
     }
   }
 
@@ -461,7 +583,7 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                                                         (widget.product.productOptions[i].multipleOptions)
                                                                             ? IconButton(
                                                                                 onPressed: () => addOption(i, x),
-                                                                                icon: (selectedProductOptions.containsKey(productOptions[i].title) && selectedProductOptions[productOptions[i].title].contains(productOptions[i].priceOptions[x]['Option']))
+                                                                                icon: (selectedProductOptions.any((option) => (option['Title'] == productOptions[i].title && option['Selected Options'].contains(productOptions[i].priceOptions[x]['Option']))))
                                                                                     ? Icon(
                                                                                         Icons.check_box,
                                                                                         color: Colors.greenAccent[400],
@@ -469,7 +591,7 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                                                                     : const Icon(Icons.check_box_outline_blank))
                                                                             : IconButton(
                                                                                 onPressed: () => addOption(i, x),
-                                                                                icon: (selectedProductOptions.containsKey(productOptions[i].title) && selectedProductOptions[productOptions[i].title].contains(productOptions[i].priceOptions[x]['Option']))
+                                                                                icon: (selectedProductOptions.any((option) => (option['Title'] == productOptions[i].title && option['Selected Options'].contains(productOptions[i].priceOptions[x]['Option']))))
                                                                                     ? Icon(
                                                                                         Icons.circle_sharp,
                                                                                         color: Colors.greenAccent[400],
@@ -493,6 +615,100 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                             );
                                           }),
 
+                                  //Size List
+                                  (singleSizesList.isNotEmpty)
+                                      ? const Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: 10),
+                                          child: Text(
+                                            'Talle',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
+                                                color: Colors.black),
+                                          ),
+                                        )
+                                      : const SizedBox(),
+                                  (singleSizesList.isNotEmpty)
+                                      ? SizedBox(
+                                          width: double.infinity,
+                                          child: Wrap(
+                                            alignment: WrapAlignment.start,
+                                            children: List.generate(
+                                                singleSizesList.length, (a) {
+                                              return Padding(
+                                                padding: const EdgeInsets.only(
+                                                    bottom: 5),
+                                                child: ElevatedButton(
+                                                  style: ElevatedButton.styleFrom(
+                                                      padding: EdgeInsets.zero,
+                                                      shape:
+                                                          const CircleBorder(),
+                                                      side: BorderSide(
+                                                          color: (selectedSize ==
+                                                                  singleSizesList[
+                                                                          a]
+                                                                      ['Size'])
+                                                              ? Colors
+                                                                  .greenAccent
+                                                              : Colors.grey
+                                                                  .shade300,
+                                                          width: (selectedSize ==
+                                                                  singleSizesList[
+                                                                          a]
+                                                                      ['Size'])
+                                                              ? 2
+                                                              : 1)),
+                                                  onPressed: () {
+                                                    setState(() {
+                                                      selectedSize =
+                                                          singleSizesList[a]
+                                                              ['Size'];
+                                                      if (selectedOptionIndex !=
+                                                          null) {
+                                                        selectedProductOptions[
+                                                                    selectedOptionIndex!]
+                                                                ['Size'] =
+                                                            singleSizesList[a]
+                                                                ['Size'];
+                                                      }
+                                                    });
+                                                    if (singleSizesList[a]
+                                                                ['SKU'] !=
+                                                            null &&
+                                                        singleSizesList[a]
+                                                                ['SKU'] !=
+                                                            '') {
+                                                      setState(() {
+                                                        sku = singleSizesList[a]
+                                                            ['SKU'];
+                                                        productStock =
+                                                            singleSizesList[a]
+                                                                ['Stock'];
+                                                      });
+                                                    }
+                                                  },
+                                                  child: Text(
+                                                    '${singleSizesList[a]['Size']}',
+                                                    style: TextStyle(
+                                                        color: (selectedSize ==
+                                                                singleSizesList[
+                                                                    a]['Size'])
+                                                            ? Colors.black
+                                                            : Colors.grey,
+                                                        fontWeight: (selectedSize ==
+                                                                singleSizesList[
+                                                                    a]['Size'])
+                                                            ? FontWeight.bold
+                                                            : FontWeight.normal,
+                                                        fontSize: 14),
+                                                  ),
+                                                ),
+                                              );
+                                            }),
+                                          ))
+                                      : const SizedBox(),
+
                                   SizedBox(
                                       height: (widget
                                               .product.productOptions.isEmpty)
@@ -508,23 +724,52 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             //Image
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 15.0),
-                              child: Container(
-                                width: MediaQuery.of(context).size.width * 0.75,
-                                height:
-                                    MediaQuery.of(context).size.width * 0.35,
-                                decoration: BoxDecoration(
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(12)),
-                                    color: Colors.grey[100],
-                                    image: DecorationImage(
-                                        image:
-                                            NetworkImage(widget.product.image),
-                                        fit: BoxFit.cover)),
-                              ),
-                            ),
+                            (widget.product.image != '')
+                                ? Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 15.0),
+                                    child: Container(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.75,
+                                      height:
+                                          MediaQuery.of(context).size.width *
+                                              0.35,
+                                      decoration: BoxDecoration(
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(12)),
+                                          color: Colors.grey[100],
+                                          image: DecorationImage(
+                                              image: NetworkImage(
+                                                  widget.product.image),
+                                              fit: BoxFit.cover)),
+                                    ),
+                                  )
+                                : Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 15.0),
+                                    child: Container(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.75,
+                                      height:
+                                          MediaQuery.of(context).size.width *
+                                              0.35,
+                                      decoration: const BoxDecoration(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(12)),
+                                          color: Colors.grey),
+                                      child: Center(
+                                        child: Text(
+                                          widget.product.product
+                                              .substring(0, 2),
+                                          style: const TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 28,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+
                             const SizedBox(height: 25),
                             SizedBox(
                               width: double.infinity,
@@ -691,7 +936,7 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                                                           onPressed: () => addOption(
                                                                               i,
                                                                               x),
-                                                                          icon: (selectedProductOptions.containsKey(productOptions[i].title) && selectedProductOptions[productOptions[i].title].contains(productOptions[i].priceOptions[x]['Option']))
+                                                                          icon: (selectedProductOptions.any((option) => (option['Title'] == productOptions[i].title && option['Selected Options'].contains(productOptions[i].priceOptions[x]['Option']))))
                                                                               ? Icon(
                                                                                   Icons.check_box,
                                                                                   color: Colors.greenAccent[400],
@@ -699,7 +944,7 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                                                               : const Icon(Icons.check_box_outline_blank))
                                                                       : IconButton(
                                                                           onPressed: () => addOption(i, x),
-                                                                          icon: (selectedProductOptions.containsKey(productOptions[i].title) && selectedProductOptions[productOptions[i].title].contains(productOptions[i].priceOptions[x]['Option']))
+                                                                          icon: (selectedProductOptions.any((option) => (option['Title'] == productOptions[i].title && option['Selected Options'].contains(productOptions[i].priceOptions[x]['Option']))))
                                                                               ? Icon(
                                                                                   Icons.circle_sharp,
                                                                                   color: Colors.greenAccent[400],
@@ -722,6 +967,91 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                       );
                                     }),
 
+                            //Size List
+                            (singleSizesList.isNotEmpty)
+                                ? const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 10),
+                                    child: Text(
+                                      'Talle',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                          color: Colors.black),
+                                    ),
+                                  )
+                                : const SizedBox(),
+                            (singleSizesList.isNotEmpty)
+                                ? SizedBox(
+                                    width: double.infinity,
+                                    child: Wrap(
+                                      alignment: WrapAlignment.start,
+                                      children: List.generate(
+                                          singleSizesList.length, (a) {
+                                        return Padding(
+                                          padding:
+                                              const EdgeInsets.only(bottom: 5),
+                                          child: ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                                padding: EdgeInsets.zero,
+                                                shape: const CircleBorder(),
+                                                side: BorderSide(
+                                                    color: (selectedSize ==
+                                                            singleSizesList[a]
+                                                                ['Size'])
+                                                        ? Colors.greenAccent
+                                                        : Colors.grey.shade300,
+                                                    width: (selectedSize ==
+                                                            singleSizesList[a]
+                                                                ['Size'])
+                                                        ? 2
+                                                        : 1)),
+                                            onPressed: () {
+                                              setState(() {
+                                                selectedSize =
+                                                    singleSizesList[a]['Size'];
+                                                if (selectedOptionIndex !=
+                                                    null) {
+                                                  selectedProductOptions[
+                                                              selectedOptionIndex!]
+                                                          ['Size'] =
+                                                      singleSizesList[a]
+                                                          ['Size'];
+                                                }
+                                              });
+                                              if (singleSizesList[a]['SKU'] !=
+                                                      null &&
+                                                  singleSizesList[a]['SKU'] !=
+                                                      '') {
+                                                setState(() {
+                                                  sku =
+                                                      singleSizesList[a]['SKU'];
+                                                  productStock =
+                                                      singleSizesList[a]
+                                                          ['Stock'];
+                                                });
+                                              }
+                                            },
+                                            child: Text(
+                                              '${singleSizesList[a]['Size']}',
+                                              style: TextStyle(
+                                                  color: (selectedSize ==
+                                                          singleSizesList[a]
+                                                              ['Size'])
+                                                      ? Colors.black
+                                                      : Colors.grey,
+                                                  fontWeight: (selectedSize ==
+                                                          singleSizesList[a]
+                                                              ['Size'])
+                                                      ? FontWeight.bold
+                                                      : FontWeight.normal,
+                                                  fontSize: 14),
+                                            ),
+                                          ),
+                                        );
+                                      }),
+                                    ))
+                                : const SizedBox(),
+
                             SizedBox(
                                 height: (widget.product.productOptions.isEmpty)
                                     ? 0
@@ -738,372 +1068,219 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                   indent: 15,
                   endIndent: 15),
               Container(
-                height: (MediaQuery.of(context).size.width > 450) ? 100 : 125,
-                width: double.infinity,
-                padding: (MediaQuery.of(context).size.width > 900)
-                    ? const EdgeInsets.all(20)
-                    : (MediaQuery.of(context).size.width > 450)
-                        ? const EdgeInsets.all(12)
-                        : const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 5),
-                child: (MediaQuery.of(context).size.width > 900)
-                    ? Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          //Add/Substract items
-                          Row(
-                            children: [
-                              //Remove
-                              IconButton(
-                                onPressed: () {
-                                  if (quantity <= 1) {
-                                    //
-                                  } else {
-                                    setState(() {
-                                      quantity = quantity - 1;
-                                    });
-                                  }
-                                },
-                                icon: const Icon(Icons.remove_circle_outline),
-                                iconSize: 24,
-                              ),
-                              const SizedBox(width: 15),
-                              Text(
-                                '$quantity',
-                                style: const TextStyle(fontSize: 18),
-                              ), //'${cartList[i]['Quantity']}'),
-                              const SizedBox(width: 15),
-                              //Add
-                              IconButton(
-                                onPressed: () {
-                                  if (widget.product.controlStock!) {
-                                    if (widget.product.currentStock! >=
-                                        quantity + 1) {
+                  height: (MediaQuery.of(context).size.width > 450) ? 100 : 125,
+                  width: double.infinity,
+                  padding: (MediaQuery.of(context).size.width > 900)
+                      ? const EdgeInsets.all(20)
+                      : (MediaQuery.of(context).size.width > 450)
+                          ? const EdgeInsets.all(12)
+                          : const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 5),
+                  child: (MediaQuery.of(context).size.width > 900)
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            //Add/Substract items
+                            Row(
+                              children: [
+                                //Remove
+                                IconButton(
+                                  onPressed: () {
+                                    if (quantity <= 1) {
+                                      //
+                                    } else {
+                                      setState(() {
+                                        quantity = quantity - 1;
+                                      });
+                                    }
+                                  },
+                                  icon: const Icon(Icons.remove_circle_outline),
+                                  iconSize: 24,
+                                ),
+                                const SizedBox(width: 15),
+                                Text(
+                                  '$quantity',
+                                  style: const TextStyle(fontSize: 18),
+                                ), //'${cartList[i]['Quantity']}'),
+                                const SizedBox(width: 15),
+                                //Add
+                                IconButton(
+                                  onPressed: () {
+                                    if (widget.product.controlStock!) {
+                                      if (productStock != null &&
+                                          productStock! >= quantity + 1) {
+                                        setState(() {
+                                          quantity = quantity + 1;
+                                        });
+                                      }
+                                    } else {
                                       setState(() {
                                         quantity = quantity + 1;
                                       });
                                     }
-                                  } else {
-                                    setState(() {
-                                      quantity = quantity + 1;
-                                    });
-                                  }
-                                },
-                                icon: const Icon(Icons.add_circle_outline),
-                                iconSize: 24,
-                              )
-                            ],
-                          ),
-                          const Spacer(),
-                          //Add to order button
-                          SizedBox(
-                            width: 250,
-                            height: 50,
-                            child: ElevatedButton(
-                                style: ButtonStyle(
-                                  backgroundColor:
-                                      (mandatoryOptionsCompleted() &&
-                                              !(widget.product.controlStock! &&
-                                                  widget.product.currentStock! <
-                                                      1))
-                                          ? WidgetStateProperty.all<Color>(
-                                              Colors.black)
-                                          : WidgetStateProperty.all<Color>(
-                                              Colors.grey.shade300),
-                                  overlayColor:
-                                      WidgetStateProperty.resolveWith<Color>(
-                                    (Set<WidgetState> states) {
-                                      if (states
-                                          .contains(WidgetState.hovered)) {
-                                        return Colors.grey.shade300;
-                                      }
-
-                                      if (states
-                                              .contains(WidgetState.focused) ||
-                                          states
-                                              .contains(WidgetState.pressed)) {
-                                        return Colors.grey.shade200;
-                                      }
-                                      return Colors
-                                          .black; // Defer to the widget's default.
-                                    },
-                                  ),
-                                ),
-                                onPressed: () {
-                                  if (mandatoryOptionsCompleted() &&
-                                      !(widget.product.controlStock! &&
-                                          widget.product.currentStock! < 1)) {
-                                    if (quantity > 0) {
-                                      bloc.addToCart({
-                                        'Name': widget.product.product,
-                                        'Category': widget.product.category,
-                                        'Price': totalAmount(
-                                            basePrice, selectedProductOptions),
-                                        'Quantity': quantity,
-                                        'Total Price': totalAmount(basePrice,
-                                                selectedProductOptions) *
-                                            quantity,
-                                        'Options': selectedTags,
-                                        'Image': widget.product.image,
-                                        'Supplies': widget.product.ingredients,
-                                        'Control Stock':
-                                            widget.product.controlStock,
-                                        'Product ID': widget.product.productID,
-                                        'Stock Updated': true,
-                                      });
-                                    }
-
-                                    // Go Back
-                                    Navigator.of(context).pop();
-                                  }
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Center(
-                                      child: Text(
-                                    (widget.product.controlStock! &&
-                                            widget.product.currentStock! < 1)
-                                        ? 'Fuera de Stock'
-                                        : ' Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedProductOptions) * quantity)}',
-                                    style: TextStyle(
-                                        color: (mandatoryOptionsCompleted() &&
+                                  },
+                                  icon: const Icon(Icons.add_circle_outline),
+                                  iconSize: 24,
+                                )
+                              ],
+                            ),
+                            const Spacer(),
+                            //Add to order button
+                            SizedBox(
+                              width: 250,
+                              height: 50,
+                              child: ElevatedButton(
+                                  style: ButtonStyle(
+                                    backgroundColor:
+                                        (mandatoryOptionsCompleted() &&
                                                 !(widget.product
                                                         .controlStock! &&
-                                                    widget.product
-                                                            .currentStock! <
-                                                        1))
-                                            ? Colors.white
-                                            : Colors.black),
-                                  )),
-                                )),
-                          ),
-                        ],
-                      )
-                    : (MediaQuery.of(context).size.width > 450)
-                        ? Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              //Add/Substract items
-                              Expanded(
-                                flex: 2,
-                                child: Row(
-                                  children: [
-                                    //Remove
-                                    IconButton(
-                                      onPressed: () {
-                                        if (quantity <= 1) {
-                                          //
-                                        } else {
-                                          setState(() {
-                                            quantity = quantity - 1;
-                                          });
+                                                    (productStock == null ||
+                                                        productStock! < 1)))
+                                            ? WidgetStateProperty.all<Color>(
+                                                Colors.black)
+                                            : WidgetStateProperty.all<Color>(
+                                                Colors.grey.shade300),
+                                    overlayColor:
+                                        WidgetStateProperty.resolveWith<Color>(
+                                      (Set<WidgetState> states) {
+                                        if (states
+                                            .contains(WidgetState.hovered)) {
+                                          return Colors.grey.shade300;
                                         }
+
+                                        if (states.contains(
+                                                WidgetState.focused) ||
+                                            states.contains(
+                                                WidgetState.pressed)) {
+                                          return Colors.grey.shade200;
+                                        }
+                                        return Colors
+                                            .black; // Defer to the widget's default.
                                       },
-                                      icon: const Icon(
-                                          Icons.remove_circle_outline),
-                                      iconSize: 24,
                                     ),
-                                    const SizedBox(width: 10),
-                                    Text(
-                                      '$quantity',
-                                      style: const TextStyle(fontSize: 18),
-                                    ), //'${cartList[i]['Quantity']}'),
-                                    const SizedBox(width: 10),
-                                    //Add
-                                    IconButton(
-                                      onPressed: () {
-                                        if (widget.product.controlStock!) {
-                                          if (widget.product.currentStock! >=
-                                              quantity + 1) {
-                                            setState(() {
-                                              quantity = quantity + 1;
-                                            });
-                                          }
-                                        } else {
+                                  ),
+                                  onPressed: () {
+                                    if (mandatoryOptionsCompleted() &&
+                                        !(widget.product.controlStock! &&
+                                            (productStock == null ||
+                                                productStock! < 1))) {
+                                      if (quantity > 0) {
+                                        bloc.addToCart({
+                                          'Name': widget.product.product,
+                                          'Category': widget.product.category,
+                                          'Base Price': widget.product.price,
+                                          'Price': totalAmount(basePrice,
+                                              selectedProductOptions),
+                                          'Quantity': quantity,
+                                          'Total Price': totalAmount(basePrice,
+                                                  selectedProductOptions) *
+                                              quantity,
+                                          'Available Options': availableOptions,
+                                          'Selected Options':
+                                              selectedProductOptions,
+                                          'Options': selectedTags,
+                                          'Image': widget.product.image,
+                                          'Supplies':
+                                              widget.product.ingredients,
+                                          'Control Stock':
+                                              widget.product.controlStock,
+                                          'Product ID':
+                                              widget.product.productID,
+                                          'Stock Updated': true,
+                                          'SKU': sku
+                                        });
+                                      }
+
+                                      // Go Back
+                                      Navigator.of(context).pop();
+                                    }
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Center(
+                                        child: Text(
+                                      (widget.product.controlStock! &&
+                                              productStock == null)
+                                          ? 'Seleccionar opción'
+                                          : (widget.product.controlStock! &&
+                                                  productStock! < 1)
+                                              ? 'Fuera de Stock'
+                                              : ' Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedProductOptions) * quantity)}',
+                                      style: TextStyle(
+                                          color: (mandatoryOptionsCompleted() &&
+                                                  !(widget.product
+                                                          .controlStock! &&
+                                                      (productStock == null ||
+                                                          productStock! < 1)))
+                                              ? Colors.white
+                                              : Colors.black),
+                                    )),
+                                  )),
+                            ),
+                          ],
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            //Add/Substract items
+                            Expanded(
+                              flex: 3,
+                              child: Row(
+                                children: [
+                                  //Remove
+                                  IconButton(
+                                    onPressed: () {
+                                      if (quantity <= 1) {
+                                        //
+                                      } else {
+                                        setState(() {
+                                          quantity = quantity - 1;
+                                        });
+                                      }
+                                    },
+                                    icon:
+                                        const Icon(Icons.remove_circle_outline),
+                                    iconSize: 24,
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    '$quantity',
+                                    style: const TextStyle(fontSize: 18),
+                                  ), //'${cartList[i]['Quantity']}'),
+                                  const SizedBox(width: 5),
+                                  //Add
+                                  IconButton(
+                                    onPressed: () {
+                                      if (widget.product.controlStock!) {
+                                        if (productStock != null &&
+                                            productStock! >= quantity + 1) {
                                           setState(() {
                                             quantity = quantity + 1;
                                           });
                                         }
-                                      },
-                                      icon:
-                                          const Icon(Icons.add_circle_outline),
-                                      iconSize: 24,
-                                    )
-                                  ],
-                                ),
+                                      } else {
+                                        setState(() {
+                                          quantity = quantity + 1;
+                                        });
+                                      }
+                                    },
+                                    icon: const Icon(Icons.add_circle_outline),
+                                    iconSize: 24,
+                                  )
+                                ],
                               ),
-                              const SizedBox(
-                                width: 15,
-                              ),
-                              //Add to order button
-                              Expanded(
-                                flex: 5,
-                                child: SizedBox(
-                                  height: 50,
-                                  child: ElevatedButton(
-                                      style: ButtonStyle(
-                                        shape: WidgetStateProperty.all(
-                                            RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(12))),
-                                        backgroundColor:
-                                            (mandatoryOptionsCompleted() &&
-                                                    !(widget.product
-                                                            .controlStock! &&
-                                                        widget.product
-                                                                .currentStock! <
-                                                            1))
-                                                ? WidgetStateProperty.all<
-                                                    Color>(Colors.black)
-                                                : WidgetStateProperty.all<
-                                                        Color>(
-                                                    Colors.grey.shade300),
-                                        overlayColor: WidgetStateProperty
-                                            .resolveWith<Color>(
-                                          (Set<WidgetState> states) {
-                                            if (states.contains(
-                                                WidgetState.hovered)) {
-                                              return Colors.grey.shade300;
-                                            }
-
-                                            if (states.contains(
-                                                    WidgetState.focused) ||
-                                                states.contains(
-                                                    WidgetState.pressed)) {
-                                              return Colors.grey.shade200;
-                                            }
-
-                                            return Colors
-                                                .black; // Defer to the widget's default.
-                                          },
-                                        ),
-                                      ),
-                                      onPressed: () {
-                                        if (mandatoryOptionsCompleted() &&
-                                            !(widget.product.controlStock! &&
-                                                widget.product.currentStock! <
-                                                    1)) {
-                                          if (quantity > 0) {
-                                            bloc.addToCart({
-                                              'Name': widget.product.product,
-                                              'Category':
-                                                  widget.product.category,
-                                              'Base Price':
-                                                  widget.product.price,
-                                              'Price': totalAmount(basePrice,
-                                                  selectedProductOptions),
-                                              'Quantity': quantity,
-                                              'Total Price': totalAmount(
-                                                      basePrice,
-                                                      selectedProductOptions) *
-                                                  quantity,
-                                              'Available Options':
-                                                  availableOptions,
-                                              'Selected Options':
-                                                  selectedProductOptions,
-                                              'Options': selectedTags,
-                                              'Image': widget.product.image,
-                                              'Supplies':
-                                                  widget.product.ingredients,
-                                              'Control Stock':
-                                                  widget.product.controlStock,
-                                              'Product ID':
-                                                  widget.product.productID,
-                                              'Stock Updated': true,
-                                            });
-                                          }
-
-                                          // Go Back
-                                          Navigator.of(context).pop();
-                                        }
-                                      },
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 4.0, vertical: 8),
-                                        child: Center(
-                                            child: Text(
-                                          (widget.product.controlStock! &&
-                                                  widget.product.currentStock! <
-                                                      1)
-                                              ? 'Fuera de Stock'
-                                              : 'Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedProductOptions) * quantity)}',
-                                          style: TextStyle(
-                                              color: (mandatoryOptionsCompleted() &&
-                                                      !(widget.product
-                                                              .controlStock! &&
-                                                          widget.product
-                                                                  .currentStock! <
-                                                              1))
-                                                  ? Colors.white
-                                                  : Colors.black),
-                                        )),
-                                      )),
-                                ),
-                              ),
-                            ],
-                          )
-                        : Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              //Add/Substract items
-                              SizedBox(
-                                  width: double.infinity,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      //Remove
-                                      IconButton(
-                                        onPressed: () {
-                                          if (quantity <= 1) {
-                                            //
-                                          } else {
-                                            setState(() {
-                                              quantity = quantity - 1;
-                                            });
-                                          }
-                                        },
-                                        icon: const Icon(
-                                            Icons.remove_circle_outline),
-                                        iconSize: 24,
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Text(
-                                        '$quantity',
-                                        style: const TextStyle(fontSize: 18),
-                                      ), //'${cartList[i]['Quantity']}'),
-                                      const SizedBox(width: 10),
-                                      //Add
-                                      IconButton(
-                                        onPressed: () {
-                                          if (widget.product.controlStock!) {
-                                            if (widget.product.currentStock! >=
-                                                quantity + 1) {
-                                              setState(() {
-                                                quantity = quantity + 1;
-                                              });
-                                            }
-                                          } else {
-                                            setState(() {
-                                              quantity = quantity + 1;
-                                            });
-                                          }
-                                        },
-                                        icon: const Icon(
-                                            Icons.add_circle_outline),
-                                        iconSize: 24,
-                                      )
-                                    ],
-                                  )),
-                              const SizedBox(
-                                height: 8,
-                              ),
-                              //Add to order button
-                              SizedBox(
+                            ),
+                            const SizedBox(
+                              width: 8,
+                            ),
+                            //Add to order button
+                            Expanded(
+                              flex: 5,
+                              child: SizedBox(
                                 height: 50,
-                                width: double.infinity,
                                 child: ElevatedButton(
                                     style: ButtonStyle(
                                       shape: WidgetStateProperty.all(
@@ -1114,9 +1291,8 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                           (mandatoryOptionsCompleted() &&
                                                   !(widget.product
                                                           .controlStock! &&
-                                                      widget.product
-                                                              .currentStock! <
-                                                          1))
+                                                      (productStock == null ||
+                                                          productStock! < 1)))
                                               ? WidgetStateProperty.all<Color>(
                                                   Colors.black)
                                               : WidgetStateProperty.all<Color>(
@@ -1128,12 +1304,14 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                               .contains(WidgetState.hovered)) {
                                             return Colors.grey.shade300;
                                           }
+
                                           if (states.contains(
                                                   WidgetState.focused) ||
                                               states.contains(
                                                   WidgetState.pressed)) {
                                             return Colors.grey.shade200;
                                           }
+
                                           return Colors
                                               .black; // Defer to the widget's default.
                                         },
@@ -1142,8 +1320,7 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                     onPressed: () {
                                       if (mandatoryOptionsCompleted() &&
                                           !(widget.product.controlStock! &&
-                                              widget.product.currentStock! <
-                                                  1)) {
+                                              productStock! < 1)) {
                                         if (quantity > 0) {
                                           bloc.addToCart({
                                             'Name': widget.product.product,
@@ -1169,6 +1346,7 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                             'Product ID':
                                                 widget.product.productID,
                                             'Stock Updated': true,
+                                            'SKU': sku
                                           });
                                         }
 
@@ -1177,29 +1355,34 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                       }
                                     },
                                     child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 4.0, vertical: 8),
                                       child: Center(
                                           child: Text(
                                         (widget.product.controlStock! &&
-                                                widget.product.currentStock! <
-                                                    1)
-                                            ? 'Fuera de Stock'
-                                            : 'Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedProductOptions) * quantity)}',
+                                                productStock == null)
+                                            ? 'Seleccionar opción'
+                                            : (widget.product.controlStock! &&
+                                                    productStock! < 1)
+                                                ? 'Fuera de Stock'
+                                                : 'Agregar  |  ${formatCurrency.format(totalAmount(basePrice, selectedProductOptions) * quantity)}',
                                         style: TextStyle(
-                                            color: (mandatoryOptionsCompleted() &&
-                                                    !(widget.product
-                                                            .controlStock! &&
-                                                        widget.product
-                                                                .currentStock! <
-                                                            1))
-                                                ? Colors.white
-                                                : Colors.black),
+                                            color:
+                                                (mandatoryOptionsCompleted() &&
+                                                        !(widget.product
+                                                                .controlStock! &&
+                                                            (productStock ==
+                                                                    null ||
+                                                                productStock! <
+                                                                    1)))
+                                                    ? Colors.white
+                                                    : Colors.black),
                                       )),
                                     )),
                               ),
-                            ],
-                          ),
-              )
+                            ),
+                          ],
+                        ))
             ],
           ),
         ),

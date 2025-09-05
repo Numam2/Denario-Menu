@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:menu_denario/Models/products.dart';
 import 'package:menu_denario/Screens/add_to_cart_dialog.dart';
+import 'package:menu_denario/Screens/add_to_cart_page.dart';
 
 class FeaturedProducts extends StatelessWidget {
   final bool open;
@@ -11,11 +12,16 @@ class FeaturedProducts extends StatelessWidget {
   final formatCurrency = NumberFormat.simpleCurrency();
 
   void addToCart(product, context) {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return AddToCartDialog(product);
-        });
+    if (MediaQuery.of(context).size.width < 700) {
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => AddToCartPage(product)));
+    } else {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AddToCartDialog(product);
+          });
+    }
   }
 
   void storeClosed(context) {

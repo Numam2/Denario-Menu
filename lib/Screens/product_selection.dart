@@ -23,11 +23,16 @@ class _ProductSelectionState extends State<ProductSelection> {
   late List<Products> product;
 
   void addToCart(product) {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return AddToCartDialog(product);
-        });
+    if (MediaQuery.of(context).size.width < 700) {
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => AddToCartPage(product)));
+    } else {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AddToCartDialog(product);
+          });
+    }
   }
 
   void storeClosed() {
@@ -138,11 +143,7 @@ class _ProductSelectionState extends State<ProductSelection> {
                           !widget.open) {
                         storeClosed();
                       } else {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    AddToCartPage(product[i])));
+                        addToCart(product[i]);
                       }
                     },
                     child: Container(

@@ -34,7 +34,10 @@ class _StoreHomeState extends State<StoreHome> {
   int businessPhone = 0;
   void openLink(rrss) {
     if (rrss['Social Media'] == 'Whatsapp') {
-      var whatsapp = Uri.parse("https://wa.me/${rrss['Link']}?text=Hola%21");
+      String formattedForWaMe = rrss['Link']
+          .replaceAll(' ', '')
+          .replaceAll('-', '');
+      var whatsapp = Uri.parse("https://wa.me/$formattedForWaMe?text=Hola!");
       launchUrl(whatsapp);
     } else {
       var link = Uri.parse(rrss['Link']);
@@ -65,6 +68,125 @@ class _StoreHomeState extends State<StoreHome> {
     final categoriesProvider = Provider.of<List?>(context);
     final businessProvider = Provider.of<BusinessProfile?>(context);
     final products = Provider.of<List<Products>?>(context);
+
+    if (widget.businessID == null || widget.businessID == '') {
+      return Scaffold(
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                //Logo
+                Container(
+                  height: 150,
+                  width: 150,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('images/Logo negro.png'),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 30),
+                //Title
+                SizedBox(
+                  width: double.infinity,
+                  child: Text(
+                    '¿Estás buscando una tienda en particular?',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                //Text
+                SizedBox(
+                  width: double.infinity,
+                  child: Text(
+                    'Intenta desde el link del negocio para llevarte a su tienda',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 14,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 40),
+                //Button to go to website
+                SizedBox(
+                  width: double.infinity,
+                  child: Text(
+                    'Si quieres ver lo que Denario puede hacer por tu negocio o emprendimiento, mira nuestra página web',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.black54,
+                      fontSize: 12,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 15),
+                SizedBox(
+                  height: 50,
+                  width: (MediaQuery.of(context).size.width > 850) ? 250 : double.infinity,
+                  child: ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all<Color>(
+                        Colors.black,
+                      ),
+                      overlayColor: WidgetStateProperty.resolveWith<Color>((
+                        Set<WidgetState> states,
+                      ) {
+                        if (states.contains(WidgetState.hovered)) {
+                          return Colors.grey.shade300;
+                        }
+                        if (states.contains(WidgetState.focused) ||
+                            states.contains(WidgetState.pressed)) {
+                          return Colors.grey.shade200;
+                        }
+                        return Colors.black; // Defer to the widget's default.
+                      }),
+                    ),
+                    onPressed: () async {
+                      const denarioURL = 'https://denario.info';
+                      if (await canLaunchUrl(Uri.parse(denarioURL))) {
+                        await launchUrl(Uri.parse(denarioURL));
+                      } else {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              backgroundColor: Colors.redAccent,
+                              content: const Text(
+                                'Ocurrió un error al intentar abrir la página. Visita https://denario.info',
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(
+                        child: Text(
+                          'Ir a la web',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     if (categoriesProvider == null ||
         categoriesProvider.isEmpty ||

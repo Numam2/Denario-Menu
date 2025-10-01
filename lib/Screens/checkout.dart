@@ -54,8 +54,25 @@ class StoreCheckoutState extends State<StoreCheckout> {
     {'Image': 'Images/MP.png', 'Type': 'MercadoPago'},
   ];
   openWhatsapp(businessPhone) {
-    var whatsapp = Uri.parse("https://wa.me/$businessPhone?text=$orderMessage");
-    launchUrl(whatsapp);
+     if (businessPhone != '') {
+      String formattedForWaMe = businessPhone
+          .replaceAll(' ', '')
+          .replaceAll('-', '');
+      var whatsapp = Uri.parse(
+        "https://wa.me/$formattedForWaMe?text=$orderMessage",
+      );
+      launchUrl(whatsapp);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.greenAccent,
+          content:  Text(
+            'El negocio no tiene whatsapp asociado, pero ya le avisamos para que se contacte para concretar la compra',
+            style: TextStyle(color: Colors.black),
+          ),
+        ),
+      );
+    }
   }
 
   //Schedule
@@ -2298,7 +2315,7 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                   const SizedBox(width: 15),
                                                   SizedBox(
                                                     height: 45,
-                                                    width: 200,
+                                                    width: 250,
                                                     child: OutlinedButton(
                                                       style: OutlinedButton
                                                           .styleFrom(

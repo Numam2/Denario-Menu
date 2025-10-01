@@ -148,7 +148,7 @@ class _ProductSelectionState extends State<ProductSelection> {
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          vertical: 15.0, horizontal: 5),
+                          vertical: 15.0, ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -237,29 +237,7 @@ class _ProductSelectionState extends State<ProductSelection> {
                               ),
                             ),
                           ),
-                          //Button
-                          IconButton(
-                            onPressed: () {
-                              if ((widget.storeType == 'Menu' ||
-                                      widget.storeType == 'Store') &&
-                                  !widget.open) {
-                                storeClosed();
-                              } else {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            AddToCartPage(product[i])));
-                              }
-                            },
-                            icon: const Icon(Icons.add_circle),
-                            color: Colors.black,
-                            hoverColor: Colors.black54,
-                            iconSize: 30,
-                            splashRadius: 15,
-                            splashColor: Colors.white70,
-                          ),
-                        ],
+                          ],
                       ),
                     )),
               ),
@@ -329,7 +307,7 @@ class _ProductSelectionState extends State<ProductSelection> {
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        vertical: 15.0, horizontal: 10),
+                        vertical: 15.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -418,24 +396,7 @@ class _ProductSelectionState extends State<ProductSelection> {
                             ),
                           ),
                         ),
-                        //Button
-                        IconButton(
-                          onPressed: () {
-                            if ((widget.storeType == 'Menu' ||
-                                    widget.storeType == 'Store') &&
-                                !widget.open) {
-                              storeClosed();
-                            } else {
-                              addToCart(product[i]);
-                            }
-                          },
-                          icon: const Icon(Icons.add_circle),
-                          color: Colors.black,
-                          hoverColor: Colors.black54,
-                          iconSize: 30,
-                          splashRadius: 15,
-                          splashColor: Colors.white70,
-                        ),
+                        
                       ],
                     ),
                   )),

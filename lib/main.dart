@@ -30,8 +30,8 @@ class MyApp extends StatelessWidget {
             colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.grey)
                 .copyWith(surface: Colors.white)),
         home: InitialConfig(
-          Uri.base.queryParameters['id'],
-          storeType: Uri.base.queryParameters['type'] ?? 'Menu',
+           Uri.base.queryParameters['id'], // 'ISZGNHSmBzjPAyA',// 'VtlNKcEIezXJ4F7',
+          storeType: Uri.base.queryParameters['type'] ?? 'Reservation', //Reservation //Menu //Catalog
           display: Uri.base.queryParameters['display'] ?? 'Categorized',
         )); //Uri.base.queryParameters['id'])); //'VTam7iYZhiWiAFs3IVRBaLB5s3m2'
   }

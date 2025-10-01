@@ -161,6 +161,12 @@ class _AddToCartPageState extends State<AddToCartPage> {
               selectedProductOptions.removeAt(optIndex);
               productStock = null;
             });
+            if (productOptions[i].mandatory) {
+              setState(() {
+                mandatoryOptions[productOptions[i].title] =
+                    false;
+              });
+            }
           }
         } else {
           setState(() {
@@ -181,6 +187,12 @@ class _AddToCartPageState extends State<AddToCartPage> {
           } else {
             //Remove the option
             selectedProductOptions.removeAt(optIndex);
+            if (productOptions[i].mandatory) {
+              setState(() {
+                mandatoryOptions[productOptions[i].title] =
+                    false;
+              });
+            }
           }
         }
         //Remove sizes config
@@ -249,6 +261,7 @@ class _AddToCartPageState extends State<AddToCartPage> {
           productStock = productOptions[i].priceOptions[x]['Stock'];
         });
       }
+      //Add sizes
       setState(() {
         // Add sizes if applicable
         selectedOptionIndex = selectedProductOptions.length - 1;
@@ -262,6 +275,12 @@ class _AddToCartPageState extends State<AddToCartPage> {
           }
         }
       });
+      if (productOptions[i].mandatory) {
+              setState(() {
+                mandatoryOptions[productOptions[i].title] =
+                    true;
+              });
+            }
     }
   }
 

@@ -256,23 +256,7 @@ class FeaturedProducts extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                    //Button
-                                    IconButton(
-                                      onPressed: () {
-                                        if (open) {
-                                          addToCart(productList[i], context);
-                                        } else {
-                                          storeClosed(context);
-                                        }
-                                      },
-                                      icon: const Icon(Icons.add_circle),
-                                      color: Colors.black,
-                                      hoverColor: Colors.black54,
-                                      iconSize: 30,
-                                      splashRadius: 15,
-                                      splashColor: Colors.white70,
-                                    ),
-                                  ],
+                                    ],
                                 ),
                               )),
                         ),
@@ -465,23 +449,7 @@ class FeaturedProducts extends StatelessWidget {
                                       ),
                                     ),
                                   ),
-                                  //Button
-                                  IconButton(
-                                    onPressed: () {
-                                      if (open) {
-                                        addToCart(productList[i], context);
-                                      } else {
-                                        storeClosed(context);
-                                      }
-                                    },
-                                    icon: const Icon(Icons.add_circle),
-                                    color: Colors.black,
-                                    hoverColor: Colors.black54,
-                                    iconSize: 30,
-                                    splashRadius: 15,
-                                    splashColor: Colors.white70,
-                                  ),
-                                ],
+                                  ],
                               ),
                             )),
                       ),

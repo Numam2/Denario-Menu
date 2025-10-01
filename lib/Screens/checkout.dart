@@ -2635,7 +2635,7 @@ class StoreCheckoutState extends State<StoreCheckout> {
                           ? Container(
                               width: double.infinity,
                               height: double.infinity,
-                              color: Colors.grey.withOpacity(0.5),
+                              color: Colors.grey.withValues(alpha: 0.5),
                               child: Center(
                                   child: CircularProgressIndicator(
                                 color: Colors.blueGrey.shade900,
@@ -3198,7 +3198,7 @@ class StoreCheckoutState extends State<StoreCheckout> {
                           ? Container(
                               width: double.infinity,
                               height: double.infinity,
-                              color: Colors.grey.withOpacity(0.5),
+                              color: Colors.grey.withValues(alpha:0.5),
                               child: Center(
                                   child: CircularProgressIndicator(
                                 color: Colors.blueGrey.shade900,

@@ -502,7 +502,7 @@ class FeaturedProducts extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                             fixedSize: const Size(40, 40),
                             shape: const CircleBorder(),
-                            backgroundColor: Colors.black45.withOpacity(0.05)),
+                            backgroundColor: Colors.black45.withValues(alpha:0.05)),
                         child: const Center(
                           child: Icon(Icons.arrow_back_ios,
                               size: 16, color: Colors.white),
@@ -523,7 +523,7 @@ class FeaturedProducts extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                             fixedSize: const Size(40, 40),
                             shape: const CircleBorder(),
-                            backgroundColor: Colors.black45.withOpacity(0.05)),
+                            backgroundColor: Colors.black45.withValues(alpha:0.05)),
                         child: const Center(
                           child: Icon(Icons.arrow_forward_ios,
                               size: 16, color: Colors.white),

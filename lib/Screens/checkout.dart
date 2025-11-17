@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:menu_denario/Screens/Loading.dart';
 import 'package:menu_denario/Screens/add_discount_dialog.dart';
 import 'package:menu_denario/Screens/opening_hours_grid.dart';
 import 'package:menu_denario/Screens/orders_successful.dart';
@@ -54,10 +55,9 @@ class StoreCheckoutState extends State<StoreCheckout> {
     {'Image': 'Images/MP.png', 'Type': 'MercadoPago'},
   ];
   openWhatsapp(businessPhone) {
-     if (businessPhone != '') {
-      String formattedForWaMe = businessPhone
-          .replaceAll(' ', '')
-          .replaceAll('-', '');
+    if (businessPhone != '') {
+      String formattedForWaMe =
+          businessPhone.replaceAll(' ', '').replaceAll('-', '');
       var whatsapp = Uri.parse(
         "https://wa.me/$formattedForWaMe?text=$orderMessage",
       );
@@ -66,7 +66,7 @@ class StoreCheckoutState extends State<StoreCheckout> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           backgroundColor: Colors.greenAccent,
-          content:  Text(
+          content: Text(
             'El negocio no tiene whatsapp asociado, pero ya le avisamos para que se contacte para concretar la compra',
             style: TextStyle(color: Colors.black),
           ),
@@ -184,6 +184,26 @@ class StoreCheckoutState extends State<StoreCheckout> {
     });
   }
 
+  void showErroronConfirmation() {
+    setState(() {
+      loading = false;
+    });
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Error al confirmar'),
+            content: const Text(
+                'Ócurrió un error inesperado, por favor asegurate que tengas buena conexión a internet y vuelve a intentarlo'),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Volver'))
+            ],
+          );
+        });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -219,462 +239,232 @@ class StoreCheckoutState extends State<StoreCheckout> {
                         icon: const Icon(Icons.arrow_back, color: Colors.black),
                         iconSize: 24),
                   ),
-                  body: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 15, horizontal: 20),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          //Title
-                          const Padding(
-                            padding: EdgeInsets.symmetric(
-                                vertical: 20, horizontal: 20),
-                            child: Text(
-                              'Checkout',
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 24.0,
-                                fontWeight: FontWeight.w600,
+                  body: Stack(
+                    children: [
+                      SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 15, horizontal: 20),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              //Title
+                              const Padding(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 20, horizontal: 20),
+                                child: Text(
+                                  'Checkout',
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 24.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                          // //Row
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  //Delivery info
-                                  Expanded(
-                                    flex: 6,
-                                    child: Form(
-                                      key: _formKey,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(30),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: const BorderRadius.all(
-                                              Radius.circular(12)),
-                                          boxShadow: <BoxShadow>[
-                                            BoxShadow(
-                                              color: Colors.grey.shade300,
-                                              offset: const Offset(0.0, 0.0),
-                                              blurRadius: 10.0,
-                                            )
-                                          ],
-                                        ),
-                                        child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              //Delivery
-                                              Row(
+                              // //Row
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 20),
+                                child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      //Delivery info
+                                      Expanded(
+                                        flex: 6,
+                                        child: Form(
+                                          key: _formKey,
+                                          child: Container(
+                                            padding: const EdgeInsets.all(30),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                      Radius.circular(12)),
+                                              boxShadow: <BoxShadow>[
+                                                BoxShadow(
+                                                  color: Colors.grey.shade300,
+                                                  offset:
+                                                      const Offset(0.0, 0.0),
+                                                  blurRadius: 10.0,
+                                                )
+                                              ],
+                                            ),
+                                            child: Column(
                                                 mainAxisAlignment:
-                                                    MainAxisAlignment.center,
+                                                    MainAxisAlignment.start,
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: [
-                                                  SizedBox(
-                                                    height: 45,
-                                                    width: 100,
-                                                    child: ElevatedButton(
-                                                      style: ElevatedButton
-                                                          .styleFrom(
-                                                        backgroundColor: delivery
-                                                            ? Colors.white
-                                                            : Colors.greenAccent[
-                                                                400],
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .symmetric(
-                                                                horizontal: 8),
-                                                        shape:
-                                                            const RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius.only(
+                                                  //Delivery
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      SizedBox(
+                                                        height: 45,
+                                                        width: 100,
+                                                        child: ElevatedButton(
+                                                          style: ElevatedButton
+                                                              .styleFrom(
+                                                            backgroundColor:
+                                                                delivery
+                                                                    ? Colors
+                                                                        .white
+                                                                    : Colors.greenAccent[
+                                                                        400],
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                                    horizontal:
+                                                                        8),
+                                                            shape:
+                                                                const RoundedRectangleBorder(
+                                                              borderRadius: BorderRadius.only(
                                                                   topLeft: Radius
                                                                       .circular(
                                                                           8),
                                                                   bottomLeft: Radius
                                                                       .circular(
                                                                           8)),
+                                                            ),
+                                                          ),
+                                                          onPressed: () {
+                                                            setState(() {
+                                                              delivery = false;
+                                                              address = '';
+                                                              apt = '';
+                                                              orderType =
+                                                                  'Takeaway';
+                                                            });
+                                                          },
+                                                          child: Center(
+                                                              child: Text(
+                                                                  'Retiro',
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontSize:
+                                                                        12,
+                                                                    color: delivery
+                                                                        ? Colors
+                                                                            .grey
+                                                                        : Colors
+                                                                            .white,
+                                                                  ))),
                                                         ),
                                                       ),
-                                                      onPressed: () {
-                                                        setState(() {
-                                                          delivery = false;
-                                                          address = '';
-                                                          apt = '';
-                                                          orderType =
-                                                              'Takeaway';
-                                                        });
-                                                      },
-                                                      child: Center(
-                                                          child: Text('Retiro',
-                                                              style: TextStyle(
-                                                                fontSize: 12,
-                                                                color: delivery
-                                                                    ? Colors
-                                                                        .grey
+                                                      SizedBox(
+                                                        width: 100,
+                                                        height: 45,
+                                                        child: ElevatedButton(
+                                                          style: ElevatedButton
+                                                              .styleFrom(
+                                                            backgroundColor:
+                                                                delivery
+                                                                    ? Colors.greenAccent[
+                                                                        400]
                                                                     : Colors
                                                                         .white,
-                                                              ))),
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: 100,
-                                                    height: 45,
-                                                    child: ElevatedButton(
-                                                      style: ElevatedButton
-                                                          .styleFrom(
-                                                        backgroundColor: delivery
-                                                            ? Colors
-                                                                .greenAccent[400]
-                                                            : Colors.white,
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .symmetric(
-                                                                horizontal: 8),
-                                                        shape:
-                                                            const RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius.only(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                                    horizontal:
+                                                                        8),
+                                                            shape:
+                                                                const RoundedRectangleBorder(
+                                                              borderRadius: BorderRadius.only(
                                                                   topRight: Radius
                                                                       .circular(
                                                                           8),
-                                                                  bottomRight:
-                                                                      Radius.circular(
+                                                                  bottomRight: Radius
+                                                                      .circular(
                                                                           8)),
+                                                            ),
+                                                          ),
+                                                          onPressed: () {
+                                                            setState(() {
+                                                              delivery = true;
+                                                              orderType =
+                                                                  'Delivery';
+                                                            });
+                                                          },
+                                                          child: Center(
+                                                              child: Text(
+                                                                  'Delivery',
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontSize:
+                                                                        12,
+                                                                    color: delivery
+                                                                        ? Colors
+                                                                            .white
+                                                                        : Colors
+                                                                            .grey,
+                                                                  ))),
                                                         ),
                                                       ),
-                                                      onPressed: () {
-                                                        setState(() {
-                                                          delivery = true;
-                                                          orderType =
-                                                              'Delivery';
-                                                        });
-                                                      },
-                                                      child: Center(
-                                                          child: Text(
-                                                              'Delivery',
-                                                              style: TextStyle(
-                                                                fontSize: 12,
-                                                                color: delivery
-                                                                    ? Colors
-                                                                        .white
-                                                                    : Colors
-                                                                        .grey,
-                                                              ))),
-                                                    ),
+                                                    ],
                                                   ),
-                                                ],
-                                              ),
-                                              const SizedBox(height: 20),
-                                              //Nombre
-                                              const Text(
-                                                'Nombre y apellido',
-                                                textAlign: TextAlign.left,
-                                                style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 14.0,
-                                                  fontWeight: FontWeight.w400,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 8),
-                                              TextFormField(
-                                                focusNode: nameNode,
-                                                textAlign: TextAlign.left,
-                                                style: const TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 14),
-                                                autofocus: true,
-                                                validator: (val) {
-                                                  if (val == null ||
-                                                      val.isEmpty) {
-                                                    return "Agregá un nombre";
-                                                  } else {
-                                                    return null;
-                                                  }
-                                                },
-                                                inputFormatters: [
-                                                  LengthLimitingTextInputFormatter(
-                                                      45)
-                                                ],
-                                                cursorColor: Colors.grey,
-                                                decoration: InputDecoration(
-                                                  border: OutlineInputBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            12.0),
-                                                    borderSide:
-                                                        const BorderSide(
-                                                      color: Colors.grey,
-                                                    ),
-                                                  ),
-                                                  errorBorder:
-                                                      OutlineInputBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            12.0),
-                                                    borderSide:
-                                                        const BorderSide(
-                                                      color: Colors.red,
-                                                    ),
-                                                  ),
-                                                  focusedBorder:
-                                                      OutlineInputBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            12.0),
-                                                    borderSide:
-                                                        const BorderSide(
-                                                      color: Colors.green,
-                                                    ),
-                                                  ),
-                                                ),
-                                                onChanged: (val) {
-                                                  setState(() => name = val);
-                                                },
-                                              ),
-                                              const SizedBox(height: 15),
-                                              //Direccion
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Expanded(
-                                                    flex: 3,
-                                                    child: Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .start,
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        const Text(
-                                                          'Dirección',
-                                                          textAlign:
-                                                              TextAlign.left,
-                                                          style: TextStyle(
-                                                            color: Colors.black,
-                                                            fontSize: 14.0,
-                                                            fontWeight:
-                                                                FontWeight.w400,
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                            height: 8),
-                                                        TextFormField(
-                                                          focusNode:
-                                                              addressNode,
-                                                          enabled: delivery
-                                                              ? true
-                                                              : false,
-                                                          textAlign:
-                                                              TextAlign.left,
-                                                          style:
-                                                              const TextStyle(
-                                                                  color: Colors
-                                                                      .black,
-                                                                  fontSize: 14),
-                                                          autofocus: true,
-                                                          validator: (val) {
-                                                            if (delivery &&
-                                                                (val == null ||
-                                                                    val.isEmpty)) {
-                                                              return "No olvides agregar una dirección";
-                                                            } else {
-                                                              return null;
-                                                            }
-                                                          },
-                                                          inputFormatters: [
-                                                            LengthLimitingTextInputFormatter(
-                                                                45)
-                                                          ],
-                                                          cursorColor:
-                                                              Colors.grey,
-                                                          decoration:
-                                                              InputDecoration(
-                                                            border:
-                                                                OutlineInputBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          12.0),
-                                                              borderSide:
-                                                                  const BorderSide(
-                                                                color:
-                                                                    Colors.grey,
-                                                              ),
-                                                            ),
-                                                            errorBorder:
-                                                                OutlineInputBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          12.0),
-                                                              borderSide:
-                                                                  const BorderSide(
-                                                                color:
-                                                                    Colors.red,
-                                                              ),
-                                                            ),
-                                                            focusedBorder:
-                                                                OutlineInputBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          12.0),
-                                                              borderSide:
-                                                                  const BorderSide(
-                                                                color: Colors
-                                                                    .green,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          onChanged: (val) {
-                                                            setState(() =>
-                                                                address = val);
-                                                          },
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 20),
-                                                  //Dpto (timbre)
-                                                  Expanded(
-                                                    flex: 1,
-                                                    child: Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .start,
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        const Text(
-                                                          'Nro de Timbre',
-                                                          textAlign:
-                                                              TextAlign.left,
-                                                          style: TextStyle(
-                                                            color: Colors.black,
-                                                            fontSize: 14.0,
-                                                            fontWeight:
-                                                                FontWeight.w400,
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                            height: 8),
-                                                        TextFormField(
-                                                          focusNode: aptNode,
-                                                          enabled: delivery
-                                                              ? true
-                                                              : false,
-                                                          textAlign:
-                                                              TextAlign.left,
-                                                          style:
-                                                              const TextStyle(
-                                                                  color: Colors
-                                                                      .black,
-                                                                  fontSize: 14),
-                                                          autofocus: true,
-                                                          validator: (val) {
-                                                            if (delivery &&
-                                                                (val == null ||
-                                                                    val.isEmpty)) {
-                                                              return "Agregá un timbre";
-                                                            } else {
-                                                              return null;
-                                                            }
-                                                          },
-                                                          inputFormatters: [
-                                                            LengthLimitingTextInputFormatter(
-                                                                4)
-                                                          ],
-                                                          cursorColor:
-                                                              Colors.grey,
-                                                          decoration:
-                                                              InputDecoration(
-                                                            border:
-                                                                OutlineInputBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          12.0),
-                                                              borderSide:
-                                                                  const BorderSide(
-                                                                color:
-                                                                    Colors.grey,
-                                                              ),
-                                                            ),
-                                                            errorBorder:
-                                                                OutlineInputBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          12.0),
-                                                              borderSide:
-                                                                  const BorderSide(
-                                                                color:
-                                                                    Colors.red,
-                                                              ),
-                                                            ),
-                                                            focusedBorder:
-                                                                OutlineInputBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          12.0),
-                                                              borderSide:
-                                                                  const BorderSide(
-                                                                color: Colors
-                                                                    .green,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          onChanged: (val) {
-                                                            setState(() =>
-                                                                apt = val);
-                                                          },
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  )
-                                                ],
-                                              ),
-                                              const SizedBox(height: 15),
-                                              //Nro celular
-                                              const Text(
-                                                'Nro Whatsapp',
-                                                textAlign: TextAlign.left,
-                                                style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 14.0,
-                                                  fontWeight: FontWeight.w400,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 8),
-                                              SizedBox(
-                                                height: 45,
-                                                width: double.infinity,
-                                                child: IntlPhoneField(
-                                                  focusNode: phoneNode,
-                                                  keyboardType:
-                                                      TextInputType.number,
-                                                  style: const TextStyle(
+                                                  const SizedBox(height: 20),
+                                                  //Nombre
+                                                  const Text(
+                                                    'Nombre y apellido',
+                                                    textAlign: TextAlign.left,
+                                                    style: TextStyle(
                                                       color: Colors.black,
-                                                      fontSize: 14),
-                                                  textInputAction:
-                                                      TextInputAction.next,
-                                                  decoration: InputDecoration(
+                                                      fontSize: 14.0,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 8),
+                                                  TextFormField(
+                                                    focusNode: nameNode,
+                                                    textAlign: TextAlign.left,
+                                                    style: const TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 14),
+                                                    autofocus: true,
+                                                    validator: (val) {
+                                                      if (val == null ||
+                                                          val.isEmpty) {
+                                                        return "Agregá un nombre";
+                                                      } else {
+                                                        return null;
+                                                      }
+                                                    },
+                                                    inputFormatters: [
+                                                      LengthLimitingTextInputFormatter(
+                                                          45)
+                                                    ],
+                                                    cursorColor: Colors.grey,
+                                                    decoration: InputDecoration(
+                                                      border:
+                                                          OutlineInputBorder(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(12.0),
+                                                        borderSide:
+                                                            const BorderSide(
+                                                          color: Colors.grey,
+                                                        ),
+                                                      ),
+                                                      errorBorder:
+                                                          OutlineInputBorder(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(12.0),
+                                                        borderSide:
+                                                            const BorderSide(
+                                                          color: Colors.red,
+                                                        ),
+                                                      ),
                                                       focusedBorder:
                                                           OutlineInputBorder(
                                                         borderRadius:
@@ -685,563 +475,881 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                           color: Colors.green,
                                                         ),
                                                       ),
-                                                      border:
-                                                          OutlineInputBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(12.0),
-                                                        borderSide:
-                                                            const BorderSide(
-                                                          color: Colors.grey,
-                                                        ),
-                                                      )),
-                                                  languageCode: "es",
-                                                  initialCountryCode: 'AR',
-                                                  disableLengthCheck: true,
-                                                  initialValue: '',
-                                                  showCountryFlag: false,
-                                                  inputFormatters: [
-                                                    FilteringTextInputFormatter
-                                                        .digitsOnly
-                                                  ],
-                                                  onChanged: (nO) {
-                                                    setState(() => phone =
-                                                        nO.completeNumber);
-                                                  },
-                                                ),
-                                              ),
-                                              const SizedBox(height: 15),
-                                              //Metodo de pago
-                                              Row(children: [
-                                                const Text(
-                                                  'Método de pago',
-                                                  textAlign: TextAlign.left,
-                                                  style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 14.0,
-                                                    fontWeight: FontWeight.w400,
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 20),
-                                                Text(
-                                                    (!paymentTypeSelected)
-                                                        ? 'Selecciona un método de pago'
-                                                        : '',
-                                                    style: const TextStyle(
-                                                        color: Colors.red))
-                                              ]),
-                                              delivery
-                                                  ? const Padding(
-                                                      padding: EdgeInsets.only(
-                                                          top: 8),
-                                                      child: Text(
-                                                        '*El costo del delivery no está incluido en el precio',
-                                                        style: TextStyle(
-                                                            color: Colors.grey,
-                                                            fontSize: 12),
-                                                      ),
-                                                    )
-                                                  : const SizedBox(),
-                                              const SizedBox(height: 15),
-                                              SizedBox(
-                                                height: 50,
-                                                width: double.infinity,
-                                                child: ListView.builder(
-                                                    scrollDirection:
-                                                        Axis.horizontal,
-                                                    itemCount: (delivery)
-                                                        ? deliveryPaymentMethods
-                                                            .length
-                                                        : takeawayPaymentMethods
-                                                            .length,
-                                                    shrinkWrap: true,
-                                                    itemBuilder: (context, i) {
-                                                      List paymentMethods;
-                                                      if (delivery) {
-                                                        paymentMethods =
-                                                            deliveryPaymentMethods;
-                                                      } else {
-                                                        paymentMethods =
-                                                            takeawayPaymentMethods;
-                                                      }
-                                                      return Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .symmetric(
-                                                                horizontal:
-                                                                    3.0),
-                                                        child: InkWell(
-                                                          onTap: () {
-                                                            setState(() {
-                                                              paymentTypeSelected =
-                                                                  true;
-                                                              paymentType =
-                                                                  paymentMethods[
-                                                                          i]
-                                                                      ['Type'];
-                                                            });
-                                                          },
-                                                          child: Padding(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .all(5.0),
-                                                            child: Container(
-                                                                padding: const EdgeInsets
-                                                                    .symmetric(
-                                                                    horizontal:
-                                                                        15.0),
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                  borderRadius:
-                                                                      const BorderRadius
-                                                                          .all(
-                                                                          Radius.circular(
-                                                                              8)),
-                                                                  color: Colors
-                                                                      .white,
-                                                                  border: Border.all(
-                                                                      color: (paymentType ==
-                                                                              paymentMethods[i][
-                                                                                  'Type'])
-                                                                          ? Colors
-                                                                              .green
-                                                                          : Colors
-                                                                              .grey
-                                                                              .shade300,
-                                                                      width: 2),
-                                                                ),
-                                                                child: Center(
-                                                                  child: Text(
-                                                                    paymentMethods[
-                                                                            i][
-                                                                        'Type'],
-                                                                    style: TextStyle(
-                                                                        color: (paymentType == paymentMethods[i]['Type'])
-                                                                            ? Colors
-                                                                                .black
-                                                                            : Colors
-                                                                                .grey,
-                                                                        fontWeight: (paymentType == paymentMethods[i]['Type'])
-                                                                            ? FontWeight
-                                                                                .bold
-                                                                            : FontWeight
-                                                                                .w400,
-                                                                        fontSize:
-                                                                            14),
-                                                                  ),
-                                                                )),
-                                                          ),
-                                                        ),
-                                                      );
-                                                    }),
-                                              ),
-                                              const SizedBox(height: 5),
-                                              //Button
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
-                                                children: [
-                                                  SizedBox(
-                                                    height: 45,
-                                                    child: OutlinedButton(
-                                                      style: OutlinedButton
-                                                          .styleFrom(
-                                                        foregroundColor: Colors
-                                                            .grey.shade300,
-                                                        shape:
-                                                            const RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius.all(
-                                                                  Radius
-                                                                      .circular(
-                                                                          12)),
-                                                        ),
-                                                      ),
-                                                      onPressed: () {
-                                                        showDialog(
-                                                            context: context,
-                                                            builder: (context) {
-                                                              return AddDiscountDialog(
-                                                                  widget
-                                                                      .businessID!);
-                                                            });
-                                                      },
-                                                      child: const Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .center,
-                                                        children: [
-                                                          Icon(
-                                                            Icons.sell_outlined,
-                                                            size: 21,
-                                                            color: Colors.grey,
-                                                          ),
-                                                          SizedBox(width: 5),
-                                                          Text(
-                                                              'Código promocional',
-                                                              style: TextStyle(
-                                                                  color: Colors
-                                                                      .grey,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w400)),
-                                                        ],
-                                                      ),
                                                     ),
+                                                    onChanged: (val) {
+                                                      setState(
+                                                          () => name = val);
+                                                    },
                                                   ),
-                                                  const SizedBox(width: 10),
-                                                  SizedBox(
-                                                    height: 45,
-                                                    width: 150,
-                                                    child: OutlinedButton(
-                                                        style: OutlinedButton
-                                                            .styleFrom(
-                                                          backgroundColor:
-                                                              Colors.black,
-                                                          side:
-                                                              const BorderSide(
+                                                  const SizedBox(height: 15),
+                                                  //Direccion
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.start,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Expanded(
+                                                        flex: 3,
+                                                        child: Column(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .start,
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            const Text(
+                                                              'Dirección',
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .left,
+                                                              style: TextStyle(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 14.0,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w400,
+                                                              ),
+                                                            ),
+                                                            const SizedBox(
+                                                                height: 8),
+                                                            TextFormField(
+                                                              focusNode:
+                                                                  addressNode,
+                                                              enabled: delivery
+                                                                  ? true
+                                                                  : false,
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .left,
+                                                              style: const TextStyle(
                                                                   color: Colors
                                                                       .black,
-                                                                  width: 1),
+                                                                  fontSize: 14),
+                                                              autofocus: true,
+                                                              validator: (val) {
+                                                                if (delivery &&
+                                                                    (val == null ||
+                                                                        val.isEmpty)) {
+                                                                  return "No olvides agregar una dirección";
+                                                                } else {
+                                                                  return null;
+                                                                }
+                                                              },
+                                                              inputFormatters: [
+                                                                LengthLimitingTextInputFormatter(
+                                                                    45)
+                                                              ],
+                                                              cursorColor:
+                                                                  Colors.grey,
+                                                              decoration:
+                                                                  InputDecoration(
+                                                                border:
+                                                                    OutlineInputBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              12.0),
+                                                                  borderSide:
+                                                                      const BorderSide(
+                                                                    color: Colors
+                                                                        .grey,
+                                                                  ),
+                                                                ),
+                                                                errorBorder:
+                                                                    OutlineInputBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              12.0),
+                                                                  borderSide:
+                                                                      const BorderSide(
+                                                                    color: Colors
+                                                                        .red,
+                                                                  ),
+                                                                ),
+                                                                focusedBorder:
+                                                                    OutlineInputBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              12.0),
+                                                                  borderSide:
+                                                                      const BorderSide(
+                                                                    color: Colors
+                                                                        .green,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              onChanged: (val) {
+                                                                setState(() =>
+                                                                    address =
+                                                                        val);
+                                                              },
+                                                            ),
+                                                          ],
                                                         ),
-                                                        onPressed: () {
-                                                          //%20 = Space //%0A Another Line
-                                                          //%3A = : //%24 = $
-
-                                                          if (_formKey
-                                                                  .currentState!
-                                                                  .validate() &&
-                                                              paymentType !=
-                                                                  '') {
-                                                            for (var i in data[
-                                                                'Items']) {
-                                                              orderItems =
-                                                                  orderItems +
-                                                                      ('${i['Quantity']} ${i['Name']}%0A');
-                                                            }
-
-                                                            orderMessage =
-                                                                'Nombre: $name %0ADelivery/Retiro: $orderType %0ADirección: $address Timbre: $apt %0ANro. Teléfono: $phone %0AMedio de Pago: $paymentType %0A%0AOrden:%0A$orderItems %0ATotal: ${formatCurrency.format(bloc.totalTicketAmount)}';
-
-                                                            DatabaseService().saveOrder(
-                                                                '${widget.businessID}',
-                                                                name,
-                                                                '$address - $apt',
-                                                                phone,
-                                                                data['Items'],
-                                                                paymentType,
-                                                                bloc
-                                                                    .totalTicketAmount,
-                                                                orderType,
-                                                                data[
-                                                                    'Discount'],
-                                                                data[
-                                                                    'Discount Code']);
-
-                                                            openWhatsapp(widget
-                                                                .businessPhone);
-
-                                                            bloc.removeAllFromCart();
-
-                                                            Navigator.push(
-                                                                context,
-                                                                MaterialPageRoute(
-                                                                    builder: (context) =>
-                                                                        OrderSuccessful(
-                                                                            widget.businessID)));
-                                                          } else if (paymentType ==
-                                                              '') {
-                                                            setState(() {
-                                                              paymentTypeSelected =
-                                                                  false;
-                                                            });
-                                                          }
-                                                        },
-                                                        child: const Padding(
-                                                          padding:
-                                                              EdgeInsets.all(
-                                                                  8.0),
-                                                          child: Center(
-                                                              child: Text(
-                                                            'Pedir',
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .white),
-                                                          )),
-                                                        )),
-                                                  ),
-                                                ],
-                                              )
-                                            ]),
-                                      ),
-                                    ),
-                                  ),
-
-                                  const SizedBox(width: 40),
-                                  //Items
-                                  Expanded(
-                                    flex: 3,
-                                    child: SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.3,
-                                        height: 450,
-                                        child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              //Title
-                                              const Text(
-                                                'Mi Pedido',
-                                                textAlign: TextAlign.left,
-                                                style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 18.0,
-                                                  fontWeight: FontWeight.w400,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 15),
-                                              //List of Products
-                                              Expanded(
-                                                child: Container(
-                                                  padding:
-                                                      const EdgeInsets.all(20),
-                                                  child: ListView.builder(
-                                                      shrinkWrap: true,
-                                                      itemCount:
-                                                          data["Items"].length,
-                                                      itemBuilder:
-                                                          (context, i) {
-                                                        final cartList =
-                                                            data["Items"];
-
-                                                        final List<String>
-                                                            selectedOptions =
-                                                            [];
-                                                        if (snapshot.data["Items"]
-                                                                        [i][
-                                                                    'Selected Options'] !=
-                                                                null &&
-                                                            snapshot
-                                                                .data["Items"]
-                                                                    [i][
-                                                                    'Selected Options']
-                                                                .isNotEmpty) {
-                                                          for (var x = 0;
-                                                              x <
-                                                                  snapshot
-                                                                      .data[
-                                                                          "Items"]
-                                                                          [i][
-                                                                          'Selected Options']
-                                                                      .length;
-                                                              x++) {
-                                                            if (snapshot.data["Items"][i]
-                                                                            ['Selected Options'][x]
-                                                                        [
-                                                                        'Size'] !=
-                                                                    null &&
-                                                                snapshot.data["Items"][i]
-                                                                            [
-                                                                            'Selected Options'][x]
-                                                                        [
-                                                                        'Size'] !=
-                                                                    '') {
-                                                              selectedOptions.add(
-                                                                  '${snapshot.data["Items"][i]['Selected Options'][x]['Selected Options'].join(', ')} | Talle ${snapshot.data["Items"][i]['Selected Options'][x]['Size']}');
-                                                            } else {
-                                                              selectedOptions.add(
-                                                                  '${snapshot.data["Items"][i]['Selected Options'][x]['Selected Options'].join(', ')}');
-                                                            }
-                                                          }
-                                                        }
-
-                                                        return Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .only(
-                                                                  bottom: 10.0),
-                                                          child: Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .start,
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .center,
-                                                              children: [
-                                                                //Column Name + Qty
-                                                                Expanded(
-                                                                  child: Column(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .start,
-                                                                    crossAxisAlignment:
-                                                                        CrossAxisAlignment
-                                                                            .start,
-                                                                    children: [
-                                                                      //Name
-                                                                      Container(
-                                                                        constraints:
-                                                                            const BoxConstraints(maxWidth: 150),
-                                                                        child: Text(
-                                                                            '${cartList[i]['Name']} (${cartList[i]['Quantity']})'),
-                                                                      ),
-                                                                      //Options
-                                                                      (snapshot.data["Items"][i]['Selected Options'] == null ||
-                                                                              snapshot.data["Items"][i]['Selected Options'].isEmpty)
-                                                                          ? const SizedBox()
-                                                                          // : SizedBox(),
-                                                                          : Padding(
-                                                                              padding: const EdgeInsets.symmetric(vertical: 5),
-                                                                              child: Text(selectedOptions.join(', '), maxLines: 6, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                                                                            ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                                //Amount
-                                                                const SizedBox(
-                                                                    width: 10),
-                                                                Text(formatCurrency
-                                                                    .format(cartList[
-                                                                            i][
-                                                                        'Total Price'])),
-                                                              ]),
-                                                        );
-                                                      }),
-                                                ),
-                                              ),
-                                              const SizedBox(height: 10),
-                                              (data['Discount'] != null &&
-                                                      data['Discount'] > 0)
-                                                  ? Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .start,
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                          const Icon(
-                                                            Icons.sell_outlined,
-                                                            size: 16,
-                                                            color: Colors.grey,
-                                                          ),
-                                                          const SizedBox(
-                                                              width: 5),
-                                                          //Column Name + Qty
-                                                          (snapshot.data[
-                                                                      "Discount Code"] !=
-                                                                  '')
-                                                              ? Container(
-                                                                  constraints:
-                                                                      const BoxConstraints(
-                                                                          maxWidth:
-                                                                              150),
-                                                                  child: Text(
-                                                                    snapshot.data[
-                                                                        "Discount Code"],
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .grey
-                                                                            .shade700),
-                                                                  ),
-                                                                )
-                                                              : Container(
-                                                                  constraints:
-                                                                      const BoxConstraints(
-                                                                          maxWidth:
-                                                                              150),
-                                                                  child: Text(
-                                                                    'Descuento',
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .grey
-                                                                            .shade700),
-                                                                  ),
-                                                                ),
-                                                          //Amount
-                                                          const Spacer(),
-                                                          Text(
-                                                              formatCurrency
-                                                                  .format(snapshot
-                                                                          .data[
-                                                                      "Discount"]),
+                                                      ),
+                                                      const SizedBox(width: 20),
+                                                      //Dpto (timbre)
+                                                      Expanded(
+                                                        flex: 1,
+                                                        child: Column(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .start,
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            const Text(
+                                                              'Nro de Timbre',
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .left,
                                                               style: TextStyle(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 14.0,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w400,
+                                                              ),
+                                                            ),
+                                                            const SizedBox(
+                                                                height: 8),
+                                                            TextFormField(
+                                                              focusNode:
+                                                                  aptNode,
+                                                              enabled: delivery
+                                                                  ? true
+                                                                  : false,
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .left,
+                                                              style: const TextStyle(
                                                                   color: Colors
-                                                                      .grey
-                                                                      .shade700)),
-                                                          const SizedBox(
-                                                              width: 10),
-                                                          //Delete
-                                                          IconButton(
-                                                              onPressed: () => bloc
-                                                                  .setDiscountAmount(
-                                                                      0),
-                                                              icon: const Icon(
-                                                                  Icons.close),
-                                                              iconSize: 14)
-                                                        ])
-                                                  : const SizedBox(),
-                                              const SizedBox(height: 10),
-                                              const Divider(
-                                                  color: Colors.grey,
-                                                  thickness: 0.5,
-                                                  indent: 15,
-                                                  endIndent: 15),
-                                              const SizedBox(height: 10),
-                                              //Total
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
-                                                children: [
+                                                                      .black,
+                                                                  fontSize: 14),
+                                                              autofocus: true,
+                                                              validator: (val) {
+                                                                if (delivery &&
+                                                                    (val == null ||
+                                                                        val.isEmpty)) {
+                                                                  return "Agregá un timbre";
+                                                                } else {
+                                                                  return null;
+                                                                }
+                                                              },
+                                                              inputFormatters: [
+                                                                LengthLimitingTextInputFormatter(
+                                                                    4)
+                                                              ],
+                                                              cursorColor:
+                                                                  Colors.grey,
+                                                              decoration:
+                                                                  InputDecoration(
+                                                                border:
+                                                                    OutlineInputBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              12.0),
+                                                                  borderSide:
+                                                                      const BorderSide(
+                                                                    color: Colors
+                                                                        .grey,
+                                                                  ),
+                                                                ),
+                                                                errorBorder:
+                                                                    OutlineInputBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              12.0),
+                                                                  borderSide:
+                                                                      const BorderSide(
+                                                                    color: Colors
+                                                                        .red,
+                                                                  ),
+                                                                ),
+                                                                focusedBorder:
+                                                                    OutlineInputBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              12.0),
+                                                                  borderSide:
+                                                                      const BorderSide(
+                                                                    color: Colors
+                                                                        .green,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              onChanged: (val) {
+                                                                setState(() =>
+                                                                    apt = val);
+                                                              },
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      )
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 15),
+                                                  //Nro celular
                                                   const Text(
-                                                    'Total',
+                                                    'Nro Whatsapp',
                                                     textAlign: TextAlign.left,
                                                     style: TextStyle(
                                                       color: Colors.black,
-                                                      fontSize: 18.0,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                    ),
-                                                  ),
-                                                  const Spacer(),
-                                                  const Text(
-                                                    'ARS',
-                                                    textAlign: TextAlign.left,
-                                                    style: TextStyle(
-                                                      color: Colors.grey,
                                                       fontSize: 14.0,
                                                       fontWeight:
                                                           FontWeight.w400,
                                                     ),
                                                   ),
-                                                  const SizedBox(width: 10),
-                                                  Text(
-                                                    formatCurrency.format(
-                                                        bloc.totalTicketAmount),
-                                                    textAlign: TextAlign.right,
-                                                    style: const TextStyle(
+                                                  const SizedBox(height: 8),
+                                                  SizedBox(
+                                                    height: 45,
+                                                    width: double.infinity,
+                                                    child: IntlPhoneField(
+                                                      focusNode: phoneNode,
+                                                      keyboardType:
+                                                          TextInputType.number,
+                                                      style: const TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 14),
+                                                      textInputAction:
+                                                          TextInputAction.next,
+                                                      decoration:
+                                                          InputDecoration(
+                                                              focusedBorder:
+                                                                  OutlineInputBorder(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            12.0),
+                                                                borderSide:
+                                                                    const BorderSide(
+                                                                  color: Colors
+                                                                      .green,
+                                                                ),
+                                                              ),
+                                                              border:
+                                                                  OutlineInputBorder(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            12.0),
+                                                                borderSide:
+                                                                    const BorderSide(
+                                                                  color: Colors
+                                                                      .grey,
+                                                                ),
+                                                              )),
+                                                      languageCode: "es",
+                                                      initialCountryCode: 'AR',
+                                                      disableLengthCheck: true,
+                                                      initialValue: '',
+                                                      showCountryFlag: false,
+                                                      inputFormatters: [
+                                                        FilteringTextInputFormatter
+                                                            .digitsOnly
+                                                      ],
+                                                      onChanged: (nO) {
+                                                        setState(() => phone =
+                                                            nO.completeNumber);
+                                                      },
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 15),
+                                                  //Metodo de pago
+                                                  Row(children: [
+                                                    const Text(
+                                                      'Método de pago',
+                                                      textAlign: TextAlign.left,
+                                                      style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 14.0,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 20),
+                                                    Text(
+                                                        (!paymentTypeSelected)
+                                                            ? 'Selecciona un método de pago'
+                                                            : '',
+                                                        style: const TextStyle(
+                                                            color: Colors.red))
+                                                  ]),
+                                                  delivery
+                                                      ? const Padding(
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  top: 8),
+                                                          child: Text(
+                                                            '*El costo del delivery no está incluido en el precio',
+                                                            style: TextStyle(
+                                                                color:
+                                                                    Colors.grey,
+                                                                fontSize: 12),
+                                                          ),
+                                                        )
+                                                      : const SizedBox(),
+                                                  const SizedBox(height: 15),
+                                                  SizedBox(
+                                                    height: 50,
+                                                    width: double.infinity,
+                                                    child: ListView.builder(
+                                                        scrollDirection:
+                                                            Axis.horizontal,
+                                                        itemCount: (delivery)
+                                                            ? deliveryPaymentMethods
+                                                                .length
+                                                            : takeawayPaymentMethods
+                                                                .length,
+                                                        shrinkWrap: true,
+                                                        itemBuilder:
+                                                            (context, i) {
+                                                          List paymentMethods;
+                                                          if (delivery) {
+                                                            paymentMethods =
+                                                                deliveryPaymentMethods;
+                                                          } else {
+                                                            paymentMethods =
+                                                                takeawayPaymentMethods;
+                                                          }
+                                                          return Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                                    horizontal:
+                                                                        3.0),
+                                                            child: InkWell(
+                                                              onTap: () {
+                                                                setState(() {
+                                                                  paymentTypeSelected =
+                                                                      true;
+                                                                  paymentType =
+                                                                      paymentMethods[
+                                                                              i]
+                                                                          [
+                                                                          'Type'];
+                                                                });
+                                                              },
+                                                              child: Padding(
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(
+                                                                        5.0),
+                                                                child:
+                                                                    Container(
+                                                                        padding: const EdgeInsets
+                                                                            .symmetric(
+                                                                            horizontal:
+                                                                                15.0),
+                                                                        decoration:
+                                                                            BoxDecoration(
+                                                                          borderRadius: const BorderRadius
+                                                                              .all(
+                                                                              Radius.circular(8)),
+                                                                          color:
+                                                                              Colors.white,
+                                                                          border: Border.all(
+                                                                              color: (paymentType == paymentMethods[i]['Type']) ? Colors.green : Colors.grey.shade300,
+                                                                              width: 2),
+                                                                        ),
+                                                                        child:
+                                                                            Center(
+                                                                          child:
+                                                                              Text(
+                                                                            paymentMethods[i]['Type'],
+                                                                            style: TextStyle(
+                                                                                color: (paymentType == paymentMethods[i]['Type']) ? Colors.black : Colors.grey,
+                                                                                fontWeight: (paymentType == paymentMethods[i]['Type']) ? FontWeight.bold : FontWeight.w400,
+                                                                                fontSize: 14),
+                                                                          ),
+                                                                        )),
+                                                              ),
+                                                            ),
+                                                          );
+                                                        }),
+                                                  ),
+                                                  const SizedBox(height: 5),
+                                                  //Button
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.end,
+                                                    children: [
+                                                      SizedBox(
+                                                        height: 45,
+                                                        child: OutlinedButton(
+                                                          style: OutlinedButton
+                                                              .styleFrom(
+                                                            foregroundColor:
+                                                                Colors.grey
+                                                                    .shade300,
+                                                            shape:
+                                                                const RoundedRectangleBorder(
+                                                              borderRadius: BorderRadius
+                                                                  .all(Radius
+                                                                      .circular(
+                                                                          12)),
+                                                            ),
+                                                          ),
+                                                          onPressed: () {
+                                                            showDialog(
+                                                                context:
+                                                                    context,
+                                                                builder:
+                                                                    (context) {
+                                                                  return AddDiscountDialog(
+                                                                      widget
+                                                                          .businessID!);
+                                                                });
+                                                          },
+                                                          child: const Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .center,
+                                                            children: [
+                                                              Icon(
+                                                                Icons
+                                                                    .sell_outlined,
+                                                                size: 21,
+                                                                color:
+                                                                    Colors.grey,
+                                                              ),
+                                                              SizedBox(
+                                                                  width: 5),
+                                                              Text(
+                                                                  'Código promocional',
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .grey,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w400)),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 10),
+                                                      SizedBox(
+                                                        height: 45,
+                                                        width: 150,
+                                                        child: OutlinedButton(
+                                                            style:
+                                                                OutlinedButton
+                                                                    .styleFrom(
+                                                              backgroundColor:
+                                                                  Colors.black,
+                                                              side: const BorderSide(
+                                                                  color: Colors
+                                                                      .black,
+                                                                  width: 1),
+                                                            ),
+                                                            onPressed:
+                                                                () async {
+                                                              //%20 = Space //%0A Another Line
+                                                              //%3A = : //%24 = $
+
+                                                              if (_formKey
+                                                                      .currentState!
+                                                                      .validate() &&
+                                                                  paymentType !=
+                                                                      '') {
+                                                                setState(() {
+                                                                  loading =
+                                                                      true;
+                                                                });
+                                                                await DatabaseService()
+                                                                    .assignOrderNumber(
+                                                                        widget
+                                                                            .businessID)
+                                                                    .then(
+                                                                        (orderID) {
+                                                                  if (orderID !=
+                                                                          null &&
+                                                                      orderID !=
+                                                                          '') {
+                                                                    try {
+                                                                      for (var i
+                                                                          in data[
+                                                                              'Items']) {
+                                                                        orderItems =
+                                                                            orderItems +
+                                                                                ('${i['Quantity']} ${i['Name']}%0A');
+                                                                      }
+
+                                                                      orderMessage =
+                                                                          'Nombre: $name %0ADelivery/Retiro: $orderType %0ADirección: $address Timbre: $apt %0ANro. Teléfono: $phone %0AMedio de Pago: $paymentType %0A%0AOrden:%0A$orderItems %0ATotal: ${formatCurrency.format(bloc.totalTicketAmount)}';
+
+                                                                      DatabaseService().saveOrder(
+                                                                          '${widget.businessID}',
+                                                                          orderID,
+                                                                          name,
+                                                                          '$address - $apt',
+                                                                          phone,
+                                                                          data[
+                                                                              'Items'],
+                                                                          paymentType,
+                                                                          bloc
+                                                                              .totalTicketAmount,
+                                                                          orderType,
+                                                                          data[
+                                                                              'Discount'],
+                                                                          data[
+                                                                              'Discount Code']);
+
+                                                                      openWhatsapp(
+                                                                          widget
+                                                                              .businessPhone);
+
+                                                                      bloc.removeAllFromCart();
+
+                                                                      Navigator.push(
+                                                                          context,
+                                                                          MaterialPageRoute(
+                                                                              builder: (context) => OrderSuccessful(widget.businessID)));
+                                                                    } catch (e) {
+                                                                      setState(
+                                                                          () {
+                                                                        loading =
+                                                                            false;
+                                                                      });
+                                                                      showErroronConfirmation();
+                                                                    }
+                                                                  } else {
+                                                                    setState(
+                                                                        () {
+                                                                      loading =
+                                                                          false;
+                                                                    });
+                                                                    showErroronConfirmation();
+                                                                  }
+                                                                });
+                                                              } else if (paymentType ==
+                                                                  '') {
+                                                                setState(() {
+                                                                  loading =
+                                                                      false;
+                                                                  paymentTypeSelected =
+                                                                      false;
+                                                                });
+                                                              }
+                                                            },
+                                                            child:
+                                                                const Padding(
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .all(8.0),
+                                                              child: Center(
+                                                                  child: Text(
+                                                                'Pedir',
+                                                                style: TextStyle(
+                                                                    color: Colors
+                                                                        .white),
+                                                              )),
+                                                            )),
+                                                      ),
+                                                    ],
+                                                  )
+                                                ]),
+                                          ),
+                                        ),
+                                      ),
+
+                                      const SizedBox(width: 40),
+                                      //Items
+                                      Expanded(
+                                        flex: 3,
+                                        child: SizedBox(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.3,
+                                            height: 450,
+                                            child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  //Title
+                                                  const Text(
+                                                    'Mi Pedido',
+                                                    textAlign: TextAlign.left,
+                                                    style: TextStyle(
                                                       color: Colors.black,
                                                       fontSize: 18.0,
                                                       fontWeight:
-                                                          FontWeight.w600,
+                                                          FontWeight.w400,
                                                     ),
                                                   ),
-                                                ],
-                                              ),
-                                              const SizedBox(height: 20),
-                                            ])),
-                                  ),
-                                ]),
+                                                  const SizedBox(height: 15),
+                                                  //List of Products
+                                                  Expanded(
+                                                    child: Container(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              20),
+                                                      child: ListView.builder(
+                                                          shrinkWrap: true,
+                                                          itemCount:
+                                                              data["Items"]
+                                                                  .length,
+                                                          itemBuilder:
+                                                              (context, i) {
+                                                            final cartList =
+                                                                data["Items"];
+
+                                                            final List<String>
+                                                                selectedOptions =
+                                                                [];
+                                                            if (snapshot.data["Items"]
+                                                                            [i][
+                                                                        'Selected Options'] !=
+                                                                    null &&
+                                                                snapshot
+                                                                    .data[
+                                                                        "Items"]
+                                                                        [i][
+                                                                        'Selected Options']
+                                                                    .isNotEmpty) {
+                                                              for (var x = 0;
+                                                                  x <
+                                                                      snapshot
+                                                                          .data[
+                                                                              "Items"]
+                                                                              [
+                                                                              i]
+                                                                              [
+                                                                              'Selected Options']
+                                                                          .length;
+                                                                  x++) {
+                                                                if (snapshot.data["Items"][i]['Selected Options'][x]
+                                                                            [
+                                                                            'Size'] !=
+                                                                        null &&
+                                                                    snapshot.data["Items"][i]['Selected Options'][x]
+                                                                            [
+                                                                            'Size'] !=
+                                                                        '') {
+                                                                  selectedOptions
+                                                                      .add(
+                                                                          '${snapshot.data["Items"][i]['Selected Options'][x]['Selected Options'].join(', ')} | Talle ${snapshot.data["Items"][i]['Selected Options'][x]['Size']}');
+                                                                } else {
+                                                                  selectedOptions
+                                                                      .add(
+                                                                          '${snapshot.data["Items"][i]['Selected Options'][x]['Selected Options'].join(', ')}');
+                                                                }
+                                                              }
+                                                            }
+
+                                                            return Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .only(
+                                                                      bottom:
+                                                                          10.0),
+                                                              child: Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .start,
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .center,
+                                                                  children: [
+                                                                    //Column Name + Qty
+                                                                    Expanded(
+                                                                      child:
+                                                                          Column(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.start,
+                                                                        crossAxisAlignment:
+                                                                            CrossAxisAlignment.start,
+                                                                        children: [
+                                                                          //Name
+                                                                          Container(
+                                                                            constraints:
+                                                                                const BoxConstraints(maxWidth: 150),
+                                                                            child:
+                                                                                Text('${cartList[i]['Name']} (${cartList[i]['Quantity']})'),
+                                                                          ),
+                                                                          //Options
+                                                                          (snapshot.data["Items"][i]['Selected Options'] == null || snapshot.data["Items"][i]['Selected Options'].isEmpty)
+                                                                              ? const SizedBox()
+                                                                              // : SizedBox(),
+                                                                              : Padding(
+                                                                                  padding: const EdgeInsets.symmetric(vertical: 5),
+                                                                                  child: Text(selectedOptions.join(', '), maxLines: 6, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                                                                                ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                    //Amount
+                                                                    const SizedBox(
+                                                                        width:
+                                                                            10),
+                                                                    Text(formatCurrency.format(
+                                                                        cartList[i]
+                                                                            [
+                                                                            'Total Price'])),
+                                                                  ]),
+                                                            );
+                                                          }),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 10),
+                                                  (data['Discount'] != null &&
+                                                          data['Discount'] > 0)
+                                                      ? Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .start,
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .center,
+                                                          children: [
+                                                              const Icon(
+                                                                Icons
+                                                                    .sell_outlined,
+                                                                size: 16,
+                                                                color:
+                                                                    Colors.grey,
+                                                              ),
+                                                              const SizedBox(
+                                                                  width: 5),
+                                                              //Column Name + Qty
+                                                              (snapshot.data[
+                                                                          "Discount Code"] !=
+                                                                      '')
+                                                                  ? Container(
+                                                                      constraints:
+                                                                          const BoxConstraints(
+                                                                              maxWidth: 150),
+                                                                      child:
+                                                                          Text(
+                                                                        snapshot
+                                                                            .data["Discount Code"],
+                                                                        style: TextStyle(
+                                                                            color:
+                                                                                Colors.grey.shade700),
+                                                                      ),
+                                                                    )
+                                                                  : Container(
+                                                                      constraints:
+                                                                          const BoxConstraints(
+                                                                              maxWidth: 150),
+                                                                      child:
+                                                                          Text(
+                                                                        'Descuento',
+                                                                        style: TextStyle(
+                                                                            color:
+                                                                                Colors.grey.shade700),
+                                                                      ),
+                                                                    ),
+                                                              //Amount
+                                                              const Spacer(),
+                                                              Text(
+                                                                  formatCurrency
+                                                                      .format(snapshot
+                                                                              .data[
+                                                                          "Discount"]),
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .grey
+                                                                          .shade700)),
+                                                              const SizedBox(
+                                                                  width: 10),
+                                                              //Delete
+                                                              IconButton(
+                                                                  onPressed:
+                                                                      () => bloc
+                                                                          .setDiscountAmount(
+                                                                              0),
+                                                                  icon: const Icon(
+                                                                      Icons
+                                                                          .close),
+                                                                  iconSize: 14)
+                                                            ])
+                                                      : const SizedBox(),
+                                                  const SizedBox(height: 10),
+                                                  const Divider(
+                                                      color: Colors.grey,
+                                                      thickness: 0.5,
+                                                      indent: 15,
+                                                      endIndent: 15),
+                                                  const SizedBox(height: 10),
+                                                  //Total
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.end,
+                                                    children: [
+                                                      const Text(
+                                                        'Total',
+                                                        textAlign:
+                                                            TextAlign.left,
+                                                        style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 18.0,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                        ),
+                                                      ),
+                                                      const Spacer(),
+                                                      const Text(
+                                                        'ARS',
+                                                        textAlign:
+                                                            TextAlign.left,
+                                                        style: TextStyle(
+                                                          color: Colors.grey,
+                                                          fontSize: 14.0,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 10),
+                                                      Text(
+                                                        formatCurrency.format(bloc
+                                                            .totalTicketAmount),
+                                                        textAlign:
+                                                            TextAlign.right,
+                                                        style: const TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 18.0,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 20),
+                                                ])),
+                                      ),
+                                    ]),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
+                      loading
+                          ? Container(
+                              height: double.infinity,
+                              width: double.infinity,
+                              color: const Color.fromRGBO(158, 158, 158, 0.5),
+                              child: const Loading(),
+                            )
+                          : const SizedBox()
+                    ],
                   ),
                 );
               } else {
@@ -1266,284 +1374,149 @@ class StoreCheckoutState extends State<StoreCheckout> {
                       ),
                       centerTitle: true,
                       actions: const []),
-                  body: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 15, horizontal: 20),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Datos
-                        Expanded(
-                          child: SingleChildScrollView(
-                            child: Form(
-                              key: _formKey,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  //Delivery
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                  body: Stack(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 15, horizontal: 20),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // Datos
+                            Expanded(
+                              child: SingleChildScrollView(
+                                child: Form(
+                                  key: _formKey,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      SizedBox(
-                                        height: 45,
-                                        width: 100,
-                                        child: ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: delivery
-                                                ? Colors.white
-                                                : Colors.greenAccent[400],
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8),
-                                            shape: const RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.only(
-                                                  topLeft: Radius.circular(8),
-                                                  bottomLeft:
-                                                      Radius.circular(8)),
+                                      //Delivery
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          SizedBox(
+                                            height: 45,
+                                            width: 100,
+                                            child: ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: delivery
+                                                    ? Colors.white
+                                                    : Colors.greenAccent[400],
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 8),
+                                                shape:
+                                                    const RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.only(
+                                                          topLeft: Radius
+                                                              .circular(8),
+                                                          bottomLeft:
+                                                              Radius.circular(
+                                                                  8)),
+                                                ),
+                                              ),
+                                              onPressed: () {
+                                                setState(() {
+                                                  delivery = false;
+                                                  address = '';
+                                                  apt = '';
+                                                  orderType = 'Takeaway';
+                                                });
+                                              },
+                                              child: Center(
+                                                  child: Text('Retiro',
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                        color: delivery
+                                                            ? Colors.grey
+                                                            : Colors.white,
+                                                      ))),
                                             ),
                                           ),
-                                          onPressed: () {
-                                            setState(() {
-                                              delivery = false;
-                                              address = '';
-                                              apt = '';
-                                              orderType = 'Takeaway';
-                                            });
-                                          },
-                                          child: Center(
-                                              child: Text('Retiro',
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    color: delivery
-                                                        ? Colors.grey
-                                                        : Colors.white,
-                                                  ))),
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        width: 100,
-                                        height: 45,
-                                        child: ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: delivery
-                                                ? Colors.greenAccent[400]
-                                                : Colors.white,
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8),
-                                            shape: const RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.only(
-                                                  topRight: Radius.circular(8),
-                                                  bottomRight:
-                                                      Radius.circular(8)),
+                                          SizedBox(
+                                            width: 100,
+                                            height: 45,
+                                            child: ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: delivery
+                                                    ? Colors.greenAccent[400]
+                                                    : Colors.white,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 8),
+                                                shape:
+                                                    const RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.only(
+                                                          topRight: Radius
+                                                              .circular(8),
+                                                          bottomRight:
+                                                              Radius.circular(
+                                                                  8)),
+                                                ),
+                                              ),
+                                              onPressed: () {
+                                                setState(() {
+                                                  delivery = true;
+                                                  orderType = 'Delivery';
+                                                });
+                                              },
+                                              child: Center(
+                                                  child: Text('Delivery',
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                        color: delivery
+                                                            ? Colors.white
+                                                            : Colors.grey,
+                                                      ))),
                                             ),
                                           ),
-                                          onPressed: () {
-                                            setState(() {
-                                              delivery = true;
-                                              orderType = 'Delivery';
-                                            });
-                                          },
-                                          child: Center(
-                                              child: Text('Delivery',
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    color: delivery
-                                                        ? Colors.white
-                                                        : Colors.grey,
-                                                  ))),
-                                        ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 20),
-                                  //Name
-                                  TextFormField(
-                                    focusNode: nameNode,
-                                    autofocus: true,
-                                    validator: (val) {
-                                      if (val == null || val.isEmpty) {
-                                        return "Agregá un nombre";
-                                      } else {
-                                        return null;
-                                      }
-                                    },
-                                    inputFormatters: [
-                                      LengthLimitingTextInputFormatter(45)
-                                    ],
-                                    cursorColor: Colors.grey,
-                                    style: const TextStyle(
-                                        color: Colors.black, fontSize: 14),
-                                    decoration: InputDecoration(
-                                      label: const Text('Nombre y apellido'),
-                                      labelStyle: const TextStyle(
-                                          color: Colors.grey, fontSize: 12),
-                                      border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
-                                        borderSide: const BorderSide(
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                      errorBorder: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
-                                        borderSide: const BorderSide(
-                                          color: Colors.red,
-                                        ),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
-                                        borderSide: const BorderSide(
-                                          color: Colors.green,
-                                        ),
-                                      ),
-                                    ),
-                                    keyboardType: TextInputType.text,
-                                    onChanged: (val) {
-                                      setState(() => name = val);
-                                    },
-                                    textInputAction: TextInputAction.next,
-                                    onEditingComplete: () {
-                                      nameNode.unfocus();
-                                      addressNode.requestFocus();
-                                    },
-                                  ),
-                                  const SizedBox(height: 20),
-                                  //Direccion
-                                  (delivery)
-                                      ? TextFormField(
-                                          focusNode: addressNode,
-                                          textAlign: TextAlign.left,
-                                          style: const TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 14),
-                                          autofocus: true,
-                                          validator: (val) {
-                                            if (delivery &&
-                                                (val == null || val.isEmpty)) {
-                                              return "No olvides agregar una dirección";
-                                            } else {
-                                              return null;
-                                            }
-                                          },
-                                          inputFormatters: [
-                                            LengthLimitingTextInputFormatter(45)
-                                          ],
-                                          cursorColor: Colors.grey,
-                                          textInputAction: TextInputAction.next,
-                                          decoration: InputDecoration(
-                                            label: const Text('Dirección'),
-                                            labelStyle: const TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 12),
-                                            border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12.0),
-                                              borderSide: const BorderSide(
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                            errorBorder: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12.0),
-                                              borderSide: const BorderSide(
-                                                color: Colors.red,
-                                              ),
-                                            ),
-                                            focusedBorder: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12.0),
-                                              borderSide: const BorderSide(
-                                                color: Colors.green,
-                                              ),
+                                      const SizedBox(height: 20),
+                                      //Name
+                                      TextFormField(
+                                        focusNode: nameNode,
+                                        autofocus: true,
+                                        validator: (val) {
+                                          if (val == null || val.isEmpty) {
+                                            return "Agregá un nombre";
+                                          } else {
+                                            return null;
+                                          }
+                                        },
+                                        inputFormatters: [
+                                          LengthLimitingTextInputFormatter(45)
+                                        ],
+                                        cursorColor: Colors.grey,
+                                        style: const TextStyle(
+                                            color: Colors.black, fontSize: 14),
+                                        decoration: InputDecoration(
+                                          label:
+                                              const Text('Nombre y apellido'),
+                                          labelStyle: const TextStyle(
+                                              color: Colors.grey, fontSize: 12),
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12.0),
+                                            borderSide: const BorderSide(
+                                              color: Colors.grey,
                                             ),
                                           ),
-                                          keyboardType: TextInputType.text,
-                                          onChanged: (val) {
-                                            setState(() => address = val);
-                                          },
-                                          onEditingComplete: () {
-                                            addressNode.unfocus();
-                                            aptNode.requestFocus();
-                                          },
-                                        )
-                                      : const SizedBox(),
-                                  SizedBox(height: delivery ? 20 : 0),
-                                  //Dpto (timbre)
-                                  (delivery)
-                                      ? TextFormField(
-                                          focusNode: aptNode,
-                                          textAlign: TextAlign.left,
-                                          style: const TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 14),
-                                          autofocus: true,
-                                          validator: (val) {
-                                            if (delivery &&
-                                                (val == null || val.isEmpty)) {
-                                              return "Agregá un nro de timbre";
-                                            } else {
-                                              return null;
-                                            }
-                                          },
-                                          inputFormatters: [
-                                            LengthLimitingTextInputFormatter(45)
-                                          ],
-                                          cursorColor: Colors.grey,
-                                          decoration: InputDecoration(
-                                            label: const Text('Timbre/Dpto'),
-                                            labelStyle: const TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 12),
-                                            border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12.0),
-                                              borderSide: const BorderSide(
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                            errorBorder: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12.0),
-                                              borderSide: const BorderSide(
-                                                color: Colors.red,
-                                              ),
-                                            ),
-                                            focusedBorder: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12.0),
-                                              borderSide: const BorderSide(
-                                                color: Colors.green,
-                                              ),
+                                          errorBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12.0),
+                                            borderSide: const BorderSide(
+                                              color: Colors.red,
                                             ),
                                           ),
-                                          textInputAction: TextInputAction.next,
-                                          keyboardType: TextInputType.text,
-                                          onChanged: (val) {
-                                            setState(() => apt = val);
-                                          },
-                                          onEditingComplete: () {
-                                            aptNode.unfocus();
-                                            phoneNode.requestFocus();
-                                          },
-                                        )
-                                      : const SizedBox(),
-                                  SizedBox(height: delivery ? 20 : 0),
-                                  //Nro celular
-                                  SizedBox(
-                                    height: 45,
-                                    width: double.infinity,
-                                    child: IntlPhoneField(
-                                      focusNode: phoneNode,
-                                      keyboardType: TextInputType.number,
-                                      style: const TextStyle(
-                                          color: Colors.black, fontSize: 14),
-                                      textInputAction: TextInputAction.next,
-                                      decoration: InputDecoration(
                                           focusedBorder: OutlineInputBorder(
                                             borderRadius:
                                                 BorderRadius.circular(12.0),
@@ -1551,241 +1524,452 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                               color: Colors.green,
                                             ),
                                           ),
-                                          border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(12.0),
-                                            borderSide: const BorderSide(
-                                              color: Colors.grey,
-                                            ),
-                                          )),
-                                      languageCode: "es",
-                                      initialCountryCode: 'AR',
-                                      disableLengthCheck: true,
-                                      initialValue: '',
-                                      showCountryFlag: false,
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.digitsOnly
-                                      ],
-                                      onChanged: (nO) {
-                                        setState(
-                                            () => phone = nO.completeNumber);
-                                      },
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  //Metodo de pago
-                                  const Text(
-                                    'Método de pago',
-                                    textAlign: TextAlign.left,
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 14.0,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                  delivery
-                                      ? const Padding(
-                                          padding: EdgeInsets.only(top: 8),
-                                          child: Text(
-                                            '*El costo del delivery no está incluido en el precio',
-                                            style: TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 12),
-                                          ),
-                                        )
-                                      : const SizedBox(),
-                                  const SizedBox(height: 15),
-                                  SizedBox(
-                                    height: 50,
-                                    width: double.infinity,
-                                    child: ListView.builder(
-                                        scrollDirection: Axis.horizontal,
-                                        itemCount: (delivery)
-                                            ? deliveryPaymentMethods.length
-                                            : takeawayPaymentMethods.length,
-                                        shrinkWrap: true,
-                                        itemBuilder: (context, i) {
-                                          List paymentMethods;
-                                          if (delivery) {
-                                            paymentMethods =
-                                                deliveryPaymentMethods;
-                                          } else {
-                                            paymentMethods =
-                                                takeawayPaymentMethods;
-                                          }
-                                          return Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 3.0),
-                                            child: InkWell(
-                                              onTap: () {
-                                                setState(() {
-                                                  paymentTypeSelected = true;
-                                                  paymentType =
-                                                      paymentMethods[i]['Type'];
-                                                });
+                                        ),
+                                        keyboardType: TextInputType.text,
+                                        onChanged: (val) {
+                                          setState(() => name = val);
+                                        },
+                                        textInputAction: TextInputAction.next,
+                                        onEditingComplete: () {
+                                          nameNode.unfocus();
+                                          addressNode.requestFocus();
+                                        },
+                                      ),
+                                      const SizedBox(height: 20),
+                                      //Direccion
+                                      (delivery)
+                                          ? TextFormField(
+                                              focusNode: addressNode,
+                                              textAlign: TextAlign.left,
+                                              style: const TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 14),
+                                              autofocus: true,
+                                              validator: (val) {
+                                                if (delivery &&
+                                                    (val == null ||
+                                                        val.isEmpty)) {
+                                                  return "No olvides agregar una dirección";
+                                                } else {
+                                                  return null;
+                                                }
                                               },
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(5.0),
-                                                child: Container(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        horizontal: 15.0),
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          const BorderRadius
-                                                              .all(
-                                                              Radius.circular(
-                                                                  8)),
-                                                      color: Colors.white,
-                                                      border: Border.all(
-                                                          color: (paymentType ==
-                                                                  paymentMethods[
-                                                                          i]
-                                                                      ['Type'])
-                                                              ? Colors.green
-                                                              : Colors.grey
-                                                                  .shade300,
-                                                          width: 2),
-                                                    ),
-                                                    child: Center(
-                                                      child: Text(
-                                                        paymentMethods[i]
-                                                            ['Type'],
-                                                        style: TextStyle(
-                                                            color: (paymentType ==
-                                                                    paymentMethods[
-                                                                            i][
-                                                                        'Type'])
-                                                                ? Colors.black
-                                                                : Colors.grey,
-                                                            fontWeight: (paymentType ==
-                                                                    paymentMethods[
-                                                                            i][
-                                                                        'Type'])
-                                                                ? FontWeight
-                                                                    .bold
-                                                                : FontWeight
-                                                                    .w400,
-                                                            fontSize: 14),
-                                                      ),
-                                                    )),
+                                              inputFormatters: [
+                                                LengthLimitingTextInputFormatter(
+                                                    45)
+                                              ],
+                                              cursorColor: Colors.grey,
+                                              textInputAction:
+                                                  TextInputAction.next,
+                                              decoration: InputDecoration(
+                                                label: const Text('Dirección'),
+                                                labelStyle: const TextStyle(
+                                                    color: Colors.grey,
+                                                    fontSize: 12),
+                                                border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          12.0),
+                                                  borderSide: const BorderSide(
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                                errorBorder: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          12.0),
+                                                  borderSide: const BorderSide(
+                                                    color: Colors.red,
+                                                  ),
+                                                ),
+                                                focusedBorder:
+                                                    OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          12.0),
+                                                  borderSide: const BorderSide(
+                                                    color: Colors.green,
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                          );
-                                        }),
+                                              keyboardType: TextInputType.text,
+                                              onChanged: (val) {
+                                                setState(() => address = val);
+                                              },
+                                              onEditingComplete: () {
+                                                addressNode.unfocus();
+                                                aptNode.requestFocus();
+                                              },
+                                            )
+                                          : const SizedBox(),
+                                      SizedBox(height: delivery ? 20 : 0),
+                                      //Dpto (timbre)
+                                      (delivery)
+                                          ? TextFormField(
+                                              focusNode: aptNode,
+                                              textAlign: TextAlign.left,
+                                              style: const TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 14),
+                                              autofocus: true,
+                                              validator: (val) {
+                                                if (delivery &&
+                                                    (val == null ||
+                                                        val.isEmpty)) {
+                                                  return "Agregá un nro de timbre";
+                                                } else {
+                                                  return null;
+                                                }
+                                              },
+                                              inputFormatters: [
+                                                LengthLimitingTextInputFormatter(
+                                                    45)
+                                              ],
+                                              cursorColor: Colors.grey,
+                                              decoration: InputDecoration(
+                                                label:
+                                                    const Text('Timbre/Dpto'),
+                                                labelStyle: const TextStyle(
+                                                    color: Colors.grey,
+                                                    fontSize: 12),
+                                                border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          12.0),
+                                                  borderSide: const BorderSide(
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                                errorBorder: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          12.0),
+                                                  borderSide: const BorderSide(
+                                                    color: Colors.red,
+                                                  ),
+                                                ),
+                                                focusedBorder:
+                                                    OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          12.0),
+                                                  borderSide: const BorderSide(
+                                                    color: Colors.green,
+                                                  ),
+                                                ),
+                                              ),
+                                              textInputAction:
+                                                  TextInputAction.next,
+                                              keyboardType: TextInputType.text,
+                                              onChanged: (val) {
+                                                setState(() => apt = val);
+                                              },
+                                              onEditingComplete: () {
+                                                aptNode.unfocus();
+                                                phoneNode.requestFocus();
+                                              },
+                                            )
+                                          : const SizedBox(),
+                                      SizedBox(height: delivery ? 20 : 0),
+                                      //Nro celular
+                                      SizedBox(
+                                        height: 45,
+                                        width: double.infinity,
+                                        child: IntlPhoneField(
+                                          focusNode: phoneNode,
+                                          keyboardType: TextInputType.number,
+                                          style: const TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 14),
+                                          textInputAction: TextInputAction.next,
+                                          decoration: InputDecoration(
+                                              focusedBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12.0),
+                                                borderSide: const BorderSide(
+                                                  color: Colors.green,
+                                                ),
+                                              ),
+                                              border: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12.0),
+                                                borderSide: const BorderSide(
+                                                  color: Colors.grey,
+                                                ),
+                                              )),
+                                          languageCode: "es",
+                                          initialCountryCode: 'AR',
+                                          disableLengthCheck: true,
+                                          initialValue: '',
+                                          showCountryFlag: false,
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter
+                                                .digitsOnly
+                                          ],
+                                          onChanged: (nO) {
+                                            setState(() =>
+                                                phone = nO.completeNumber);
+                                          },
+                                        ),
+                                      ),
+                                      const SizedBox(height: 20),
+                                      //Metodo de pago
+                                      const Text(
+                                        'Método de pago',
+                                        textAlign: TextAlign.left,
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 14.0,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                      delivery
+                                          ? const Padding(
+                                              padding: EdgeInsets.only(top: 8),
+                                              child: Text(
+                                                '*El costo del delivery no está incluido en el precio',
+                                                style: TextStyle(
+                                                    color: Colors.grey,
+                                                    fontSize: 12),
+                                              ),
+                                            )
+                                          : const SizedBox(),
+                                      const SizedBox(height: 15),
+                                      SizedBox(
+                                        height: 50,
+                                        width: double.infinity,
+                                        child: ListView.builder(
+                                            scrollDirection: Axis.horizontal,
+                                            itemCount: (delivery)
+                                                ? deliveryPaymentMethods.length
+                                                : takeawayPaymentMethods.length,
+                                            shrinkWrap: true,
+                                            itemBuilder: (context, i) {
+                                              List paymentMethods;
+                                              if (delivery) {
+                                                paymentMethods =
+                                                    deliveryPaymentMethods;
+                                              } else {
+                                                paymentMethods =
+                                                    takeawayPaymentMethods;
+                                              }
+                                              return Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 3.0),
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    setState(() {
+                                                      paymentTypeSelected =
+                                                          true;
+                                                      paymentType =
+                                                          paymentMethods[i]
+                                                              ['Type'];
+                                                    });
+                                                  },
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            5.0),
+                                                    child: Container(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                horizontal:
+                                                                    15.0),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          borderRadius:
+                                                              const BorderRadius
+                                                                  .all(Radius
+                                                                      .circular(
+                                                                          8)),
+                                                          color: Colors.white,
+                                                          border: Border.all(
+                                                              color: (paymentType ==
+                                                                      paymentMethods[
+                                                                              i]
+                                                                          [
+                                                                          'Type'])
+                                                                  ? Colors.green
+                                                                  : Colors.grey
+                                                                      .shade300,
+                                                              width: 2),
+                                                        ),
+                                                        child: Center(
+                                                          child: Text(
+                                                            paymentMethods[i]
+                                                                ['Type'],
+                                                            style: TextStyle(
+                                                                color: (paymentType ==
+                                                                        paymentMethods[i]
+                                                                            [
+                                                                            'Type'])
+                                                                    ? Colors
+                                                                        .black
+                                                                    : Colors
+                                                                        .grey,
+                                                                fontWeight: (paymentType ==
+                                                                        paymentMethods[i]
+                                                                            [
+                                                                            'Type'])
+                                                                    ? FontWeight
+                                                                        .bold
+                                                                    : FontWeight
+                                                                        .w400,
+                                                                fontSize: 14),
+                                                          ),
+                                                        )),
+                                                  ),
+                                                ),
+                                              );
+                                            }),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        //Coupon
-                        const SizedBox(height: 10),
-                        SizedBox(
-                          height: 40,
-                          width: double.infinity,
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.grey.shade300,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(12)),
-                              ),
-                            ),
-                            onPressed: () {
-                              showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return AddDiscountDialog(
-                                        widget.businessID!);
-                                  });
-                            },
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.sell_outlined,
-                                  size: 21,
-                                  color: Colors.grey,
                                 ),
-                                const SizedBox(width: 5),
-                                Text(
-                                    (data['Discount'] != null &&
-                                            data['Discount'] > 0)
-                                        ? '${snapshot.data["Discount Code"]} (${formatCurrency.format(snapshot.data["Discount"])})'
-                                        : 'Código promocional',
-                                    style: const TextStyle(
-                                        color: Colors.grey,
-                                        fontWeight: FontWeight.w400)),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        //Button
-                        SizedBox(
-                          height: 45,
-                          width: double.infinity,
-                          child: OutlinedButton(
-                              style: OutlinedButton.styleFrom(
-                                backgroundColor: Colors.black,
-                                side: const BorderSide(
-                                    color: Colors.black, width: 1),
                               ),
-                              onPressed: () {
-                                //%20 = Space //%0A Another Line
-                                //%3A = : //%24 = $
+                            ),
+                            //Coupon
+                            const SizedBox(height: 10),
+                            SizedBox(
+                              height: 40,
+                              width: double.infinity,
+                              child: OutlinedButton(
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.grey.shade300,
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(12)),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AddDiscountDialog(
+                                            widget.businessID!);
+                                      });
+                                },
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.sell_outlined,
+                                      size: 21,
+                                      color: Colors.grey,
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                        (data['Discount'] != null &&
+                                                data['Discount'] > 0)
+                                            ? '${snapshot.data["Discount Code"]} (${formatCurrency.format(snapshot.data["Discount"])})'
+                                            : 'Código promocional',
+                                        style: const TextStyle(
+                                            color: Colors.grey,
+                                            fontWeight: FontWeight.w400)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            //Button
+                            SizedBox(
+                              height: 45,
+                              width: double.infinity,
+                              child: OutlinedButton(
+                                  style: OutlinedButton.styleFrom(
+                                    backgroundColor: Colors.black,
+                                    side: const BorderSide(
+                                        color: Colors.black, width: 1),
+                                  ),
+                                  onPressed: () async {
+                                    //%20 = Space //%0A Another Line
+                                    //%3A = : //%24 = $
 
-                                if (_formKey.currentState!.validate() &&
-                                    paymentType != '') {
-                                  for (var i in data['Items']) {
-                                    orderItems = orderItems +
-                                        ('${i['Quantity']} ${i['Name']}%0A');
-                                  }
+                                    if (_formKey.currentState!.validate() &&
+                                        paymentType != '') {
+                                      setState(() {
+                                        loading = true;
+                                      });
+                                      await DatabaseService()
+                                          .assignOrderNumber(widget.businessID)
+                                          .then((orderID) {
+                                        if (orderID != null && orderID != '') {
+                                          try {
+                                            for (var i in data['Items']) {
+                                              orderItems = orderItems +
+                                                  ('${i['Quantity']} ${i['Name']}%0A');
+                                            }
 
-                                  DatabaseService().saveOrder(
-                                      '${widget.businessID}',
-                                      name,
-                                      '$address - $apt',
-                                      phone,
-                                      data['Items'],
-                                      paymentType,
-                                      bloc.totalTicketAmount,
-                                      orderType,
-                                      data['Discount'],
-                                      data['Discount Code']);
+                                            DatabaseService().saveOrder(
+                                                '${widget.businessID}',
+                                                orderID,
+                                                name,
+                                                '$address - $apt',
+                                                phone,
+                                                data['Items'],
+                                                paymentType,
+                                                bloc.totalTicketAmount,
+                                                orderType,
+                                                data['Discount'],
+                                                data['Discount Code']);
 
-                                  orderMessage =
-                                      'Nombre: $name %0ADelivery/Retiro: $orderType %0ADirección: $address Timbre: $apt %0ANro. Teléfono: $phone %0AMedio de Pago: $paymentType %0A%0AOrden:%0A$orderItems %0ATotal: ${formatCurrency.format(bloc.totalTicketAmount)}';
+                                            orderMessage =
+                                                'Nombre: $name %0ADelivery/Retiro: $orderType %0ADirección: $address Timbre: $apt %0ANro. Teléfono: $phone %0AMedio de Pago: $paymentType %0A%0AOrden:%0A$orderItems %0ATotal: ${formatCurrency.format(bloc.totalTicketAmount)}';
 
-                                  openWhatsapp(widget.businessPhone);
-                                  //Create order in Firestore "Saved"
+                                            openWhatsapp(widget.businessPhone);
+                                            //Create order in Firestore "Saved"
 
-                                  bloc.removeAllFromCart();
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => OrderSuccessful(
-                                              widget.businessID)));
-                                } else if (paymentType == '') {
-                                  setState(() {
-                                    paymentTypeSelected = false;
-                                  });
-                                }
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Center(
-                                    child: Text(
-                                  'Pedir (${formatCurrency.format(bloc.totalTicketAmount)})',
-                                  style: const TextStyle(color: Colors.white),
-                                )),
-                              )),
+                                            bloc.removeAllFromCart();
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        OrderSuccessful(widget
+                                                            .businessID)));
+                                          } catch (e) {
+                                            setState(() {
+                                              loading = false;
+                                            });
+                                            showErroronConfirmation();
+                                          }
+                                        } else {
+                                          setState(() {
+                                            loading = false;
+                                          });
+                                          showErroronConfirmation();
+                                        }
+                                      });
+                                    } else if (paymentType == '') {
+                                      setState(() {
+                                        paymentTypeSelected = false;
+                                      });
+                                    }
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Center(
+                                        child: Text(
+                                      'Pedir (${formatCurrency.format(bloc.totalTicketAmount)})',
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                    )),
+                                  )),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                      loading
+                          ? Container(
+                              height: double.infinity,
+                              width: double.infinity,
+                              color: const Color.fromRGBO(158, 158, 158, 0.5),
+                              child: const Loading(),
+                            )
+                          : const SizedBox()
+                    ],
                   ),
                 );
               }
@@ -2379,7 +2563,8 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                                       email,
                                                       phone,
                                                       reservationTime,
-                                                      pageController),
+                                                      pageController,
+                                                      showErroronConfirmation),
                                                 ],
                                               )
                                             ]),
@@ -2650,13 +2835,11 @@ class StoreCheckoutState extends State<StoreCheckout> {
                       //Loading?
                       loading
                           ? Container(
-                              width: double.infinity,
                               height: double.infinity,
-                              color: Colors.grey.withValues(alpha: 0.5),
-                              child: Center(
-                                  child: CircularProgressIndicator(
-                                color: Colors.blueGrey.shade900,
-                              )))
+                              width: double.infinity,
+                              color: const Color.fromRGBO(158, 158, 158, 0.5),
+                              child: const Loading(),
+                            )
                           : const SizedBox()
                     ],
                   ),
@@ -2815,7 +2998,8 @@ class StoreCheckoutState extends State<StoreCheckout> {
                                     email,
                                     phone,
                                     reservationTime,
-                                    pageController),
+                                    pageController,
+                                    showErroronConfirmation),
                               ],
                             ),
                           ),
@@ -3213,13 +3397,11 @@ class StoreCheckoutState extends State<StoreCheckout> {
                       //Loading?
                       loading
                           ? Container(
-                              width: double.infinity,
                               height: double.infinity,
-                              color: Colors.grey.withValues(alpha:0.5),
-                              child: Center(
-                                  child: CircularProgressIndicator(
-                                color: Colors.blueGrey.shade900,
-                              )))
+                              width: double.infinity,
+                              color: const Color.fromRGBO(158, 158, 158, 0.5),
+                              child: const Loading(),
+                            )
                           : const SizedBox()
                     ],
                   ),

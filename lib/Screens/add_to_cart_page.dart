@@ -332,6 +332,10 @@ class _AddToCartPageState extends State<AddToCartPage> {
       }
     }
 
+    if((widget.product.controlStock ?? false) && (widget.product.currentStock ?? 0) > 0){
+      productStock = widget.product.currentStock;
+    }
+
     super.initState();
   }
 

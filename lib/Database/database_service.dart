@@ -248,13 +248,13 @@ class DatabaseService {
   }
 
   //Create Order
-  Future createOrder(String businessID, orderName, address, phone, orderDetail,
+  Future createOrder(String businessID, String orderID, orderName, address, phone, orderDetail,
       paymentType, total, String orderType, discount, discountCode) async {
     return await FirebaseFirestore.instance
         .collection('ERP')
         .doc(businessID)
         .collection('Pending')
-        .doc(DateTime.now().toString())
+        .doc(orderID)
         .set({
       'Order Name': orderName,
       'Address': address,
@@ -270,7 +270,7 @@ class DatabaseService {
     });
   }
 
-  void saveOrder(String businessID, orderName, address, phone, orderDetail,
+  void saveOrder(String businessID, String orderID,  orderName, address, phone, orderDetail,
       paymentType, total, String orderType, discount, discountCode) async {
     /////////////////////////// Update Product Stock ///////////////////////////
 
@@ -342,7 +342,7 @@ class DatabaseService {
       }
     }
 
-    createOrder(businessID, orderName, address, phone, orderDetail, paymentType,
+    createOrder(businessID, orderID, orderName, address, phone, orderDetail, paymentType,
         total, orderType, discount, discountCode);
   }
 
@@ -444,5 +444,13 @@ class DatabaseService {
         initialPayment,
         remainingBalance,
         note);
+  }
+
+  Future<String?> assignOrderNumber(activeBusiness) async {
+    String orderNo = '${DateTime.now().day} ${DateTime.now().millisecond}';
+    int currentOrderYear = DateTime.now().year;
+    int currentOrderMonth = DateTime.now().month;
+    
+     return '$currentOrderYear${(currentOrderMonth < 10) ? '0' : ''}$currentOrderMonth - $orderNo';
   }
 }

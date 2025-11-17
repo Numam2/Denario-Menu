@@ -329,6 +329,11 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
         mandatoryOptions[widget.product.productOptions[i].title] = false;
       }
     }
+    
+    if((widget.product.controlStock ?? false) && (widget.product.currentStock ?? 0) > 0){
+      productStock = widget.product.currentStock;
+    }
+
     super.initState();
   }
 
@@ -1181,7 +1186,7 @@ class _AddToCartDialogState extends State<AddToCartDialog> {
                                   ),
                                   onPressed: () {
                                     if (mandatoryOptionsCompleted() &&
-                                        !(widget.product.controlStock! &&
+                                        !((widget.product.controlStock ?? false) &&
                                             (productStock == null ||
                                                 productStock! < 1))) {
                                       if (quantity > 0) {

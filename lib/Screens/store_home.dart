@@ -34,9 +34,8 @@ class _StoreHomeState extends State<StoreHome> {
   int businessPhone = 0;
   void openLink(rrss) {
     if (rrss['Social Media'] == 'Whatsapp') {
-      String formattedForWaMe = rrss['Link']
-          .replaceAll(' ', '')
-          .replaceAll('-', '');
+      String formattedForWaMe =
+          rrss['Link'].replaceAll(' ', '').replaceAll('-', '');
       var whatsapp = Uri.parse("https://wa.me/$formattedForWaMe?text=Hola!");
       launchUrl(whatsapp);
     } else {
@@ -133,7 +132,9 @@ class _StoreHomeState extends State<StoreHome> {
                 SizedBox(height: 15),
                 SizedBox(
                   height: 50,
-                  width: (MediaQuery.of(context).size.width > 850) ? 250 : double.infinity,
+                  width: (MediaQuery.of(context).size.width > 850)
+                      ? 250
+                      : double.infinity,
                   child: ElevatedButton(
                     style: ButtonStyle(
                       backgroundColor: WidgetStateProperty.all<Color>(
@@ -754,177 +755,157 @@ class _StoreHomeState extends State<StoreHome> {
                   : SliverToBoxAdapter(),
               //Categories
               (display == 'Categorized')
-                  ? SliverAppBar(
-                      backgroundColor: Theme.of(context).colorScheme.surface,
-                      elevation: 5,
-                      pinned: true,
-                      automaticallyImplyLeading: false,
-                      actions: <Widget>[Container()],
-                      flexibleSpace: (searchByName)
-                          ? Row(
-                              children: [
-                                SizedBox(
-                                  width: MediaQuery.of(context).size.width > 600
-                                      ? 500
-                                      : double.infinity,
-                                  height: 50,
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10.0),
-                                    child: TextFormField(
-                                      style: TextStyle(
-                                          color: Colors.black, fontSize: 14),
-                                      validator: (val) => val!.isEmpty
-                                          ? "Agrega un nombre"
-                                          : null,
-                                      expands: false,
-                                      autofocus: true,
-                                      cursorColor: Colors.grey,
-                                      cursorHeight: 18,
-                                      initialValue: '',
-                                      textInputAction: TextInputAction.next,
-                                      decoration: InputDecoration(
-                                        prefixIcon: Icon(
-                                          Icons.search,
-                                          color: Colors.grey,
-                                          size: 16,
-                                        ),
-                                        suffixIcon: IconButton(
-                                            tooltip: 'Cerrar',
-                                            splashRadius: 25,
-                                            onPressed: () {
-                                              setState(() {
-                                                searchByName = false;
-                                                searchName = '';
-                                              });
-                                            },
-                                            icon: Icon(
-                                              Icons.close,
-                                              size: 16,
-                                              color: Colors.grey,
-                                            )),
-                                        errorStyle: TextStyle(
-                                            color: Colors.redAccent[700],
-                                            fontSize: 12),
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12.0),
-                                          borderSide: BorderSide(
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12.0),
-                                          borderSide: BorderSide(
-                                            color: Colors.green,
-                                          ),
-                                        ),
-                                      ),
-                                      onChanged: (val) {
-                                        setState(() => searchName = val);
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Row(
-                              children: [
-                                //Search
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 5.0),
-                                  child: IconButton(
-                                      tooltip: 'Buscar',
-                                      splashRadius: 25,
-                                      onPressed: () {
-                                        setState(() {
-                                          searchByName = true;
-                                        });
-                                      },
-                                      icon: Icon(Icons.search, size: 16)),
-                                ),
-                                //List
-                                Expanded(
-                                  child: SizedBox(
+                  ? SliverToBoxAdapter(
+                      child: (searchByName)
+                          ? Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: MediaQuery.of(context).size.width >
+                                            600
+                                        ? 500
+                                        : MediaQuery.of(context).size.width *
+                                            0.9,
                                     height: 50,
-                                    child: ListView.builder(
-                                        shrinkWrap: true,
-                                        physics: BouncingScrollPhysics(),
-                                        scrollDirection: Axis.horizontal,
-                                        itemCount: categories.length,
-                                        itemBuilder: (context, i) {
-                                          return Padding(
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 5, vertical: 5),
-                                            child: TextButton(
-                                              style: ButtonStyle(
-                                                backgroundColor:
-                                                    (selectedCategory ==
-                                                            categories[i])
-                                                        ? WidgetStateProperty
-                                                            .all<Color>(
-                                                                Colors.black)
-                                                        : WidgetStateProperty
-                                                            .all<Color>(Colors
-                                                                .transparent),
-                                                overlayColor:
-                                                    WidgetStateProperty
-                                                        .resolveWith<Color>(
-                                                  (Set<WidgetState> states) {
-                                                    if (states.contains(
-                                                        WidgetState.hovered)) {
-                                                      return Colors
-                                                          .grey.shade300;
-                                                    }
-                                                    if (states.contains(
-                                                            WidgetState
-                                                                .focused) ||
-                                                        states.contains(
-                                                            WidgetState
-                                                                .pressed)) {
-                                                      return Colors
-                                                          .grey.shade200;
-                                                    }
-                                                    return Colors
-                                                        .black; // Defer to the widget's default.
-                                                  },
-                                                ),
-                                              ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10.0),
+                                      child: TextFormField(
+                                        style: TextStyle(
+                                            color: Colors.black, fontSize: 14),
+                                        validator: (val) => val!.isEmpty
+                                            ? "Agrega un nombre"
+                                            : null,
+                                        expands: false,
+                                        autofocus: true,
+                                        cursorColor: Colors.grey,
+                                        cursorHeight: 18,
+                                        initialValue: '',
+                                        textInputAction: TextInputAction.next,
+                                        decoration: InputDecoration(
+                                          prefixIcon: Icon(
+                                            Icons.search,
+                                            color: Colors.grey,
+                                            size: 16,
+                                          ),
+                                          suffixIcon: IconButton(
+                                              tooltip: 'Cerrar',
+                                              splashRadius: 25,
                                               onPressed: () {
                                                 setState(() {
-                                                  selectedCategory =
-                                                      categories[i];
-                                                  firstLoad = false;
+                                                  searchByName = false;
+                                                  searchName = '';
                                                 });
                                               },
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        vertical: 5.0,
-                                                        horizontal: 10),
-                                                child: Center(
-                                                  child: Text(
-                                                    categories[i],
-                                                    style: TextStyle(
-                                                        color:
-                                                            (selectedCategory ==
-                                                                    categories[
-                                                                        i])
-                                                                ? Colors.white
-                                                                : Colors.black,
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.w400),
+                                              icon: Icon(
+                                                Icons.close,
+                                                size: 16,
+                                                color: Colors.grey,
+                                              )),
+                                          errorStyle: TextStyle(
+                                              color: Colors.redAccent[700],
+                                              fontSize: 12),
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12.0),
+                                            borderSide: BorderSide(
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12.0),
+                                            borderSide: BorderSide(
+                                              color: Colors.green,
+                                            ),
+                                          ),
+                                        ),
+                                        onChanged: (val) {
+                                          setState(() => searchName = val);
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Row(
+                                children: [
+                                  //Search
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 5.0),
+                                    child: IconButton(
+                                        tooltip: 'Buscar',
+                                        splashRadius: 25,
+                                        onPressed: () {
+                                          setState(() {
+                                            searchByName = true;
+                                          });
+                                        },
+                                        icon: Icon(Icons.search, size: 16)),
+                                  ),
+                                  //List
+                                  Expanded(
+                                    child: SizedBox(
+                                    height: 50,
+                                      child: ListView.builder(
+                                          shrinkWrap: true,
+                                          physics: BouncingScrollPhysics(),
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: categories.length,
+                                          itemBuilder: (context, i) {
+                                            return Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 5, vertical: 5),
+                                              child: ElevatedButton(
+                                                style: TextButton.styleFrom(
+                                                  backgroundColor:
+                                                      (selectedCategory ==
+                                                              categories[i])
+                                                          ? Colors.black
+                                                          : Colors.transparent,
+                                                ),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    selectedCategory =
+                                                        categories[i];
+                                                    firstLoad = false;
+                                                  });
+                                                },
+                                                child: Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      vertical: 3,
+                                                      horizontal: 10),
+                                                  child: Center(
+                                                    child: Text(
+                                                      categories[i],
+                                                      style: TextStyle(
+                                                          color:
+                                                              (selectedCategory ==
+                                                                      categories[
+                                                                          i])
+                                                                  ? Colors.white
+                                                                  : Colors
+                                                                      .black,
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.w400),
+                                                    ),
                                                   ),
                                                 ),
                                               ),
-                                            ),
-                                          );
-                                        }),
+                                            );
+                                          }),
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                     )
                   : SliverToBoxAdapter(
@@ -1035,40 +1016,39 @@ class _StoreHomeState extends State<StoreHome> {
                     ),
               //Products
               ProductSelection(
-                  ((businessSchedule[DateTime.now().weekday - 1]['Open']
-                                  ['Hour'] >
-                              TimeOfDay.now().hour) ||
-                          (businessSchedule[DateTime.now().weekday - 1]['Close']
-                                  ['Hour'] <
+                  ((businessSchedule[DateTime.now().weekday - 1]['Open']['Hour'] > TimeOfDay.now().hour) ||
+                          (businessSchedule[DateTime.now().weekday - 1]['Close']['Hour'] <
                               TimeOfDay.now().hour))
                       ? false
                       : true,
                   storeType,
                   (searchByName)
-                      ? products
-                          .where((prd) =>
-                              prd.product.toLowerCase() == searchName.toLowerCase() ||
-                              prd.product
-                                  .toLowerCase()
-                                  .contains(searchName.toLowerCase()) ||
-                              prd.category
-                                  .toLowerCase()
-                                  .contains(searchName.toLowerCase()) ||
-                              prd.description
-                                  .toLowerCase()
-                                  .contains(searchName.toLowerCase()))
-                          .toList()
+                      ? (storeType == 'Reservation')
+                          ? products
+                              .where((prd) =>
+                                  (prd.product.toLowerCase() == searchName.toLowerCase() ||
+                                      prd.product
+                                          .toLowerCase()
+                                          .contains(searchName.toLowerCase()) ||
+                                      prd.category
+                                          .toLowerCase()
+                                          .contains(searchName.toLowerCase()) ||
+                                      prd.description.toLowerCase().contains(
+                                          searchName.toLowerCase())) &&
+                                  (prd.allowReservation == true))
+                              .toList()
+                          : products
+                              .where((prd) =>
+                                  (prd.product.toLowerCase() == searchName.toLowerCase() ||
+                                      prd.product.toLowerCase().contains(searchName.toLowerCase()) ||
+                                      prd.category.toLowerCase().contains(searchName.toLowerCase()) ||
+                                      prd.description.toLowerCase().contains(searchName.toLowerCase())) &&
+                                  (prd.showOnMenu == true))
+                              .toList()
                       : (storeType == 'Menu')
                           ? (display == 'Consolidated')
-                              ? products
-                                  .where(
-                                      (product) => product.deliveryMenu == true)
-                                  .toList()
-                              : products
-                                  .where((product) =>
-                                      product.category == selectedCategory &&
-                                      product.deliveryMenu == true)
-                                  .toList()
+                              ? products.where((product) => product.deliveryMenu == true).toList()
+                              : products.where((product) => product.category == selectedCategory && product.deliveryMenu == true).toList()
                           : (storeType == 'Reservation' && display == 'Categorized')
                               ? products.where((product) => product.category == selectedCategory && product.allowReservation == true).toList()
                               : (storeType == 'Reservation' && display != 'Categorized')

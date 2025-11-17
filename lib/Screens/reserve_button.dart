@@ -21,6 +21,7 @@ class ReserveButton extends StatefulWidget {
   final String phone;
   final TimeOfDay? reservationTime;
   final PageController pageController;
+  final VoidCallback showErroronConfirmation;
   const ReserveButton(
       this.businessID,
       this.businessPhone,
@@ -35,6 +36,7 @@ class ReserveButton extends StatefulWidget {
       this.phone,
       this.reservationTime,
       this.pageController,
+      this.showErroronConfirmation,
       {super.key});
 
   @override
@@ -66,6 +68,8 @@ class _ReserveButtonState extends State<ReserveButton> {
     }
   }
 
+  bool loading = false;
+
   @override
   void initState() {
     checkAvailability = dayIsAvailable();
@@ -95,77 +99,87 @@ class _ReserveButtonState extends State<ReserveButton> {
                         backgroundColor: Colors.black,
                         side: const BorderSide(color: Colors.black, width: 1),
                       ),
-                      onPressed: () {
+                      onPressed: () async {
                         //%20 = Space //%0A Another Line
                         //%3A = : //%24 = $
 
                         if (widget.formKey.currentState!.validate()) {
-                          String orderItems = '';
-                          for (var i in widget.data['Items']) {
-                            if (i['Options'] != null && !i['Options'].isEmpty) {
-                              orderItems = orderItems +
-                                  ('${i['Quantity']} ${i['Name']} (${i['Options'].join(', ')}) %0A');
+                          setState(() {
+                            loading = true;
+                          });
+                          await DatabaseService()
+                              .assignOrderNumber(widget.businessID)
+                              .then((orderID) async {
+                            if (orderID != null && orderID != '') {
+                              String orderItems = '';
+                              for (var i in widget.data['Items']) {
+                                if (i['Options'] != null &&
+                                    !i['Options'].isEmpty) {
+                                  orderItems = orderItems +
+                                      ('${i['Quantity']} ${i['Name']} (${i['Options'].join(', ')}) %0A');
+                                } else {
+                                  orderItems = orderItems +
+                                      ('${i['Quantity']} ${i['Name']}%0A');
+                                }
+                              }
+
+                              try {
+                                String reservedTime =
+                                    '${DateFormat.yMMMd().format(widget.selectedDate)} ${DateFormat.Hm().format(widget.selectedDate)}';
+                                var orderMessage =
+                                    'Nombre: ${widget.name} %0ATipo de Orden: Reserva %0ANro. Teléfono: ${widget.phone} %0Aemail: ${widget.email}%0AFecha de reserva: $reservedTime%0N° de Orden: $orderID  %0AOrden:%0A$orderItems %0ATotal: ${widget.total}';
+
+                                await DatabaseService()
+                                    .scheduleSale(
+                                        widget.businessID,
+                                        orderID,
+                                        widget.total,
+                                        widget.data['Discount'],
+                                        widget.data['Discount Code'],
+                                        0,
+                                        widget.total,
+                                        widget.data['Items'],
+                                        widget.name,
+                                        widget.selectedDate,
+                                        {
+                                          'Name': widget.name,
+                                          'Address': widget.address,
+                                          'Phone': widget.phone,
+                                          'email': widget.email,
+                                        },
+                                        0,
+                                        widget.total,
+                                        widget.note)
+                                    .then((value) async {
+                                  openWhatsapp(orderMessage);
+                                  bloc.removeAllFromCart();
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => OrderSuccessful(
+                                              widget.businessID)));
+                                });
+                              } catch (e) {
+                                print('error: $e');
+                                widget.showErroronConfirmation();
+                              }
                             } else {
-                              orderItems = orderItems +
-                                  ('${i['Quantity']} ${i['Name']}%0A');
+                              print('no order ID: $orderID');
+                              widget.showErroronConfirmation();
                             }
-                          }
-
-                          try {
-                            String reservedTime =
-                                '${DateFormat.yMMMd().format(widget.selectedDate)} ${DateFormat.Hm().format(widget.selectedDate)}';
-                            var orderMessage =
-                                'Nombre: ${widget.name} %0ATipo de Orden: Reserva %0ANro. Teléfono: ${widget.phone} %0Aemail: ${widget.email}%0AFecha de reserva: $reservedTime  %0AOrden:%0A$orderItems %0ATotal: ${widget.total}';
-
-                            DatabaseService()
-                                .scheduleSale(
-                                    widget.businessID,
-                                    // ignore: prefer_interpolation_to_compose_strings
-                                    '00' +
-                                        (DateTime.now().day).toString() +
-                                        (DateTime.now().month).toString() +
-                                        (DateTime.now().year).toString() +
-                                        (DateTime.now().hour).toString() +
-                                        (DateTime.now().minute).toString() +
-                                        (DateTime.now().millisecond).toString(),
-                                    widget.total,
-                                    widget.data['Discount'],
-                                    widget.data['Discount Code'],
-                                    0,
-                                    widget.total,
-                                    widget.data['Items'],
-                                    widget.name,
-                                    widget.selectedDate,
-                                    {
-                                      'Name': widget.name,
-                                      'Address': widget.address,
-                                      'Phone': widget.phone,
-                                      'email': widget.email,
-                                    },
-                                    0,
-                                    widget.total,
-                                    widget.note)
-                                .then((value) async {
-                              openWhatsapp(orderMessage);
-                              bloc.removeAllFromCart();
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          OrderSuccessful(widget.businessID)));
-                            });
-                          } catch (e) {
-                            //do nothing
-                          }
+                          });
                         }
                       },
-                      child: const Padding(
-                        padding: EdgeInsets.all(8.0),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
                         child: Center(
-                            child: Text(
-                          'Reservar',
-                          style: TextStyle(color: Colors.white),
-                        )),
+                            child: loading
+                                ? const CircularProgressIndicator(
+                                    color: Colors.black)
+                                : const Text(
+                                    'Reservar',
+                                    style: TextStyle(color: Colors.white),
+                                  )),
                       )),
                 );
               } else {
@@ -186,13 +200,13 @@ class _ReserveButtonState extends State<ReserveButton> {
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Center(
-                            child: Text(
-                          'Avanzar',
-                          style: TextStyle(
-                              color: (widget.reservationTime != null)
-                                  ? Colors.white
-                                  : Colors.black),
-                        )),
+                            child: loading
+                                ? const CircularProgressIndicator(
+                                    color: Colors.black)
+                                : const Text(
+                                    'Avanzar',
+                                    style: TextStyle(color: Colors.white),
+                                  )),
                       )),
                 );
               }
